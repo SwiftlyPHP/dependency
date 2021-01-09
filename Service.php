@@ -9,7 +9,7 @@ Class Service
 {
 
     /**
-     * 
+     *
      */
     protected $classname;
 
@@ -31,9 +31,9 @@ Class Service
     /**
      *
      */
-    public function alias( string $name ) : self
+    public function alias( string $name, Container $container ) : self
     {
-        // TODO
+        $container->alias( $name, $this );
 
         return $this;
     }
