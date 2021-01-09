@@ -7,6 +7,12 @@ use Swiftly\Dependency\{
     LoaderInterface
 };
 
+use function is_array;
+use function is_string;
+use function is_callable;
+use function is_readable;
+use function substr;
+
 /**
  * Class responsible for loading services from PHP files
  *
@@ -47,31 +53,32 @@ Class PhpLoader Implements LoaderInterface
         // TODO: Sandbox this in future!
         $services = include ($this->file);
 
-        if ( empty( $services ) || !\is_array( $services ) ) {
+        if ( empty( $services ) || !is_array( $services ) ) {
             return $container;
         }
 
         // Parse the service structures
         foreach ( $services as $name => $service ) {
-            if ( !\is_string( $name ) || empty( $service ) ) {
+            if ( !is_string( $name ) || empty( $service ) ) {
                 continue;
             }
 
             // Callback func or service name?
-            if ( \is_string( $service ) ) {
+            if ( is_string( $service ) ) {
                 $handler = $service;
-            } elseif ( !empty( $service['handler'] ) && \is_callable( $service['handler'] ) ) {
+            } elseif ( !empty( $service['handler'] ) && is_callable( $service['handler'] ) ) {
                 $handler = $service['handler'];
             } else {
                 $handler = $name;
             }
 
-            $registered = $container->bind( $name, $handler );
-
             // Explicitly not a singleton?
-            if ( isset( $service['singleton'] ) && empty( $service['singleton'] ) ) {
-                $registered->singleton( false );
-            }
+            $single = ( isset( $service['singleton'] )
+                && empty( $service['singleton'] )
+            );
+
+            $registered = $container->bind( $name, $handler );
+            $registered->singleton( $single );
         }
 
         return $container;
@@ -84,8 +91,8 @@ Class PhpLoader Implements LoaderInterface
      */
     private function valid() : bool
     {
-        return ( \is_readable( $this->file )
-            && \substr( $this->file, -4 ) === '.php'
+        return ( is_readable( $this->file )
+            && substr( $this->file, -4 ) === '.php'
         );
     }
 }
