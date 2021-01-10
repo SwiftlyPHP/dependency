@@ -68,9 +68,10 @@ Class Container
     /**
      * Checks to see if a named service is available
      *
-     * @return bool Service available?
+     * @param string $name Service name
+     * @return bool        Service available?
      */
-    public function has() : bool
+    public function has( string $name ) : bool
     {
         return isset( $this->services[$name] );
     }
