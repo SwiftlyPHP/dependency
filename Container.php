@@ -8,7 +8,9 @@ use Swiftly\Dependency\{
 };
 
 /**
+ * Container used to manage application services
  *
+ * @author clvarley
  */
 Class Container
 {
