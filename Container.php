@@ -3,6 +3,7 @@
 namespace Swiftly\Dependency;
 
 use Swiftly\Dependency\{
+    Invokable,
     LoaderInterface,
     Service
 };
