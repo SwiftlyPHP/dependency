@@ -125,16 +125,16 @@ Class Invokable
             return $this->type;
         }
 
-        if ( $this->callable instanceof \Closure ) {
-            $this->type = self::TYPE_CLOSURE;
-        }
-
         // Not even close to being callable!
         if ( !\is_callable( $this->callable, true ) ) {
             return $this->type;
         }
 
-        // Is object and is callable, must have __invoke magic method
+        if ( $this->callable instanceof \Closure ) {
+            $this->type = self::TYPE_CLOSURE;
+        }
+
+        // Is object and is callable, so must have __invoke method
         if ( \is_object( $this->callable ) ) {
             $this->type = self::TYPE_OBJECT;
             return $this->type;
