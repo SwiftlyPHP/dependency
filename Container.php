@@ -43,7 +43,10 @@ Class Container
      */
     public function bind( string $name, /* object */ $service ) : Service
     {
-        $this->services[$name] = new Service( $service );
+        $this->services[$name] = new Service(
+            new Invokable( $service ),
+            $this
+        );
 
         return $this->services[$name];
     }

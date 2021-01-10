@@ -16,18 +16,18 @@ Class Service
 {
 
     /**
-     * The container in which this service is registered
-     *
-     * @var Container $container Service container
-     */
-    protected $container;
-
-    /**
      * The callback used to create this service
      *
      * @var Invokable $callable Service callback
      */
     protected $callback;
+
+    /**
+     * The container in which this service is registered
+     *
+     * @var Container $container Service container
+     */
+    protected $container;
 
     /**
      * The resolved service object
@@ -49,6 +49,15 @@ Class Service
      * @var bool $singleton Single service?
      */
     protected $singleton = true;
+
+    /**
+     *
+     */
+    public function __construct( Invokable $callback, Container $container )
+    {
+        $this->callback = $callback;
+        $this->container = $container;
+    }
 
     /**
      * Sets an alias for this service
@@ -100,6 +109,8 @@ Class Service
         if ( $this->resolved !== null ) {
             return $this->resolved;
         }
+
+        $arguments = $this->callback->getArgs();
 
         // TODO: implement!
     }
