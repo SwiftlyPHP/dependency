@@ -205,7 +205,7 @@ Class Invokable
             case self::TYPE_FUNCTION:
             case self::TYPE_CLOSURE:
             case self::TYPE_OBJECT:
-                $result = call_user_func_array( $this->callable, $arguments );
+                $result = ($this->callable)( ...$arguments );
                 break;
             case self::TYPE_STATIC:
             case self::TYPE_METHOD:
