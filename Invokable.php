@@ -53,6 +53,13 @@ Class Invokable
     const TYPE_OBJECT = 5;
 
     /**
+     * Indicates the callable is actually a class constructor
+     *
+     * @var int TYPE_CONSTRUCT Class constructor
+     */
+    const TYPE_CONSTRUCT = 6;
+
+    /**
      * The type of this callable
      *
      * Maps to one of the TYPE_* constants.
@@ -105,9 +112,15 @@ Class Invokable
             case self::TYPE_OBJECT:
                 $func = new \ReflectionMethod( $this->callable, '__invoke' );
                 break;
+            case self::TYPE_CONSTRUCT:
+                $func = (new \ReflectionClass( $this->callable[0] ))->getConstructor();
+                break;
         }
 
-        return $func->getParameters();
+        return ( $func !== null
+            ? $func->getParameters()
+            : []
+        );
     }
 
     /**
@@ -132,6 +145,7 @@ Class Invokable
 
         if ( $this->callable instanceof \Closure ) {
             $this->type = self::TYPE_CLOSURE;
+            return $this->type;
         }
 
         // Is object and is callable, so must have __invoke method
@@ -148,6 +162,12 @@ Class Invokable
             }
 
             $this->callable = \explode( '::', $this->callable );
+        }
+
+        // Handle special internal case of constructor
+        if ( $this->callable[1] === '__construct' ) {
+            $this->type = self::TYPE_CONSTRUCT;
+            return $this->type;
         }
 
         try {
@@ -173,7 +193,22 @@ Class Invokable
     {
         $type = $this->getType();
 
+        switch ( $type ) {
+            case self::TYPE_FUNCTION:
+            case self::TYPE_CLOSURE:
+            case self::TYPE_OBJECT:
+                $result = \call_user_func_array( $this->callable, $arguments );
+                break;
+            case self::TYPE_STATIC:
+            case self::TYPE_METHOD:
+                $result = \call_user_func_array( ...$this->callable, $arguments );
+                break;
+            case self::TYPE_CONSTRUCT:
+                $reflect = new \ReflectionClass( $this->callable[0] );
+                $result = $reflect->newInstanceArgs( $arguments );
+            break;
+        }
 
-
+        return $result;
     }
 }
