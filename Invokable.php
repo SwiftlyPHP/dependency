@@ -201,7 +201,7 @@ Class Invokable
                 break;
             case self::TYPE_STATIC:
             case self::TYPE_METHOD:
-                $result = \call_user_func_array( ...$this->callable, $arguments );
+                $result = \call_user_func_array( $this->callable, $arguments );
                 break;
             case self::TYPE_CONSTRUCT:
                 $reflect = new \ReflectionClass( $this->callable[0] );
