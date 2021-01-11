@@ -110,8 +110,29 @@ Class Service
             return $this->resolved;
         }
 
-        $arguments = $this->callback->getArgs();
+        $parameters = $this->callback->getParameters();
 
-        // TODO: implement!
+        $arguments = [];
+
+        // Resolve param values
+        foreach ( $parameters as $parameter ) {
+            $arguments[] = $this->param( $parameter );
+        }
+
+        // Get the result!
+        return $this->callback->invoke( $arguments );
+    }
+
+    /**
+     * Attempts to resolve a parameter value
+     *
+     * @param ReflectionParameter $parameter Reflected parameter
+     * @return mixed|null                    Parameter value
+     */
+    private function param( \ReflectionParameter $parameter ) // : mixed
+    {
+        // TODO: Resolve parameter by type and/or name
+
+        return;
     }
 }
