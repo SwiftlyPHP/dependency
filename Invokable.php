@@ -107,11 +107,6 @@ Class Invokable
     {
         $type = $this->getType();
 
-        // Should be impossible?
-        if ( $type === self::TYPE_UNKNOWN ) {
-            return [];
-        }
-
         // Get appropriate reflection type
         switch ( $type ) {
             case self::TYPE_FUNCTION:
@@ -127,6 +122,10 @@ Class Invokable
                 break;
             case self::TYPE_CONSTRUCT:
                 $func = (new ReflectionClass( $this->callable[0] ))->getConstructor();
+                break;
+            case self::TYPE_UNKNOWN:
+            default:
+                $func = null;
                 break;
         }
 
@@ -151,11 +150,7 @@ Class Invokable
             return $this->type;
         }
 
-        // Not even close to being callable!
-        if ( !is_callable( $this->callable, true ) ) {
-            return $this->type;
-        }
-
+        // Nice and easy!
         if ( $this->callable instanceof Closure ) {
             $this->type = self::TYPE_CLOSURE;
             return $this->type;
