@@ -7,6 +7,10 @@ use Swiftly\Dependency\{
     Invokable
 };
 
+use ReflectionParameter;
+
+use function array_merge;
+
 /**
  * Class used to represent an application service
  *
@@ -93,7 +97,7 @@ Class Service
      */
     public function parameters( array $parameters ) : self
     {
-        $this->parameters = \array_merge( $this->parameters, $parameters );
+        $this->parameters = array_merge( $this->parameters, $parameters );
 
         return $this;
     }
@@ -129,7 +133,7 @@ Class Service
      * @param ReflectionParameter $parameter Reflected parameter
      * @return mixed|null                    Parameter value
      */
-    private function param( \ReflectionParameter $parameter ) // : mixed
+    private function param( ReflectionParameter $parameter ) // : mixed
     {
         // TODO: Resolve parameter by type and/or name
 

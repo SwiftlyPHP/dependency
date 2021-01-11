@@ -2,6 +2,19 @@
 
 namespace Swiftly\Dependency;
 
+use Closure;
+use ReflectionFunction;
+use ReflectionMethod;
+use ReflectionClass;
+use ReflectionException;
+
+use function is_callable;
+use function is_object;
+use function is_string;
+use function strpos;
+use function explode;
+use function call_user_func_array;
+
 /**
  * Class used to represent a callable function/method
  *
@@ -103,17 +116,17 @@ Class Invokable
         switch ( $type ) {
             case self::TYPE_FUNCTION:
             case self::TYPE_CLOSURE:
-                $func = new \ReflectionFunction( $this->callable );
+                $func = new ReflectionFunction( $this->callable );
                 break;
             case self::TYPE_STATIC:
             case self::TYPE_METHOD:
-                $func = new \ReflectionMethod( ...$this->callable );
+                $func = new ReflectionMethod( ...$this->callable );
                 break;
             case self::TYPE_OBJECT:
-                $func = new \ReflectionMethod( $this->callable, '__invoke' );
+                $func = new ReflectionMethod( $this->callable, '__invoke' );
                 break;
             case self::TYPE_CONSTRUCT:
-                $func = (new \ReflectionClass( $this->callable[0] ))->getConstructor();
+                $func = (new ReflectionClass( $this->callable[0] ))->getConstructor();
                 break;
         }
 
@@ -139,29 +152,29 @@ Class Invokable
         }
 
         // Not even close to being callable!
-        if ( !\is_callable( $this->callable, true ) ) {
+        if ( !is_callable( $this->callable, true ) ) {
             return $this->type;
         }
 
-        if ( $this->callable instanceof \Closure ) {
+        if ( $this->callable instanceof Closure ) {
             $this->type = self::TYPE_CLOSURE;
             return $this->type;
         }
 
         // Is object and is callable, so must have __invoke method
-        if ( \is_object( $this->callable ) ) {
+        if ( is_object( $this->callable ) ) {
             $this->type = self::TYPE_OBJECT;
             return $this->type;
         }
 
         // Possibly using the "class::method" string format?
-        if ( \is_string( $this->callable ) ) {
-            if ( !\strpos( $this->callable, '::' ) ) {
+        if ( is_string( $this->callable ) ) {
+            if ( !strpos( $this->callable, '::' ) ) {
                 $this->type = self::TYPE_FUNCTION;
                 return $this->type;
             }
 
-            $this->callable = \explode( '::', $this->callable );
+            $this->callable = explode( '::', $this->callable );
         }
 
         // Handle special internal case of constructor
@@ -171,8 +184,8 @@ Class Invokable
         }
 
         try {
-            $reflected = new \ReflectionMethod( ...$this->callable );
-        } catch ( \ReflectionException $e ) {
+            $reflected = new ReflectionMethod( ...$this->callable );
+        } catch ( ReflectionException $e ) {
             return $this->type; // Method doesn't exist!
         }
 
@@ -197,14 +210,14 @@ Class Invokable
             case self::TYPE_FUNCTION:
             case self::TYPE_CLOSURE:
             case self::TYPE_OBJECT:
-                $result = \call_user_func_array( $this->callable, $arguments );
+                $result = call_user_func_array( $this->callable, $arguments );
                 break;
             case self::TYPE_STATIC:
             case self::TYPE_METHOD:
-                $result = \call_user_func_array( $this->callable, $arguments );
+                $result = call_user_func_array( $this->callable, $arguments );
                 break;
             case self::TYPE_CONSTRUCT:
-                $reflect = new \ReflectionClass( $this->callable[0] );
+                $reflect = new ReflectionClass( $this->callable[0] );
                 $result = $reflect->newInstanceArgs( $arguments );
             break;
         }
