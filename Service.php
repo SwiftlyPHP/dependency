@@ -171,8 +171,26 @@ Class Service
      */
     private function param( ReflectionParameter $parameter ) // : mixed
     {
-        // TODO: Resolve parameter by type and/or name
+        $name = $parameter->getName();
 
-        return;
+        if ( isset( $this->parameters[$name] ) ) {
+            return $this->parameters[$name];
+        }
+
+        $type = $parameter->getType();
+
+        // If no type supplied?
+        if ( $type === null && $parameter->isDefaultValueAvailable() ) {
+            return $parameter->getDefaultValue();
+        } elseif ( $type === null && $parameter->allowsNull() ) {
+            return null;
+        } elseif ( $type === null ) {
+            return; // We have a problem!
+        }
+
+        // Get the class/interface name
+        $type = $type->getName();
+
+        return $this->container->resolve( $type );
     }
 }
