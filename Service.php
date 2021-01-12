@@ -55,6 +55,13 @@ Class Service
     protected $singleton = true;
 
     /**
+     * Post initialization hooks to be run at resolution
+     *
+     * @var Invokable[] $hooks Post-initialization hooks
+     */
+    protected $hooks = [];
+
+    /**
      *
      */
     public function __construct( Invokable $callback, Container $container )
@@ -103,6 +110,19 @@ Class Service
     }
 
     /**
+     * Sets a callback to be run post-resolution
+     *
+     * @param callable $hook Post-initialization hook
+     * @return self          Allow chaining
+     */
+    public function then( callable $hook ) : self
+    {
+        $this->hooks[] = new Invokable( $hook );
+
+        return $this;
+    }
+
+    /**
      * Resolve the service and returns the instantiated object
      *
      * @internal
@@ -121,6 +141,13 @@ Class Service
         // Resolve param values
         foreach ( $parameters as $parameter ) {
             $arguments[] = $this->param( $parameter );
+        }
+
+        $this->resolved = $this->callback->invoke( $arguments );
+
+        // Run any post hooks!
+        foreach ( $this->hooks as $hook ) {
+            $hook->invoke( $this->resolved );
         }
 
         // Get the result!
