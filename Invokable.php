@@ -7,6 +7,7 @@ use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionParameter;
 
 use function is_callable;
 use function is_object;
