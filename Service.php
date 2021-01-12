@@ -134,24 +134,33 @@ Class Service
             return $this->resolved;
         }
 
-        $parameters = $this->callback->getParameters();
-
-        $arguments = [];
-
-        // Resolve param values
-        foreach ( $parameters as $parameter ) {
-            $arguments[] = $this->param( $parameter );
-        }
-
-        $this->resolved = $this->callback->invoke( $arguments );
+        // Resolve the object
+        $this->resolved = $this->invoke( $this->callback );
 
         // Run any post hooks!
         foreach ( $this->hooks as $hook ) {
-            $hook->invoke( $this->resolved );
+            $this->invoke( $hook );
         }
 
         // Get the result!
-        return $this->callback->invoke( $arguments );
+        return $this->resolved;
+    }
+
+    /**
+     * Resolves any neccessary parameters and invokes the action
+     *
+     * @param Invokable $action Invokable action
+     * @return mixed            Action result
+     */
+    private function invoke( Invokable $action ) // : mixed
+    {
+        $arguments = [];
+
+        foreach ( $action->getParameters() as $parameter ) {
+            $arguments[] = $this->param( $parameter );
+        }
+
+        return $action->invoke( $arguments );
     }
 
     /**
