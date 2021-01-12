@@ -92,9 +92,12 @@ Class Invokable
     /**
      * Create a wrapper around the given callable variable
      *
+     * Cannot use the `callable` type hint as we sometimes need to work with our
+     * custom `[CLASS_NAME, '__construct']` notation.
+     *
      * @param callable $callable Callable variable
      */
-    public function __construct( callable $callable )
+    public function __construct( $callable )
     {
         $this->callable = $callable;
     }
@@ -154,6 +157,11 @@ Class Invokable
         // Nice and easy!
         if ( $this->callable instanceof Closure ) {
             $this->type = self::TYPE_CLOSURE;
+            return $this->type;
+        }
+
+        // Not callable, unknown type!
+        if ( \is_callable( $this->callable, true ) ) {
             return $this->type;
         }
 
