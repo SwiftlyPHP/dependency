@@ -180,12 +180,14 @@ Class Service
         $type = $parameter->getType();
 
         // If no type supplied?
-        if ( $type === null && $parameter->isDefaultValueAvailable() ) {
-            return $parameter->getDefaultValue();
-        } elseif ( $type === null && $parameter->allowsNull() ) {
-            return null;
-        } elseif ( $type === null ) {
-            return; // We have a problem!
+        if ( $type === null || $type->isBuiltin() ) {
+            if ( $parameter->isDefaultValueAvailable() ) {
+                $value = $parameter->getDefaultValue();
+            } else {
+                $value = null;
+            }
+
+            return $value;
         }
 
         // Get the class/interface name
