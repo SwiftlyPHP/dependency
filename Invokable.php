@@ -6,15 +6,13 @@ use Closure;
 use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionClass;
-use ReflectionException;
 use ReflectionParameter;
+use ReflectionFunctionAbstract;
 
-use function is_callable;
-use function is_object;
 use function is_string;
 use function strpos;
 use function explode;
-use function call_user_func_array;
+use function is_object;
 
 /**
  * Class used to represent a callable function/method
@@ -76,11 +74,16 @@ Class Invokable
     /**
      * The type of this callable
      *
-     * Maps to one of the TYPE_* constants.
-     *
      * @var int $type Invokable type
      */
     private $type = self::TYPE_UNKNOWN;
+
+    /**
+     * The reflected function or method
+     *
+     * @var ReflectionFunctionAbstract $reflected Reflected function/method
+     */
+    private $reflected = null;
 
     /**
      * The underlying callable function/method
@@ -90,14 +93,29 @@ Class Invokable
     private $callable;
 
     /**
-     * Create a wrapper around the given callable variable
+     * Handles the special case of class constructors
      *
-     * Cannot use the `callable` type hint as we sometimes need to work with our
-     * custom `[CLASS_NAME, '__construct']` notation.
+     * @param object|string $class Class(name)
+     * @return Invokable           Constructor invokable
+     */
+    public static function forConstructor( /* object|string */ $class ) : Invokable
+    {
+        $reflected = new ReflectionClass( $class );
+
+        $invokable = new Invokable([ $reflected, 'newInstanceArgs' ]);
+        $invokable->type = Invokable::TYPE_CONSTRUCT;
+        $invokable->callable = $class;
+        $invokable->reflected = $reflected->getConstructor();
+
+        return $invokable;
+    }
+
+    /**
+     * Create a wrapper around the given callable variable
      *
      * @param callable $callable Callable variable
      */
-    public function __construct( $callable )
+    public function __construct( callable $callable )
     {
         $this->callable = $callable;
     }
@@ -109,123 +127,84 @@ Class Invokable
      */
     public function getParameters() : array
     {
-        $type = $this->getType();
-
-        // Get appropriate reflection type
-        switch ( $type ) {
-            case self::TYPE_FUNCTION:
-            case self::TYPE_CLOSURE:
-                $func = new ReflectionFunction( $this->callable );
-                break;
-            case self::TYPE_STATIC:
-            case self::TYPE_METHOD:
-                $func = new ReflectionMethod( ...$this->callable );
-                break;
-            case self::TYPE_OBJECT:
-                $func = new ReflectionMethod( $this->callable, '__invoke' );
-                break;
-            case self::TYPE_CONSTRUCT:
-                $func = (new ReflectionClass( $this->callable[0] ))->getConstructor();
-                break;
-            case self::TYPE_UNKNOWN:
-            default:
-                $func = null;
-                break;
-        }
-
-        return ( $func !== null
-            ? $func->getParameters()
-            : []
-        );
+        return $this->getReflection()->getParameters();
     }
 
     /**
-     * Gets the type of the underlying callable
+     * Gets the ReflectionFunction/ReflectionMethod for this callable
      *
-     * Attempts to infer what kind of callable we are dealing with and returns
-     * one of the TYPE_* constants.
+     * @return ReflectionFunctionAbstract|null Reflection object
+     */
+    public function getReflection() : ?ReflectionFunctionAbstract
+    {
+        // Already reflected
+        if ( $this->reflected !== null ) {
+            return $this->reflected;
+        }
+
+        // Choose appropriate representation
+        switch ( $this->getType() ) {
+            case self::TYPE_FUNCTION:
+            case self::TYPE_CLOSURE:
+                $this->reflected = new ReflectionFunction( $this->callable );
+                break;
+            case self::TYPE_STATIC:
+            case self::TYPE_METHOD:
+                $this->reflected = new ReflectionMethod( ...$this->callable );
+                break;
+            case self::TYPE_OBJECT:
+                $this->reflected = new ReflectionMethod( $this->callable, '__invoke' );
+                break;
+            case self::TYPE_UNKNOWN:
+                // Throw: Custom exception
+                break;
+        }
+
+        return $this->reflected;
+    }
+
+    /**
+     * Gets the type of this callable
      *
-     * @return int Invokable type
+     * Returns one of the invokable `TYPE_*` constants.
+     *
+     * @return int
      */
     public function getType() : int
     {
-        // Type already inferred!
+        // Already inferred type
         if ( $this->type !== self::TYPE_UNKNOWN ) {
             return $this->type;
         }
 
-        // Nice and easy!
-        if ( $this->callable instanceof Closure ) {
+        $callable = $this->callable;
+
+        if ( $callable instanceof Closure ) {
             $this->type = self::TYPE_CLOSURE;
             return $this->type;
         }
 
-        // Not callable, unknown type!
-        if ( \is_callable( $this->callable, true ) ) {
-            return $this->type;
+        // Support older "Class::method" syntax?
+        if ( is_string( $callable ) && strpos( $callable, '::' ) ) {
+            $callable = explode( '::', $callable );
         }
 
-        // Is object and is callable, so must have __invoke method
-        if ( is_object( $this->callable ) ) {
+        // Still a string? Must be a function
+        if ( is_string( $callable ) ) {
+            $this->type = self::TYPE_FUNCTION;
+
+        // Invokable object
+        } else if ( is_object( $callable ) ) {
             $this->type = self::TYPE_OBJECT;
-            return $this->type;
+
+        // Class method
+        } else {
+            $this->type = (( new ReflectionMethod( ...$callable ))->isStatic()
+                ? self::TYPE_STATIC
+                : self::TYPE_METHOD
+            );
         }
-
-        // Possibly using the "class::method" string format?
-        if ( is_string( $this->callable ) ) {
-            if ( !strpos( $this->callable, '::' ) ) {
-                $this->type = self::TYPE_FUNCTION;
-                return $this->type;
-            }
-
-            $this->callable = explode( '::', $this->callable );
-        }
-
-        // Handle special internal case of constructor
-        if ( $this->callable[1] === '__construct' ) {
-            $this->type = self::TYPE_CONSTRUCT;
-            return $this->type;
-        }
-
-        try {
-            $reflected = new ReflectionMethod( ...$this->callable );
-        } catch ( ReflectionException $e ) {
-            return $this->type; // Method doesn't exist!
-        }
-
-        $this->type = ( $reflected->isStatic()
-            ? self::TYPE_STATIC
-            : self::TYPE_METHOD
-        );
 
         return $this->type;
-    }
-
-    /**
-     * Invoke the underlying callable and return its result
-     *
-     * @param array $arguments (Optional) Callable arguments
-     */
-    public function invoke( array $arguments = [] ) // : mixed
-    {
-        $type = $this->getType();
-
-        switch ( $type ) {
-            case self::TYPE_FUNCTION:
-            case self::TYPE_CLOSURE:
-            case self::TYPE_OBJECT:
-                $result = ($this->callable)( ...$arguments );
-                break;
-            case self::TYPE_STATIC:
-            case self::TYPE_METHOD:
-                $result = call_user_func_array( $this->callable, $arguments );
-                break;
-            case self::TYPE_CONSTRUCT:
-                $reflect = new ReflectionClass( $this->callable[0] );
-                $result = $reflect->newInstanceArgs( $arguments );
-            break;
-        }
-
-        return $result;
     }
 }
