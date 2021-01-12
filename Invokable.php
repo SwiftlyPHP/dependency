@@ -80,7 +80,7 @@ Class Invokable
      *
      * @var int $type Invokable type
      */
-    private $type = TYPE_UNKNOWN;
+    private $type = self::TYPE_UNKNOWN;
 
     /**
      * The underlying callable function/method
