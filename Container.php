@@ -8,6 +8,9 @@ use Swiftly\Dependency\{
     Service
 };
 
+use function is_string;
+use function function_exists;
+
 /**
  * Container used to manage application services
  *
@@ -44,7 +47,7 @@ Class Container
     public function bind( string $name, /* object */ $service ) : Service
     {
         // Explicitly mark as a constructor
-        if ( \is_string( $service ) && !\function_exists( $service ) ) {
+        if ( is_string( $service ) && !function_exists( $service ) ) {
             $service = [ $service, '__construct' ];
         }
 
@@ -54,6 +57,20 @@ Class Container
         );
 
         return $this->services[$name];
+    }
+
+    /**
+     * Tries to resolve the given service
+     *
+     * @param string $name Service name
+     * @return object|null Resolved service
+     */
+    public function resolve( string $name ) // : object
+    {
+        return ( isset( $this->services[$name] )
+            ? $this->services[$name]->resolve()
+            : null
+        );
     }
 
     /**
