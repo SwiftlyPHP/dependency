@@ -10,6 +10,7 @@ use Swiftly\Dependency\{
 use ReflectionParameter;
 
 use function array_merge;
+use function is_object;
 
 /**
  * Class used to represent an application service
@@ -132,6 +133,18 @@ Class Service
     {
         if ( $this->resolved !== null ) {
             return $this->resolved;
+        }
+
+        $callback = new Invokable( $this->callback );
+
+        // We need to instantiate the object first!
+        if ( $callback->getType() === Invokable::TYPE_METHOD && !is_object( $this->callback[0] ) ) {
+            $object = Invokable::forConstructor( $this->callback[0] );
+            $object = $this->invoke( $object );
+
+            // Update ref so we don't have to do this again
+            $this->callback[0] = $object;
+            $callback = new Invokable( $this->callback );
         }
 
         // Resolve the object
