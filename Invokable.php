@@ -105,7 +105,6 @@ Class Invokable
 
         $invokable = new Invokable([ $reflected, 'newInstanceArgs' ]);
         $invokable->type = Invokable::TYPE_CONSTRUCT;
-        $invokable->callable = $class;
         $invokable->reflected = $reflected->getConstructor();
 
         return $invokable;
@@ -114,9 +113,12 @@ Class Invokable
     /**
      * Create a wrapper around the given callable variable
      *
+     * Have to avoid use of the `callable` typehint to suppress the:
+     * "Non-static method should not be called statically" warning
+     *
      * @param callable $callable Callable variable
      */
-    public function __construct( callable $callable )
+    public function __construct( /* callable */ $callable )
     {
         $this->callable = $callable;
     }
@@ -128,6 +130,10 @@ Class Invokable
      */
     public function getParameters() : array
     {
+        if ( $this->reflected === null && $this->type === self::TYPE_CONSTRUCT ) {
+            return []; // Class with no constructor
+        }
+
         return $this->getReflection()->getParameters();
     }
 
@@ -157,6 +163,7 @@ Class Invokable
                 $this->reflected = new ReflectionMethod( $this->callable, '__invoke' );
                 break;
             case self::TYPE_UNKNOWN:
+            case self::TYPE_CONSTRUCT:
                 // Throw: Custom exception
                 break;
         }
@@ -225,8 +232,10 @@ Class Invokable
             break;
             case self::TYPE_STATIC:
             case self::TYPE_METHOD:
-            case self::TYPE_CONSTRUCT:
                 return call_user_func_array( $this->callable, $arguments );
+            break;
+            case self::TYPE_CONSTRUCT:
+                return ($this->callable)( $arguments );
             break;
         }
     }

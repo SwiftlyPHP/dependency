@@ -11,6 +11,8 @@ use ReflectionParameter;
 
 use function array_merge;
 use function is_object;
+use function is_string;
+use function is_callable;
 
 /**
  * Class used to represent an application service
@@ -135,7 +137,17 @@ Class Service
             return $this->resolved;
         }
 
-        $callback = new Invokable( $this->callback );
+        // Might be a regular object?
+        if ( is_object( $this->callback ) && !method_exists( $this->callback, '__invoke' ) ) {
+            return $this->callback;
+        }
+
+        // Maybe just a class name?
+        if ( !is_callable( $this->callback ) && is_string( $this->callback ) ) {
+            $callback = Invokable::forConstructor( $this->callback );
+        } else {
+            $callback = new Invokable( $this->callback );
+        }
 
         // We need to instantiate the object first!
         if ( $callback->getType() === Invokable::TYPE_METHOD && !is_object( $this->callback[0] ) ) {
@@ -148,7 +160,7 @@ Class Service
         }
 
         // Resolve the object
-        $this->resolved = $this->invoke( $this->callback );
+        $this->resolved = $this->invoke( $callback );
 
         // Run any post hooks!
         foreach ( $this->hooks as $hook ) {
