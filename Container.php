@@ -46,15 +46,7 @@ Class Container
      */
     public function bind( string $name, /* object */ $service ) : Service
     {
-        // Explicitly mark as a constructor
-        if ( is_string( $service ) && !function_exists( $service ) ) {
-            $service = [ $service, '__construct' ];
-        }
-
-        $this->services[$name] = new Service(
-            new Invokable( $service ),
-            $this
-        );
+        $this->services[$name] = new Service( $service, $this );
 
         return $this->services[$name];
     }

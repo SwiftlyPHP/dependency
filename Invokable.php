@@ -13,6 +13,7 @@ use function is_string;
 use function strpos;
 use function explode;
 use function is_object;
+use function call_user_func_array;
 
 /**
  * Class used to represent a callable function/method
@@ -206,5 +207,27 @@ Class Invokable
         }
 
         return $this->type;
+    }
+
+    /**
+     * Invoke the underlying function and return its result
+     *
+     * @param mixed[] $arguments Function arguments
+     * @return mixed             Function result
+     */
+    public function invoke( array $arguments = [] ) // : mixed
+    {
+        switch ( $this->type ) {
+            case self::TYPE_FUNCTION:
+            case self::TYPE_CLOSURE:
+            case self::TYPE_OBJECT:
+                return ($this->callable)( ...$arguments );
+            break;
+            case self::TYPE_STATIC:
+            case self::TYPE_METHOD:
+            case self::TYPE_CONSTRUCT:
+                return call_user_func_array( $this->callable, $arguments );
+            break;
+        }
     }
 }

@@ -22,7 +22,7 @@ Class Service
     /**
      * The callback used to create this service
      *
-     * @var Invokable $callable Service callback
+     * @var string|callable $callable Service callback
      */
     protected $callback;
 
@@ -64,7 +64,7 @@ Class Service
     /**
      *
      */
-    public function __construct( Invokable $callback, Container $container )
+    public function __construct( /*string|callable*/ $callback, Container $container )
     {
         $this->callback = $callback;
         $this->container = $container;
