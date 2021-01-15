@@ -13,6 +13,14 @@ Interface LoaderInterface
 {
 
     /**
+     * Returns whether this loader can load the given file
+     *
+     * @param string $file File path
+     * @return bool        File supported
+     */
+    public function supports( string $file ) : bool;
+
+    /**
      * Load services into the given dependency container
      *
      * Loaders are expected to return the dependency container to allow method
