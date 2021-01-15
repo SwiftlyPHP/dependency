@@ -7,6 +7,14 @@ use Swiftly\Dependency\{
     LoaderInterface
 };
 
+use function is_readable;
+use function file_get_contents;
+use function json_decode;
+use function is_array;
+use function json_last_error;
+
+use const JSON_ERROR_NONE;
+
 /**
  * Class responsible for loading services from JSON files
  *
