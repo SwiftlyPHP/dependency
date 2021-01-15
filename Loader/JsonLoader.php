@@ -56,7 +56,32 @@ Class JsonLoader Implements LoaderInterface
         }
 
         foreach ( $service as $name => $service ) {
-            // TODO
+            if ( empty( $service ) ) {
+                continue;
+            }
+
+            // Just a service name
+            if ( \is_numeric( $name ) && \is_string( $service ) ) {
+                $name = $service;
+            } elseif ( \is_numeric( $name ) ) {
+                continue; // Cannot have an anonymous definition
+            }
+
+            // Figure out the callback type
+            if ( \is_string( $service ) ) {
+                $handler = $service;
+            } elseif ( !empty( $service['handler'] ) && \is_callable( $service['handler'] ) ) {
+                $handler = $service['handler'];
+            } else {
+                $handler = $name; // Fallback
+            }
+
+            $registered = $container->bind( $name, $handler );
+
+            // Marked as non-singleton?
+            if ( isset( $service['singleton'] ) && empty( $service['singleton'] ) ) {
+                $registered->singleton( false );
+            }
         }
 
         return $container;
