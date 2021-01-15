@@ -7,10 +7,13 @@ use Swiftly\Dependency\{
     LoaderInterface
 };
 
+use function is_numeric;
+use function is_string;
+use function is_callable;
 use function is_readable;
+use function is_array;
 use function file_get_contents;
 use function json_decode;
-use function is_array;
 use function json_last_error;
 
 use const JSON_ERROR_NONE;
@@ -61,16 +64,16 @@ Class JsonLoader Implements LoaderInterface
             }
 
             // Just a service name
-            if ( \is_numeric( $name ) && \is_string( $service ) ) {
+            if ( is_numeric( $name ) && is_string( $service ) ) {
                 $name = $service;
-            } elseif ( \is_numeric( $name ) ) {
+            } elseif ( is_numeric( $name ) ) {
                 continue; // Cannot have an anonymous definition
             }
 
             // Figure out the callback type
-            if ( \is_string( $service ) ) {
+            if ( is_string( $service ) ) {
                 $handler = $service;
-            } elseif ( !empty( $service['handler'] ) && \is_callable( $service['handler'] ) ) {
+            } elseif ( !empty( $service['handler'] ) && is_callable( $service['handler'] ) ) {
                 $handler = $service['handler'];
             } else {
                 $handler = $name; // Fallback
