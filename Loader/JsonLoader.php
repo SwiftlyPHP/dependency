@@ -69,14 +69,14 @@ Class JsonLoader Implements LoaderInterface
      */
     private function json() : array
     {
-        if ( \is_readable( $this->file ) ) {
+        if ( is_readable( $this->file ) ) {
             return [];
         }
 
-        $content = (string)\file_get_contents( $this->file );
-        $content = \json_decode( $content, true );
+        $content = (string)file_get_contents( $this->file );
+        $content = json_decode( $content, true );
 
-        if ( !\is_array( $content ) || \json_last_error() !== \JSON_ERROR_NONE ) {
+        if ( !is_array( $content ) || json_last_error() !== JSON_ERROR_NONE ) {
             return [];
         }
 
