@@ -7,6 +7,7 @@ use Swiftly\Dependency\{
     LoaderInterface
 };
 
+use function substr;
 use function is_numeric;
 use function is_string;
 use function is_callable;
@@ -41,6 +42,17 @@ Class JsonLoader Implements LoaderInterface
     public function __construct( string $file )
     {
         $this->file = $file;
+    }
+
+    /**
+     * Returns whether this loader can load the given file
+     *
+     * @param string $file File path
+     * @return bool        File supported
+     */
+    public function supports( string $file ) : bool
+    {
+        return ( substr( $file, -5 ) === '.json' );
     }
 
     /**

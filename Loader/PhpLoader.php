@@ -7,11 +7,11 @@ use Swiftly\Dependency\{
     LoaderInterface
 };
 
+use function substr;
 use function is_array;
 use function is_string;
 use function is_callable;
 use function is_readable;
-use function substr;
 
 /**
  * Class responsible for loading services from PHP files
@@ -36,6 +36,17 @@ Class PhpLoader Implements LoaderInterface
     public function __construct( string $file )
     {
         $this->file = $file;
+    }
+
+    /**
+     * Returns whether this loader can load the given file
+     *
+     * @param string $file File path
+     * @return bool        File supported
+     */
+    public function supports( string $file ) : bool
+    {
+        return ( substr( $file, -4 ) === '.php' );
     }
 
     /**
