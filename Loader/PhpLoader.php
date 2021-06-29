@@ -2,10 +2,8 @@
 
 namespace Swiftly\Dependency\Loader;
 
-use Swiftly\Dependency\{
-    Container,
-    LoaderInterface
-};
+use Swiftly\Dependency\Container;
+use Swiftly\Dependency\LoaderInterface;
 
 use function substr;
 use function is_array;

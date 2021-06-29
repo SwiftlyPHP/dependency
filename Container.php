@@ -2,11 +2,9 @@
 
 namespace Swiftly\Dependency;
 
-use Swiftly\Dependency\{
-    Invokable,
-    LoaderInterface,
-    Service
-};
+use Swiftly\Dependency\Invokable;
+use Swiftly\Dependency\LoaderInterface;
+use Swiftly\Dependency\Service;
 
 use function is_string;
 use function function_exists;

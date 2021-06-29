@@ -2,10 +2,8 @@
 
 namespace Swiftly\Dependency;
 
-use Swiftly\Dependency\{
-    Container,
-    Invokable
-};
+use Swiftly\Dependency\Container;
+use Swiftly\Dependency\Invokable;
 
 use ReflectionParameter;
 
