@@ -57,7 +57,7 @@ Class JsonLoader Implements LoaderInterface
      * Load services into this dependency container
      *
      * @param Container $container Dependency container
-     * @return void                N/a
+     * @return Container           Updated container
      */
     public function load( Container $container ) : Container
     {
@@ -68,7 +68,7 @@ Class JsonLoader Implements LoaderInterface
             return $container;
         }
 
-        foreach ( $service as $name => $service ) {
+        foreach ( $json as $name => $service ) {
             if ( empty( $service ) ) {
                 continue;
             }
@@ -107,11 +107,13 @@ Class JsonLoader Implements LoaderInterface
      */
     private function json() : array
     {
-        if ( is_readable( $this->file ) ) {
+        if ( !is_readable( $this->file ) ) {
             return [];
         }
 
         $content = (string)file_get_contents( $this->file );
+
+        /** @var array|false $content */
         $content = json_decode( $content, true );
 
         if ( !is_array( $content ) || json_last_error() !== JSON_ERROR_NONE ) {
