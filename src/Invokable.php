@@ -35,7 +35,7 @@ Class Invokable
     /**
      * The reflected function or method
      *
-     * @var ReflectionFunctionAbstract $reflected Reflected function/method
+     * @var ReflectionFunctionAbstract|null $reflected Reflected function/method
      */
     private $reflected = null;
 

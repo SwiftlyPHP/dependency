@@ -4,6 +4,7 @@ namespace Swiftly\Dependency;
 
 use Swiftly\Dependency\Container;
 use Swiftly\Dependency\Invokable;
+use Swiftly\Dependency\CallableType;
 
 use ReflectionParameter;
 
@@ -23,7 +24,7 @@ Class Service
     /**
      * The callback used to create this service
      *
-     * @var string|callable $callable Service callback
+     * @var string|object|callable $callable Service callback
      */
     protected $callback;
 
@@ -148,7 +149,7 @@ Class Service
         }
 
         // We need to instantiate the object first!
-        if ( $callback->getType() === Invokable::TYPE_METHOD && !is_object( $this->callback[0] ) ) {
+        if ( $callback->getType() === CallableType::TYPE_METHOD && !is_object( $this->callback[0] ) ) {
             $object = Invokable::forConstructor( $this->callback[0] );
             $object = $this->invoke( $object );
 

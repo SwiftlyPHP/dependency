@@ -51,7 +51,7 @@ Class PhpLoader Implements LoaderInterface
      * Load services into this dependency container
      *
      * @param Container $container Dependency container
-     * @return void                N/a
+     * @return Container           Updated container
      */
     public function load( Container $container ) : Container
     {
