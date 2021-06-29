@@ -1,0 +1,19 @@
+{
+    "name": "swiftly/dependency",
+    "description": "Straightforward dependency injection.",
+    "homepage": "https://github.com/SwiftlyPHP/dependency",
+    "readme": "README.md",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.1"
+    },
+    "require-dev": {
+        "vimeo/psalm": "^4.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Swiftly\\Dependency\\": "src/"
+        }
+    }
+}
