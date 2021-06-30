@@ -28,7 +28,7 @@ Class Invokable
     /**
      * The type of this callable
      *
-     * @var int $type Invokable type
+     * @var Types::TYPE_* $type Callable type
      */
     private $type = Types::TYPE_UNKNOWN;
 
@@ -129,7 +129,7 @@ Class Invokable
      *
      * Returns one of the invokable `TYPE_*` constants.
      *
-     * @return int
+     * @return Types::TYPE_* Callable type
      */
     public function getType() : int
     {
