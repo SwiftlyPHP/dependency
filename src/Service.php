@@ -64,7 +64,10 @@ Class Service
     protected $hooks = [];
 
     /**
+     * Construct a service wrapper around the given function/method/object
      *
+     * @param callable|object|string $callback Service callback
+     * @param Container $container             Dependency container
      */
     public function __construct(
         /*string|callable*/ $callback,
