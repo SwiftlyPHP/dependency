@@ -66,8 +66,10 @@ Class Service
     /**
      *
      */
-    public function __construct( /*string|callable*/ $callback, Container $container )
-    {
+    public function __construct(
+        /*string|callable*/ $callback,
+        Container $container
+    ) {
         $this->callback = $callback;
         $this->container = $container;
     }
@@ -137,7 +139,9 @@ Class Service
         }
 
         // Might be a regular object?
-        if ( is_object( $this->callback ) && !method_exists( $this->callback, '__invoke' ) ) {
+        if ( is_object( $this->callback )
+            && !method_exists( $this->callback, '__invoke' )
+        ) {
             return $this->callback;
         }
 
@@ -149,7 +153,9 @@ Class Service
         }
 
         // We need to instantiate the object first!
-        if ( $callback->getType() === Types::TYPE_METHOD && !is_object( $this->callback[0] ) ) {
+        if ( $callback->getType() === Types::TYPE_METHOD
+            && !is_object( $this->callback[0] )
+        ) {
             $object = Invokable::forConstructor( $this->callback[0] );
             $object = $this->invoke( $object );
 
