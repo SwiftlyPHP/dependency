@@ -10,7 +10,7 @@ namespace Swiftly\Dependency;
  *
  * @author clvarley
  */
-Class CallableType
+Class Types
 {
 
     /**

@@ -2,7 +2,7 @@
 
 namespace Swiftly\Dependency;
 
-use Swiftly\Dependency\CallableType;
+use Swiftly\Dependency\Types;
 
 use Closure;
 use ReflectionFunction;
@@ -30,7 +30,7 @@ Class Invokable
      *
      * @var int $type Invokable type
      */
-    private $type = CallableType::TYPE_UNKNOWN;
+    private $type = Types::TYPE_UNKNOWN;
 
     /**
      * The reflected function or method
@@ -57,7 +57,7 @@ Class Invokable
         $reflected = new ReflectionClass( $class );
 
         $invokable = new Invokable([ $reflected, 'newInstanceArgs' ]);
-        $invokable->type = CallableType::TYPE_CONSTRUCT;
+        $invokable->type = Types::TYPE_CONSTRUCT;
         $invokable->reflected = $reflected->getConstructor();
 
         return $invokable;
@@ -83,7 +83,7 @@ Class Invokable
      */
     public function getParameters() : array
     {
-        if ( $this->reflected === null && $this->type === CallableType::TYPE_CONSTRUCT ) {
+        if ( $this->reflected === null && $this->type === Types::TYPE_CONSTRUCT ) {
             return []; // Class with no constructor
         }
 
@@ -104,19 +104,19 @@ Class Invokable
 
         // Choose appropriate representation
         switch ( $this->getType() ) {
-            case CallableType::TYPE_FUNCTION:
-            case CallableType::TYPE_CLOSURE:
+            case Types::TYPE_FUNCTION:
+            case Types::TYPE_CLOSURE:
                 $this->reflected = new ReflectionFunction( $this->callable );
                 break;
-            case CallableType::TYPE_STATIC:
-            case CallableType::TYPE_METHOD:
+            case Types::TYPE_STATIC:
+            case Types::TYPE_METHOD:
                 $this->reflected = new ReflectionMethod( ...$this->callable );
                 break;
-            case CallableType::TYPE_OBJECT:
+            case Types::TYPE_OBJECT:
                 $this->reflected = new ReflectionMethod( $this->callable, '__invoke' );
                 break;
-            case CallableType::TYPE_UNKNOWN:
-            case CallableType::TYPE_CONSTRUCT:
+            case Types::TYPE_UNKNOWN:
+            case Types::TYPE_CONSTRUCT:
                 // Throw: Custom exception
                 break;
         }
@@ -134,14 +134,14 @@ Class Invokable
     public function getType() : int
     {
         // Already inferred type
-        if ( $this->type !== CallableType::TYPE_UNKNOWN ) {
+        if ( $this->type !== Types::TYPE_UNKNOWN ) {
             return $this->type;
         }
 
         $callable = $this->callable;
 
         if ( $callable instanceof Closure ) {
-            $this->type = CallableType::TYPE_CLOSURE;
+            $this->type = Types::TYPE_CLOSURE;
             return $this->type;
         }
 
@@ -152,17 +152,17 @@ Class Invokable
 
         // Still a string? Must be a function
         if ( is_string( $callable ) ) {
-            $this->type = CallableType::TYPE_FUNCTION;
+            $this->type = Types::TYPE_FUNCTION;
 
         // Invokable object
         } else if ( is_object( $callable ) ) {
-            $this->type = CallableType::TYPE_OBJECT;
+            $this->type = Types::TYPE_OBJECT;
 
         // Class method
         } else {
             $this->type = (( new ReflectionMethod( ...$callable ))->isStatic()
-                ? CallableType::TYPE_STATIC
-                : CallableType::TYPE_METHOD
+                ? Types::TYPE_STATIC
+                : Types::TYPE_METHOD
             );
         }
 
@@ -178,16 +178,16 @@ Class Invokable
     public function invoke( array $arguments = [] ) // : mixed
     {
         switch ( $this->type ) {
-            case CallableType::TYPE_FUNCTION:
-            case CallableType::TYPE_CLOSURE:
-            case CallableType::TYPE_OBJECT:
+            case Types::TYPE_FUNCTION:
+            case Types::TYPE_CLOSURE:
+            case Types::TYPE_OBJECT:
                 return ($this->callable)( ...$arguments );
             break;
-            case CallableType::TYPE_STATIC:
-            case CallableType::TYPE_METHOD:
+            case Types::TYPE_STATIC:
+            case Types::TYPE_METHOD:
                 return call_user_func_array( $this->callable, $arguments );
             break;
-            case CallableType::TYPE_CONSTRUCT:
+            case Types::TYPE_CONSTRUCT:
                 return ($this->callable)( $arguments );
             break;
         }
