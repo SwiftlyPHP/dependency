@@ -38,7 +38,7 @@ Class Container
     /**
      * Binds a new service by name
      *
-     * @template T
+     * @template-covariant T
      * @psalm-param class-string<T> $name
      * @psalm-param class-string<T>|callable():T|T $service
      * @psalm-return Service<T>
@@ -57,7 +57,7 @@ Class Container
     /**
      * Tries to resolve the given service
      *
-     * @template T
+     * @template-covariant T
      * @psalm-param class-string<T> $name
      * @psalm-return T|null
      *
@@ -92,6 +92,8 @@ Class Container
 
     /**
      * Checks to see if a named service is available
+     *
+     * @psalm-param class-string $name
      *
      * @param string $name Service name
      * @return bool        Service available?
