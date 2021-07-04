@@ -39,7 +39,7 @@ Class Container
     /**
      * Binds a new service by name
      *
-     * @template-covariant T
+     * @template T
      * @psalm-param class-string<T> $name
      * @psalm-param class-string<T>|callable():T|T $service
      * @psalm-return Service<T>
@@ -58,7 +58,7 @@ Class Container
     /**
      * Tries to resolve the given service
      *
-     * @template-covariant T
+     * @template T
      * @psalm-param class-string<T> $name
      * @psalm-return T
      *
