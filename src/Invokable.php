@@ -42,7 +42,7 @@ Class Invokable
     /**
      * The underlying callable function/method
      *
-     * @var callable $callable Callable variable
+     * @var Closure|callable $callable Callable variable
      */
     private $callable;
 

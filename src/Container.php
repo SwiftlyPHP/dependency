@@ -20,7 +20,7 @@ Class Container
     /**
      * Holds the currently registered services
      *
-     * @var Service[] $services Registered services
+     * @var array<string,Service> $services Registered services
      */
     protected $services = [];
 
@@ -38,6 +38,11 @@ Class Container
     /**
      * Binds a new service by name
      *
+     * @template T
+     * @psalm-param class-string<T> $name
+     * @psalm-param class-string<T>|callable():T|T $service
+     * @psalm-return Service<T>
+     *
      * @param string $name   Service name
      * @param mixed $service Service provider
      * @return Service       Allow chaining
@@ -52,10 +57,14 @@ Class Container
     /**
      * Tries to resolve the given service
      *
+     * @template T
+     * @psalm-param class-string<T> $name
+     * @psalm-return T|null
+     *
      * @param string $name Service name
      * @return object|null Resolved service
      */
-    public function resolve( string $name ) // : object
+    public function resolve( string $name ) // : ?object
     {
         return ( isset( $this->services[$name] )
             ? $this->services[$name]->resolve()

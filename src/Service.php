@@ -16,6 +16,7 @@ use function is_callable;
 /**
  * Class used to represent an application service
  *
+ * @template T
  * @author clvarley
  */
 Class Service
@@ -24,7 +25,9 @@ Class Service
     /**
      * The callback used to create this service
      *
-     * @var string|object|callable $callable Service callback
+     * @psalm-var class-string<T>|callable():T|T $callback
+     *
+     * @var string|callable|object $callable Service callback
      */
     protected $callback;
 
@@ -37,6 +40,8 @@ Class Service
 
     /**
      * The resolved service object
+     *
+     * @psalm-var T|null $resolved
      *
      * @var object|null $resolved Resolved service
      */
@@ -66,7 +71,9 @@ Class Service
     /**
      * Construct a service wrapper around the given function/method/object
      *
-     * @param callable|object|string $callback Service callback
+     * @psalm-param class-string<T>|callable():T|T $callback
+     *
+     * @param string|callable|object $callback Service callback
      * @param Container $container             Dependency container
      */
     public function __construct(
@@ -131,6 +138,8 @@ Class Service
 
     /**
      * Resolve the service and returns the instantiated object
+     *
+     * @psalm-return T|null
      *
      * @internal
      * @return object|null Instantiated object
