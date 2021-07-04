@@ -5,6 +5,7 @@ namespace Swiftly\Dependency;
 use Swiftly\Dependency\Invokable;
 use Swiftly\Dependency\LoaderInterface;
 use Swiftly\Dependency\Service;
+use Swiftly\Dependency\Exception\NotFoundException;
 
 use function is_string;
 use function function_exists;
@@ -59,17 +60,19 @@ Class Container
      *
      * @template-covariant T
      * @psalm-param class-string<T> $name
-     * @psalm-return T|null
+     * @psalm-return T
      *
+     * @throws NotFoundException
      * @param string $name Service name
-     * @return object|null Resolved service
+     * @return object      Resolved service
      */
-    public function resolve( string $name ) // : ?object
+    public function resolve( string $name ) // : object
     {
-        return ( isset( $this->services[$name] )
-            ? $this->services[$name]->resolve()
-            : null
-        );
+        if ( !isset( $this->services[$name] ) ) {
+            throw new NotFoundException(); // TODO:
+        }
+
+        return $this->services[$name]->resolve();
     }
 
     /**
