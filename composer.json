@@ -9,7 +9,7 @@
         "ext-json": "To allow JSON configuration files"
     },
     "require": {
-        "php": ">=7.1"
+        "php": "^7.1 || ^8"
     },
     "require-dev": {
         "vimeo/psalm": "^4.8"
