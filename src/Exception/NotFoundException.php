@@ -10,7 +10,7 @@ use RuntimeException;
  * @package Cache
  * @author clvarley
  */
-Final Class NotFoundException Implements RuntimeException
+Final Class NotFoundException Extends RuntimeException
 {
     // TODO:
 }
