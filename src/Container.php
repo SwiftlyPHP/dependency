@@ -21,7 +21,9 @@ Class Container
     /**
      * Holds the currently registered services
      *
-     * @var array<string,Service> $services Registered services
+     * @psalm-var array<class-string,Service> $services
+     *
+     * @var Service[] $services Registered services
      */
     protected $services = [];
 

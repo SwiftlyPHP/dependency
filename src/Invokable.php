@@ -186,14 +186,14 @@ Class Invokable
             case Types::TYPE_CLOSURE:
             case Types::TYPE_OBJECT:
                 return ($this->callable)( ...$arguments );
-            break;
+                break;
             case Types::TYPE_STATIC:
             case Types::TYPE_METHOD:
                 return call_user_func_array( $this->callable, $arguments );
-            break;
+                break;
             case Types::TYPE_CONSTRUCT:
                 return ($this->callable)( $arguments );
-            break;
+                break;
         }
     }
 }
