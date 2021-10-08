@@ -5,8 +5,9 @@ namespace Swiftly\Dependency;
 use Swiftly\Dependency\Container;
 use Swiftly\Dependency\Invokable;
 use Swiftly\Dependency\Types;
-
+use Swiftly\Dependency\Exception\UnionTypeException;
 use ReflectionParameter;
+use ReflectionNamedType;
 
 use function array_merge;
 use function is_object;
@@ -220,6 +221,11 @@ Class Service
         }
 
         $type = $parameter->getType();
+
+        // We can't really support union types (yet)!
+        if ( $type && $type instanceof ReflectionNamedType === false ) {
+            throw new UnionTypeException(); // TODO
+        }
 
         // If no type supplied?
         if ( $type === null || $type->isBuiltin() ) {
