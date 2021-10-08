@@ -42,15 +42,17 @@ Class Invokable
     /**
      * The underlying callable function/method
      *
-     * @var Closure|callable $callable Callable variable
+     * @var callable $callable Callable variable
      */
     private $callable;
 
     /**
      * Handles the special case of class constructors
      *
-     * @param object|string $class Class(name)
-     * @return Invokable           Constructor invokable
+     * @psalm-param class-string $class
+     *
+     * @param string $class Classname
+     * @return Invokable    Constructor invokable
      */
     public static function forConstructor( /* object|string */ $class ) : Invokable
     {
@@ -79,15 +81,15 @@ Class Invokable
     /**
      * Gets the parameters expected by this callable
      *
+     * @psalm-return list<ReflectionParameter>
+     *
      * @return ReflectionParameter[] Defined parameters
      */
     public function getParameters() : array
     {
-        if ( $this->reflected === null && $this->type === Types::TYPE_CONSTRUCT ) {
-            return []; // Class with no constructor
-        }
+        $reflection = $this->getReflection();
 
-        return $this->getReflection()->getParameters();
+        return $reflection ? $reflection->getParameters() : [];
     }
 
     /**
@@ -171,6 +173,8 @@ Class Invokable
 
     /**
      * Invoke the underlying function and return its result
+     *
+     * @psalm-param list<mixed> $arguments
      *
      * @param mixed[] $arguments Function arguments
      * @return mixed             Function result
