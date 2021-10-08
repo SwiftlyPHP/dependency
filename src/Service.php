@@ -51,6 +51,8 @@ Class Service
     /**
      * Parameters to be used during service creation
      *
+     * @psalm-var array<string,mixed> $parameters
+     *
      * @var array $parameters Service parameters
      */
     protected $parameters = [];
@@ -114,6 +116,8 @@ Class Service
     /**
      * Sets parameters to be used during service creation
      *
+     * @psalm-param array<string,mixed> $parameters
+     *
      * @param mixed[] $parameters Service parameters
      * @return self               Allow chaining
      */
@@ -140,12 +144,11 @@ Class Service
     /**
      * Resolve the service and returns the instantiated object
      *
-     * @psalm-return T|null
+     * @psalm-return T
      *
-     * @internal
-     * @return object|null Instantiated object
+     * @return object Instantiated object
      */
-    public function resolve() // : ?object
+    public function resolve() // : object
     {
         if ( $this->resolved !== null ) {
             return $this->resolved;
@@ -178,6 +181,7 @@ Class Service
         }
 
         // Resolve the object
+        /** @psalm-var T $this->resolved */
         $this->resolved = $this->invoke( $callback );
 
         // Run any post hooks!
@@ -210,7 +214,7 @@ Class Service
      * Attempts to resolve a parameter value
      *
      * @param ReflectionParameter $parameter Reflected parameter
-     * @return mixed|null                    Parameter value
+     * @return mixed                         Parameter value
      */
     private function param( ReflectionParameter $parameter ) // : mixed
     {
@@ -222,7 +226,7 @@ Class Service
 
         $type = $parameter->getType();
 
-        // We can't really support union types (yet)!
+        // We can't really support PHP8 union types (yet)!
         if ( $type && $type instanceof ReflectionNamedType === false ) {
             throw new UnionTypeException(); // TODO
         }
@@ -238,7 +242,7 @@ Class Service
             return $value;
         }
 
-        // Get the class/interface name
+        /** @psalm-var class-string $type */
         $type = $type->getName();
 
         return $this->container->resolve( $type );
