@@ -42,8 +42,9 @@ Class Container
      * Binds a new service by name
      *
      * @template T of object
-     * @psalm-param class-string $name
+     * @psalm-param class-string<T> $name
      * @psalm-param class-string<T>|callable():T|T $service
+     * @psalm-return Service<T>
      *
      * @param string $name   Service name
      * @param mixed $service Service provider
@@ -59,7 +60,7 @@ Class Container
     /**
      * Tries to resolve the given service
      *
-     * @template T
+     * @template T of object
      * @psalm-param class-string<T> $name
      * @psalm-return T
      *
