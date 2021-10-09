@@ -41,8 +41,9 @@ Class Container
     /**
      * Binds a new service by name
      *
+     * @template T of object
      * @psalm-param class-string $name
-     * @psalm-param class-string|callable()|object $service
+     * @psalm-param class-string<T>|callable():T|T $service
      *
      * @param string $name   Service name
      * @param mixed $service Service provider

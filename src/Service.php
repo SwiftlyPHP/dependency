@@ -17,7 +17,7 @@ use function is_callable;
 /**
  * Class used to represent an application service
  *
- * @template T
+ * @template T of object
  * @author clvarley
  */
 Class Service
