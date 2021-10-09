@@ -70,7 +70,7 @@ Class Container
      */
     public function resolve( string $name ) // : object
     {
-        if ( !isset( $this->services[$name] ) ) {
+        if ( !$this->has( $name ) ) {
             throw new NotFoundException(); // TODO:
         }
 
@@ -82,6 +82,8 @@ Class Container
      *
      * Please do not rely on this method, it may be reworked/removed in a
      * future release. Instead use the {@see Service::alias} method.
+     *
+     * @psalm-param class-string $name
      *
      * @internal
      * @param string $name     Service name

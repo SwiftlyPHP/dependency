@@ -90,6 +90,8 @@ Class Service
     /**
      * Sets an alias for this service
      *
+     * @psalm-param class-string $name
+     *
      * @param string $name Service name
      * @return self        Allow chaining
      */
