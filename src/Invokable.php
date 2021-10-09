@@ -53,7 +53,9 @@ Class Invokable
     /**
      * Handles the special case of class constructors
      *
-     * @psalm-param class-string $class
+     * @template C
+     * @psalm-param class-string<C> $class
+     * @psalm-return Invokable<callable():C>
      *
      * @param string $class Classname
      * @return Invokable    Constructor invokable
@@ -62,7 +64,10 @@ Class Invokable
     {
         $reflected = new ReflectionClass( $class );
 
-        $invokable = new Invokable([ $reflected, 'newInstanceArgs' ]);
+        /** @psalm-var callable():C $callback */
+        $callback = [ $reflected, 'newInstanceArgs' ];
+
+        $invokable = new Invokable( $callback );
         $invokable->type = Types::TYPE_CONSTRUCT;
         $invokable->reflected = $reflected->getConstructor();
 
