@@ -20,6 +20,8 @@ use function call_user_func_array;
 /**
  * Class used to represent a callable function/method
  *
+ * @template T
+ *
  * @author clvarley
  */
 Class Invokable
@@ -42,6 +44,8 @@ Class Invokable
     /**
      * The underlying callable function/method
      *
+     * @psalm-var T $callable
+     *
      * @var callable $callable Callable variable
      */
     private $callable;
@@ -54,7 +58,7 @@ Class Invokable
      * @param string $class Classname
      * @return Invokable    Constructor invokable
      */
-    public static function forConstructor( /* object|string */ $class ) : Invokable
+    public static function forConstructor( string $class ) : Invokable
     {
         $reflected = new ReflectionClass( $class );
 
@@ -70,6 +74,8 @@ Class Invokable
      *
      * Have to avoid use of the `callable` typehint to suppress the:
      * "Non-static method should not be called statically" warning
+     *
+     * @psalm-param T $callable
      *
      * @param callable $callable Callable variable
      */
