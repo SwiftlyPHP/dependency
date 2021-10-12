@@ -11,7 +11,7 @@ use function sprintf;
  *
  * @author clvarley
  */
-Class NotFoundException Extends RuntimeException
+Final Class NotFoundException Extends RuntimeException
 {
 
     /**

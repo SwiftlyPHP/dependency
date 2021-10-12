@@ -66,7 +66,7 @@ Class Invokable
 
         /** @psalm-var callable():C $callback */
         $callback = [ $reflected, 'newInstanceArgs' ];
-
+        
         $invokable = new Invokable( $callback );
         $invokable->type = Types::TYPE_CONSTRUCT;
         $invokable->reflected = $reflected->getConstructor();

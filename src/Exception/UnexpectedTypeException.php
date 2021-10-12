@@ -11,7 +11,7 @@ use function sprintf;
  *
  * @author clvarley
  */
-Class UnexpectedTypeException Extends UnexpectedValueException
+Final Class UnexpectedTypeException Extends UnexpectedValueException
 {
 
     /**
