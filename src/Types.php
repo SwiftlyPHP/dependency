@@ -66,8 +66,6 @@ Class Types
      *    : TFunc is callable-string
      *    ? self::TYPE_FUNCTION
      *    : TFunc is object
-     *    ? self::TYPE_OBJECT
-     *    : TFunc is array{0:ReflectionClass,1:'newInstanceArgs'}
      *    ? self::TYPE_CONSTRUCT
      *    : TFunc is array{0:string,1:string}
      *    ? self::TYPE_STATIC

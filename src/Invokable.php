@@ -31,7 +31,9 @@ Class Invokable
     /**
      * The type of this callable
      *
-     * @var Types::TYPE_* $type Callable type
+     * @psalm-var Types::TYPE_* $type
+     *
+     * @var int $type Callable type
      */
     private $type = Types::TYPE_UNKNOWN;
 
@@ -68,7 +70,7 @@ Class Invokable
         $callback = [ $reflected, 'newInstanceArgs' ];
 
         $invokable = new Invokable( $callback );
-        $invokable->type = Types::TYPE_CONSTRUCT;
+        $invokable->type = Types::TYPE_METHOD;
         $invokable->reflected = $reflected->getConstructor();
 
         return $invokable;
@@ -129,7 +131,6 @@ Class Invokable
                 $this->reflected = new ReflectionMethod( $this->callable, '__invoke' );
                 break;
             case Types::TYPE_UNKNOWN:
-            case Types::TYPE_CONSTRUCT:
                 // Throw: Custom exception
                 break;
         }
@@ -142,31 +143,16 @@ Class Invokable
      *
      * Returns one of the invokable `TYPE_*` constants.
      *
-     * @psalm-return (
-     *  TFunc is Closure
-     *  ? Types::TYPE_CLOSURE
-     *  : TFunc is callable-string
-     *    ? Types::TYPE_FUNCTION
-     *    : TFunc is object
-     *      ? Types::TYPE_OBJECT
-     *      : TFunc is array{0:ReflectionClass,1:'newInstanceArgs'}
-     *        ? Types::TYPE_CONSTRUCT
-     *        : TFunc is array{0:string,1:string}
-     *          ? Types::TYPE_STATIC
-     *          : TFunc is callable-array
-     *            ? Types::TYPE_METHOD
-     *            : Types::TYPE_UNKNOWN
-     * )
+     * @psalm-return Types::TYPE_*
      *
-     * @return Types::TYPE_* Callable type
+     * @return int Callable type
      */
     public function getType() : int
     {
         // Yet to infer type
         if ( $this->type === Types::TYPE_UNKNOWN ) {
-            return $this->type;
+            $this->type = Types::inferType( $this->callable );
         }
-
 
         return $this->type;
     }
@@ -182,7 +168,7 @@ Class Invokable
      */
     public function invoke( array $arguments = [] ) // : mixed
     {
-        switch ( $this->type ) {
+        switch ( $this->getType() ) {
             case Types::TYPE_FUNCTION:
             case Types::TYPE_CLOSURE:
             case Types::TYPE_OBJECT:
@@ -191,9 +177,6 @@ Class Invokable
             case Types::TYPE_STATIC:
             case Types::TYPE_METHOD:
                 return call_user_func_array( $this->callable, $arguments );
-                break;
-            case Types::TYPE_CONSTRUCT:
-                return ($this->callable)( $arguments );
                 break;
         }
     }
