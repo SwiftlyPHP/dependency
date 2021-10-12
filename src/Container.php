@@ -2,13 +2,10 @@
 
 namespace Swiftly\Dependency;
 
-use Swiftly\Dependency\Invokable;
 use Swiftly\Dependency\LoaderInterface;
 use Swiftly\Dependency\Service;
 use Swiftly\Dependency\Exception\NotFoundException;
-
-use function is_string;
-use function function_exists;
+use Swiftly\Dependency\Exception\UnexpectedTypeException;
 
 /**
  * Container used to manage application services
@@ -74,7 +71,14 @@ Class Container
             throw new NotFoundException(); // TODO:
         }
 
-        return $this->services[$name]->resolve();
+        $resolved = $this->services[$name]->resolve();
+
+        // Resolution returned wrong type
+        if ( $resolved instanceof $name === false ) {
+            throw new UnexpectedTypeException( $name, $resolved );
+        }
+
+        return $resolved;
     }
 
     /**
