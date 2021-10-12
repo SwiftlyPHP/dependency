@@ -67,7 +67,7 @@ Class Types
      * Attempt to infer exactly what type the given callable is
      *
      * @template TCall
-     * @psalm-param TCall $callable
+     * @psalm-param TCall as callable $callable
      * @psalm-return (
      *    TCall is Closure
      *    ? self::TYPE_CLOSURE
@@ -94,12 +94,7 @@ Class Types
             return $type;
         }
 
-        // Support older "Class::method" syntax?
-        if ( is_string( $callable ) && strpos( $callable, '::' ) ) {
-            $callable = explode( '::', $callable );
-        }
-
-        // Still a string? Must be a function
+        // A string? Must be a function
         if ( is_string( $callable ) ) {
             $type = Types::TYPE_FUNCTION;
 
