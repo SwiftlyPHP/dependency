@@ -37,17 +37,6 @@ Class PhpLoader Implements LoaderInterface
     }
 
     /**
-     * Returns whether this loader can load the given file
-     *
-     * @param string $file File path
-     * @return bool        File supported
-     */
-    public function supports( string $file ) : bool
-    {
-        return ( substr( $file, -4 ) === '.php' );
-    }
-
-    /**
      * Load services into this dependency container
      *
      * @param Container $container Dependency container

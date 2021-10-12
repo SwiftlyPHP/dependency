@@ -43,17 +43,6 @@ Class JsonLoader Implements LoaderInterface
     }
 
     /**
-     * Returns whether this loader can load the given file
-     *
-     * @param string $file File path
-     * @return bool        File supported
-     */
-    public function supports( string $file ) : bool
-    {
-        return ( substr( $file, -5 ) === '.json' );
-    }
-
-    /**
      * Load services into this dependency container
      *
      * @param Container $container Dependency container
@@ -112,8 +101,6 @@ Class JsonLoader Implements LoaderInterface
         }
 
         $content = (string)file_get_contents( $this->file );
-
-        /** @var array|false $content */
         $content = json_decode( $content, true );
 
         if ( !is_array( $content ) || json_last_error() !== JSON_ERROR_NONE ) {
