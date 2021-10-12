@@ -20,8 +20,7 @@ use function call_user_func_array;
 /**
  * Class used to represent a callable function/method
  *
- * @template TValue
- * @template TFunc as callable():TValue
+ * @template TFunc as callable
  *
  * @author clvarley
  */
@@ -161,7 +160,6 @@ Class Invokable
      * Invoke the underlying function and return its result
      *
      * @psalm-param list<mixed> $arguments
-     * @psalm-return TValue
      *
      * @param mixed[] $arguments Function arguments
      * @return mixed             Function result
