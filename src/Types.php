@@ -2,6 +2,14 @@
 
 namespace Swiftly\Dependency;
 
+use Closure;
+use ReflectionMethod;
+
+use function is_string;
+use function strpos;
+use function explode;
+use function is_object;
+
 /**
  * Used to represent the types a callable can be
  *
@@ -61,15 +69,15 @@ Class Types
      * @template TCall
      * @psalm-param TCall $callable
      * @psalm-return (
-     *    TFunc is Closure
+     *    TCall is Closure
      *    ? self::TYPE_CLOSURE
-     *    : TFunc is callable-string
+     *    : TCall is callable-string
      *    ? self::TYPE_FUNCTION
-     *    : TFunc is object
-     *    ? self::TYPE_CONSTRUCT
-     *    : TFunc is array{0:string,1:string}
+     *    : TCall is object
+     *    ? self::TYPE_OBJECT
+     *    : TCall is array{0:string,1:string}
      *    ? self::TYPE_STATIC
-     *    : TFunc is callable-array
+     *    : TCall is callable-array
      *    ? self::TYPE_METHOD
      *    : self::TYPE_UNKNOWN
      * )
