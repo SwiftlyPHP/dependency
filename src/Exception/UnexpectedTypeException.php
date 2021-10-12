@@ -35,7 +35,7 @@ Final Class UnexpectedTypeException Extends UnexpectedValueException
      */
     public function __construct( string $expected, $actual )
     {
-        $this->actual;
+        $this->actual = $actual;
 
         parent::__construct(
             sprintf(
