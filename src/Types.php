@@ -6,9 +6,8 @@ use Closure;
 use ReflectionMethod;
 
 use function is_string;
-use function strpos;
-use function explode;
 use function is_object;
+use function is_array;
 
 /**
  * Used to represent the types a callable can be
@@ -67,7 +66,7 @@ Class Types
      * Attempt to infer exactly what type the given callable is
      *
      * @template TCall
-     * @psalm-param TCall as callable $callable
+     * @psalm-param TCall $callable
      * @psalm-return (
      *    TCall is Closure
      *    ? self::TYPE_CLOSURE
@@ -103,7 +102,7 @@ Class Types
             $type = Types::TYPE_OBJECT;
 
         // Class method
-        } else {
+        } else if ( is_array( $callable ) ) {
             $type = (( new ReflectionMethod( ...$callable ))->isStatic()
                 ? Types::TYPE_STATIC
                 : Types::TYPE_METHOD
