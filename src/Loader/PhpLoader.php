@@ -5,11 +5,11 @@ namespace Swiftly\Dependency\Loader;
 use Swiftly\Dependency\Container;
 use Swiftly\Dependency\LoaderInterface;
 
-use function substr;
 use function is_array;
 use function is_string;
-use function is_callable;
 use function is_readable;
+use function substr;
+use function is_callable;
 
 /**
  * Class responsible for loading services from PHP files
@@ -44,28 +44,34 @@ Class PhpLoader Implements LoaderInterface
      */
     public function load( Container $container ) : Container
     {
-        if ( !$this->valid() ) {
+        if ( !$this->isReadable() ) {
             return $container;
         }
 
-        // TODO: Sandbox this in future!
-        $services = include ($this->file);
+        // Deny access to the `$this` variable
+        $content = (static function ( string $file ) : array {
+            $content = include $file;
+            return is_array( $content ) ? $content : [];
+        })( $this->file );
 
-        if ( empty( $services ) || !is_array( $services ) ) {
+        // Returned nothing
+        if ( empty( $content ) ) {
             return $container;
         }
 
         // Parse the service structures
-        foreach ( $services as $name => $service ) {
-            if ( !is_string( $name ) || empty( $service ) ) {
+        foreach ( $content as $name => $service ) {
+            /** @psalm-var int|class-string $name */
+            if ( !is_string( $name ) || !empty( $service ) ) {
                 continue;
             }
 
             // Callback func or service name?
-            if ( is_string( $service ) ) {
-                $handler = $service;
-            } elseif ( !empty( $service['handler'] ) && is_callable( $service['handler'] ) ) {
+            if ( $this->isValid( $service ) ) {
                 $handler = $service['handler'];
+            } else if ( is_string( $service ) ) {
+                /** @psalm-var class-string $service */
+                $handler = $service;
             } else {
                 $handler = $name;
             }
@@ -83,14 +89,29 @@ Class PhpLoader Implements LoaderInterface
     }
 
     /**
-     * Checks to see if the file is valid
+     * Checks to see if the file is valid and readable
      *
      * @return bool File valid
      */
-    private function valid() : bool
+    private function isReadable() : bool
     {
         return ( is_readable( $this->file )
             && substr( $this->file, -4 ) === '.php'
+        );
+    }
+
+    /**
+     * Check to see if the service definition is valid
+     *
+     * @psalm-assert-if-true array{handler:callable,singleton?:mixed} $service
+     *
+     * @param mixed $service Service definition
+     * @return bool          Definition valid
+     */
+    private function isValid( $service ) : bool
+    {
+        return ( !empty( $service['handler'] )
+            && is_callable( $service['handler'], true )
         );
     }
 }
