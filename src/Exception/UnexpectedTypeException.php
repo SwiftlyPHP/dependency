@@ -18,7 +18,7 @@ Class UnexpectedTypeException Extends UnexpectedValueException
      * @psalm-param class-string $expected
      *
      * @param string $expected Expected class
-     * @param mixed $actual    Actual result
+     * @param object $actual   Actual result
      */
     public function __construct( string $expected, $actual )
     {

@@ -62,13 +62,14 @@ Class Container
      * @psalm-return T
      *
      * @throws NotFoundException
+     * @throws UnexpectedTypeException
      * @param string $name Service name
      * @return object      Resolved service
      */
     public function resolve( string $name ) // : object
     {
         if ( !$this->has( $name ) ) {
-            throw new NotFoundException(); // TODO:
+            throw new NotFoundException( $name );
         }
 
         $resolved = $this->services[$name]->resolve();
