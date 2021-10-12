@@ -20,7 +20,8 @@ use function call_user_func_array;
 /**
  * Class used to represent a callable function/method
  *
- * @template T
+ * @template TValue
+ * @template TFunc as callable():TValue
  *
  * @author clvarley
  */
@@ -44,7 +45,7 @@ Class Invokable
     /**
      * The underlying callable function/method
      *
-     * @psalm-var T $callable
+     * @psalm-var TFunc $callable
      *
      * @var callable $callable Callable variable
      */
@@ -55,7 +56,6 @@ Class Invokable
      *
      * @template C
      * @psalm-param class-string<C> $class
-     * @psalm-return Invokable<callable():C>
      *
      * @param string $class Classname
      * @return Invokable    Constructor invokable
@@ -66,7 +66,7 @@ Class Invokable
 
         /** @psalm-var callable():C $callback */
         $callback = [ $reflected, 'newInstanceArgs' ];
-        
+
         $invokable = new Invokable( $callback );
         $invokable->type = Types::TYPE_CONSTRUCT;
         $invokable->reflected = $reflected->getConstructor();
@@ -80,7 +80,7 @@ Class Invokable
      * Have to avoid use of the `callable` typehint to suppress the:
      * "Non-static method should not be called statically" warning
      *
-     * @psalm-param T $callable
+     * @psalm-param TFunc $callable
      *
      * @param callable $callable Callable variable
      */
@@ -142,42 +142,31 @@ Class Invokable
      *
      * Returns one of the invokable `TYPE_*` constants.
      *
+     * @psalm-return (
+     *  TFunc is Closure
+     *  ? Types::TYPE_CLOSURE
+     *  : TFunc is callable-string
+     *    ? Types::TYPE_FUNCTION
+     *    : TFunc is object
+     *      ? Types::TYPE_OBJECT
+     *      : TFunc is array{0:ReflectionClass,1:'newInstanceArgs'}
+     *        ? Types::TYPE_CONSTRUCT
+     *        : TFunc is array{0:string,1:string}
+     *          ? Types::TYPE_STATIC
+     *          : TFunc is callable-array
+     *            ? Types::TYPE_METHOD
+     *            : Types::TYPE_UNKNOWN
+     * )
+     *
      * @return Types::TYPE_* Callable type
      */
     public function getType() : int
     {
-        // Already inferred type
-        if ( $this->type !== Types::TYPE_UNKNOWN ) {
+        // Yet to infer type
+        if ( $this->type === Types::TYPE_UNKNOWN ) {
             return $this->type;
         }
 
-        $callable = $this->callable;
-
-        if ( $callable instanceof Closure ) {
-            $this->type = Types::TYPE_CLOSURE;
-            return $this->type;
-        }
-
-        // Support older "Class::method" syntax?
-        if ( is_string( $callable ) && strpos( $callable, '::' ) ) {
-            $callable = explode( '::', $callable );
-        }
-
-        // Still a string? Must be a function
-        if ( is_string( $callable ) ) {
-            $this->type = Types::TYPE_FUNCTION;
-
-        // Invokable object
-        } else if ( is_object( $callable ) ) {
-            $this->type = Types::TYPE_OBJECT;
-
-        // Class method
-        } else {
-            $this->type = (( new ReflectionMethod( ...$callable ))->isStatic()
-                ? Types::TYPE_STATIC
-                : Types::TYPE_METHOD
-            );
-        }
 
         return $this->type;
     }
@@ -186,6 +175,7 @@ Class Invokable
      * Invoke the underlying function and return its result
      *
      * @psalm-param list<mixed> $arguments
+     * @psalm-return TValue
      *
      * @param mixed[] $arguments Function arguments
      * @return mixed             Function result

@@ -56,10 +56,59 @@ Class Types
     const TYPE_OBJECT = 5;
 
     /**
-     * Indicates the callable is actually a class constructor
+     * Attempt to infer exactly what type the given callable is
      *
-     * @var int TYPE_CONSTRUCT Class constructor
+     * @template TCall
+     * @psalm-param TCall $callable
+     * @psalm-return (
+     *    TFunc is Closure
+     *    ? self::TYPE_CLOSURE
+     *    : TFunc is callable-string
+     *    ? self::TYPE_FUNCTION
+     *    : TFunc is object
+     *    ? self::TYPE_OBJECT
+     *    : TFunc is array{0:ReflectionClass,1:'newInstanceArgs'}
+     *    ? self::TYPE_CONSTRUCT
+     *    : TFunc is array{0:string,1:string}
+     *    ? self::TYPE_STATIC
+     *    : TFunc is callable-array
+     *    ? self::TYPE_METHOD
+     *    : self::TYPE_UNKNOWN
+     * )
+     *
+     * @param callable $callable Callable variable
+     * @return int               Inferred type
      */
-    const TYPE_CONSTRUCT = 6;
+    public static function inferType( $callable ) : int
+    {
+        $type = self::TYPE_UNKNOWN;
 
+        if ( $callable instanceof Closure ) {
+            $type = self::TYPE_CLOSURE;
+            return $type;
+        }
+
+        // Support older "Class::method" syntax?
+        if ( is_string( $callable ) && strpos( $callable, '::' ) ) {
+            $callable = explode( '::', $callable );
+        }
+
+        // Still a string? Must be a function
+        if ( is_string( $callable ) ) {
+            $type = Types::TYPE_FUNCTION;
+
+        // Invokable object
+        } else if ( is_object( $callable ) ) {
+            $type = Types::TYPE_OBJECT;
+
+        // Class method
+        } else {
+            $type = (( new ReflectionMethod( ...$callable ))->isStatic()
+                ? Types::TYPE_STATIC
+                : Types::TYPE_METHOD
+            );
+        }
+
+        return $type;
+    }
 }
