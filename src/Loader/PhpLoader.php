@@ -76,10 +76,14 @@ Class PhpLoader Implements LoaderInterface
                 $handler = $name;
             }
 
-            // Explicitly not a singleton?
-            $single = ( isset( $service['singleton'] )
-                && empty( $service['singleton'] )
-            );
+            // Opt out of singleton pattern?
+            if ( isset( $service['singleton'] )
+                && $service['singleton'] == false
+            ) {
+                $single = false;
+            } else {
+                $single = true;
+            }
 
             $registered = $container->bind( $name, $handler );
             $registered->singleton( $single );
