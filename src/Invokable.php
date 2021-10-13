@@ -30,7 +30,7 @@ Class Invokable
     /**
      * The type of this callable
      *
-     * @psalm-var Types::TYPE_* $type
+     * @psalm-var Types::_CONSTRUCT|Types::TYPE_* $type
      *
      * @var int $type Callable type
      */
@@ -70,7 +70,7 @@ Class Invokable
         $callback = [ $reflected, 'newInstanceArgs' ];
 
         $invokable = new Invokable( $callback );
-        $invokable->type = Types::TYPE_METHOD;
+        $invokable->type = Types::_CONSTRUCT;
         $invokable->reflected = $reflected->getConstructor();
 
         return $invokable;
@@ -113,7 +113,7 @@ Class Invokable
     public function getReflection() : ?ReflectionFunctionAbstract
     {
         // Already reflected
-        if ( $this->reflected !== null ) {
+        if ( $this->reflected !== null || $this->type === Types::_CONSTRUCT ) {
             return $this->reflected;
         }
 
@@ -171,16 +171,11 @@ Class Invokable
      */
     public function invoke( array $arguments = [] ) // : mixed
     {
-        if (( $type = $this->getType() === Types::TYPE_UNKNOWN )) {
+        if ( $this->getType() === Types::TYPE_UNKNOWN ) {
             // TODO: Throw
         }
 
-        if ( $type === Types::TYPE_METHOD || $type === Types::TYPE_STATIC ) {
-            $result = call_user_func_array( $this->callable, $arguments );
-        } else {
-            $result = ($this->callable)( ...$arguments );
-        }
-
-        return $result;
+        // Let's go!
+        return ($this->callable)( ...$arguments );
     }
 }

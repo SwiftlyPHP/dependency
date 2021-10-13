@@ -63,6 +63,14 @@ Class Types
     const TYPE_OBJECT = 5;
 
     /**
+     * Used to represent the special case of a class constructor
+     *
+     * @internal
+     * @var int _CONSTRUCT Class constructor
+     */
+    const _CONSTRUCT = 6;
+
+    /**
      * Attempt to infer exactly what type the given callable is
      *
      * @template TCall
