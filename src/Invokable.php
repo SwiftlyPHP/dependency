@@ -20,7 +20,8 @@ use function call_user_func_array;
 /**
  * Class used to represent a callable function/method
  *
- * @template TFunc as callable
+ * @template TVal
+ * @psalm-type CArr=array{0:class-string,1:string}&callable
  *
  * @author clvarley
  */
@@ -46,7 +47,7 @@ Class Invokable
     /**
      * The underlying callable function/method
      *
-     * @psalm-var TFunc $callable
+     * @psalm-var callable(mixed=):TVal $callable
      *
      * @var callable $callable Callable variable
      */
@@ -57,6 +58,7 @@ Class Invokable
      *
      * @template C
      * @psalm-param class-string<C> $class
+     * @psalm-return Invokable<C>
      *
      * @param string $class Classname
      * @return Invokable    Constructor invokable
@@ -81,7 +83,7 @@ Class Invokable
      * Have to avoid use of the `callable` typehint to suppress the:
      * "Non-static method should not be called statically" warning
      *
-     * @psalm-param TFunc $callable
+     * @psalm-param callable():TVal $callable
      *
      * @param callable $callable Callable variable
      */
@@ -120,13 +122,16 @@ Class Invokable
         switch ( $this->getType() ) {
             case Types::TYPE_FUNCTION:
             case Types::TYPE_CLOSURE:
+                /** @psalm-var Closure|callable-string $this->callable */
                 $this->reflected = new ReflectionFunction( $this->callable );
                 break;
             case Types::TYPE_STATIC:
             case Types::TYPE_METHOD:
+                /** @psalm-var array{0:class-string,1:string} $this->callable */
                 $this->reflected = new ReflectionMethod( ...$this->callable );
                 break;
             case Types::TYPE_OBJECT:
+                /** @psalm-var callable-object $this->callable */
                 $this->reflected = new ReflectionMethod( $this->callable, '__invoke' );
                 break;
             case Types::TYPE_UNKNOWN:
@@ -160,22 +165,17 @@ Class Invokable
      * Invoke the underlying function and return its result
      *
      * @psalm-param list<mixed> $arguments
+     * @psalm-return TVal
      *
      * @param mixed[] $arguments Function arguments
      * @return mixed             Function result
      */
     public function invoke( array $arguments = [] ) // : mixed
     {
-        switch ( $this->getType() ) {
-            case Types::TYPE_FUNCTION:
-            case Types::TYPE_CLOSURE:
-            case Types::TYPE_OBJECT:
-                return ($this->callable)( ...$arguments );
-                break;
-            case Types::TYPE_STATIC:
-            case Types::TYPE_METHOD:
-                return call_user_func_array( $this->callable, $arguments );
-                break;
+        if ( $this->getType() === Types::TYPE_UNKNOWN ) {
+            // TODO: Throw
         }
+
+        return ($this->callable)( ...$arguments );
     }
 }
