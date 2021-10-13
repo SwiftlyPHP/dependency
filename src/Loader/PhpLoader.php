@@ -62,7 +62,7 @@ Class PhpLoader Implements LoaderInterface
         // Parse the service structures
         foreach ( $content as $name => $service ) {
             /** @psalm-var int|class-string $name */
-            if ( !is_string( $name ) || !empty( $service ) ) {
+            if ( !is_string( $name ) || empty( $service ) ) {
                 continue;
             }
 
