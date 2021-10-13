@@ -173,7 +173,7 @@ Class Service
 
         // We need to instantiate the object first!
         if ( $callback->getType() === Types::TYPE_METHOD
-            && !is_object( $this->callback[0] )
+            && is_string( $this->callback[0] )
         ) {
             $object = Invokable::forConstructor( $this->callback[0] );
             $object = $this->invoke( $object );
@@ -184,7 +184,6 @@ Class Service
         }
 
         // Resolve the object
-        /** @psalm-var T $this->resolved */
         $this->resolved = $this->invoke( $callback );
 
         // Run any post hooks!
