@@ -171,10 +171,16 @@ Class Invokable
      */
     public function invoke( array $arguments = [] ) // : mixed
     {
-        if ( $this->getType() === Types::TYPE_UNKNOWN ) {
+        if (( $type = $this->getType() === Types::TYPE_UNKNOWN )) {
             // TODO: Throw
         }
 
-        return ($this->callable)( ...$arguments );
+        if ( $type === Types::TYPE_METHOD || $type === Types::TYPE_STATIC ) {
+            $result = call_user_func_array( $this->callable, $arguments );
+        } else {
+            $result = ($this->callable)( ...$arguments );
+        }
+
+        return $result;
     }
 }
