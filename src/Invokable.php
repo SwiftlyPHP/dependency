@@ -171,7 +171,7 @@ Class Invokable
      */
     public function invoke( array $arguments = [] ) // : mixed
     {
-        if (( $type = $this->getType() === Types::TYPE_UNKNOWN )) {
+        if (( $type = $this->getType() )=== Types::TYPE_UNKNOWN ) {
             // TODO: Throw
         }
 
