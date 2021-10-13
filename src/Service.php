@@ -11,8 +11,10 @@ use ReflectionNamedType;
 
 use function array_merge;
 use function is_object;
-use function is_string;
+use function method_exists;
 use function is_callable;
+use function is_string;
+use function is_array;
 
 /**
  * Class used to represent an application service
@@ -173,6 +175,7 @@ Class Service
 
         // We need to instantiate the object first!
         if ( $callback->getType() === Types::TYPE_METHOD
+            && is_array( $this->callback )
             && is_string( $this->callback[0] )
         ) {
             $object = Invokable::forConstructor( $this->callback[0] );
