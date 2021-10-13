@@ -138,6 +138,7 @@ Class Service
      */
     public function then( callable $hook ) : self
     {
+        /** @psalm-suppress MixedArgumentTypeCoercion */
         $this->hooks[] = new Invokable( $hook );
 
         return $this;
@@ -152,7 +153,7 @@ Class Service
      */
     public function resolve() // : object
     {
-        if ( $this->resolved !== null ) {
+        if ( $this->resolved !== null && $this->singleton ) {
             return $this->resolved;
         }
 
@@ -197,6 +198,10 @@ Class Service
 
     /**
      * Resolves any neccessary parameters and invokes the action
+     *
+     * @template TVal
+     * @psalm-param Invokable<TVal> $action
+     * @psalm-return TVal
      *
      * @param Invokable $action Invokable action
      * @return mixed            Action result

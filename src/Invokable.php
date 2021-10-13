@@ -21,7 +21,6 @@ use function call_user_func_array;
  * Class used to represent a callable function/method
  *
  * @template TVal
- * @psalm-type CArr=array{0:class-string,1:string}&callable
  *
  * @author clvarley
  */
