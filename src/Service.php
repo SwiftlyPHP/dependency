@@ -10,6 +10,8 @@ use ReflectionParameter;
 use ReflectionNamedType;
 
 use function array_merge;
+use function array_unique;
+use function in_array;
 use function is_object;
 use function method_exists;
 use function is_callable;
@@ -72,6 +74,13 @@ Class Service
      * @var Invokable[] $hooks Post-initialization hooks
      */
     protected $hooks = [];
+
+    /**
+     * Tags that apply to this service
+     * 
+     * @var string[] $tags Service tags
+     */
+    protected $tags = [];
 
     /**
      * Construct a service wrapper around the given function/method/object
@@ -144,6 +153,30 @@ Class Service
         $this->hooks[] = new Invokable( $hook );
 
         return $this;
+    }
+
+    /**
+     * Add tags that apply to this service
+     * 
+     * @param string[] $tags Service tags
+     * @return self          Allow chaining
+     */
+    public function tag(string ...$tags): self
+    {
+        $this->tags = array_unique(array_merge($this->tags, $tags));
+
+        return $this;
+    }
+
+    /**
+     * Determine if this service has a given tag
+     * 
+     * @param string $tag Tag name
+     * @return bool       Has tag?
+     */
+    public function hasTag(string $tag): bool
+    {
+        return in_array($tag, $this->tags, true);
     }
 
     /**

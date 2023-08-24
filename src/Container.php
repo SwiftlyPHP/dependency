@@ -83,6 +83,39 @@ Class Container
     }
 
     /**
+     * Resolve all services that have the given tag
+     * 
+     * @template T of object
+     * @psalm-param class-string<T>|null $constaint
+     * @psalm-return ($constraint is null ? object[] : T[])
+     * 
+     * @throws UnexpectedTypeException
+     * @param string $tag       Tag name
+     * @param string $constaint Optional class/interface constraint
+     * @return object[]         Array of resolved services
+     */
+    public function resolveTag(string $tag, string $constraint = null): array
+    {
+        $resolved = [];
+
+        foreach ($this->services as $service) {
+            if (!$service->hasTag($tag)) {
+                continue;
+            }
+
+            $object = $service->resolve();
+
+            if ($constraint && !($object instanceof $constraint)) {
+                throw new UnexpectedTypeException($constraint, $object);
+            }
+
+            $resolved[] = $object;
+        }
+
+        return $resolved;
+    }
+
+    /**
      * Used to set an alias for a service
      *
      * Please do not rely on this method, it may be reworked/removed in a
