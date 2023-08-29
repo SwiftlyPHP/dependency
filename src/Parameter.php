@@ -43,7 +43,7 @@ final class Parameter
         bool $builtin
     ) {
         $this->name = $name;
-        $this->type = $type;
+        $this->type = self::mapType($type);
         $this->default = $default;
         $this->builtin = $builtin;
     }
@@ -64,32 +64,25 @@ final class Parameter
         }
 
         $type = gettype($value);
+        $type = self::mapType($type);
 
         switch($type) {
-            case 'boolean':
+            case 'bool':
             case 'array':
                 return $type === $this->type;
-            case 'integer':
-            case 'double':
-                return $strict ? $this->isType($type) : $this->isNumeric();
+            case 'int':
+            case 'float':
+                return $strict
+                    ? $this->type === $type
+                    : $this->isNumeric();
             case 'string':
                 return $strict
-                    ? $this->isType($type)
-                    : ($this->isNumeric() && is_numeric($value));
+                    ? $this->type === $type
+                    : ($this->type === $type
+                        || ($this->isNumeric() && is_numeric($value)));
             default:
                 return false;
         }
-    }
-    
-    /**
-     * Determine if this parameter is a certain type
-     *
-     * @param string $type Data type
-     * @return bool        Is datatype
-     */
-    public function isType(string $type): bool
-    {
-        return $this->type === $type;
     }
 
     /**
@@ -100,5 +93,20 @@ final class Parameter
     public function isNumeric(): bool 
     {
         return in_array($this->type, ['int', 'float'], true);
+    }
+
+    /**
+     * Maps some of the older longhand type names to their newer variants
+     *
+     * @param string $type Datatype name
+     * @return string      Datatype name
+     */
+    private static function mapType(string $type): string
+    {
+        return [
+            'integer' => 'int',
+            'double'  => 'float',
+            'boolean' => 'bool'
+        ][$type] ?? $type;
     }
 }
