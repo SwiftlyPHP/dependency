@@ -16,7 +16,7 @@ final class Entry
     /** Unique service ID */
     public string $id;
 
-    /** @var class-string $type */
+    /** @var class-string<T> $type */
     public string $type;
 
     /**
