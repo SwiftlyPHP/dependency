@@ -43,7 +43,7 @@ final class Parameter
         bool $builtin
     ) {
         $this->name = $name;
-        $this->type = self::mapType($type);
+        $this->type = ($type ? self::mapType($type) : $type);
         $this->default = $default;
         $this->builtin = $builtin;
     }
@@ -98,6 +98,7 @@ final class Parameter
     /**
      * Maps some of the older longhand type names to their newer variants
      *
+     * @php:8.0 Swap to using match statement
      * @param string $type Datatype name
      * @return string      Datatype name
      */
