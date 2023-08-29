@@ -4,8 +4,8 @@ namespace Swiftly\Dependency;
 
 use function is_object;
 use function gettype;
-use function in_array;
 use function is_numeric;
+use function in_array;
 
 /**
  * Holds information regarding a single function/method parameter
@@ -75,7 +75,7 @@ final class Parameter
             case 'string':
                 return $strict
                     ? $this->isType($type)
-                    : $this->wouldAllowString($value);
+                    : ($this->isNumeric() && is_numeric($value));
             default:
                 return false;
         }
@@ -100,20 +100,5 @@ final class Parameter
     public function isNumeric(): bool 
     {
         return in_array($this->type, ['int', 'float'], true);
-    }
-
-    /**
-     * Determine if the subject string could be used in place of an int or float
-     * 
-     * @param string $subject Subject string
-     * @return bool           Allowed numeric string
-     */
-    public function wouldAllowString(string $subject): bool
-    {
-        if (!$this->isNumeric()) {
-            return false;
-        }
-
-        return is_numeric($subject);
     }
 }
