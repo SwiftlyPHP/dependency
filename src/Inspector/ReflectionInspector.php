@@ -107,7 +107,10 @@ class ReflectionInspector implements InspectorInterface
         $type = $reflected->getType();
 
         if ($type !== null && !($type instanceof ReflectionNamedType)) {
-            throw new CompoundTypeException($reflected);
+            throw new CompoundTypeException(
+                $reflected->getName(),
+                $reflected->getDeclaringFunction()
+            );
         }
 
         if ($reflected->isDefaultValueAvailable()) {

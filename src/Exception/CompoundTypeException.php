@@ -3,9 +3,11 @@
 namespace Swiftly\Dependency\Exception;
 
 use ReflectionException;
-use ReflectionParameter;
+use ReflectionFunctionAbstract;
+use ReflectionMethod;
 
 use function sprintf;
+use function is_string;
 
 /**
  * Exception used to warn we do not yet support union/intersection types
@@ -21,33 +23,33 @@ final class CompoundTypeException extends ReflectionException
     /**
      * Warn that a function parameter is compound and cannot be reflected
      *
-     * @param ReflectionParameter $parameter Function parameter information
+     * @param string $parameter                           Parameter name
+     * @param string|ReflectionFunctionAbstract $function Function or method
      */
-    public function __construct(ReflectionParameter $parameter)
+    public function __construct(string $parameter, $function)
     {
         parent::__construct(
             sprintf(
                 "Could not resolve complex type of parameter \$%s to %s",
-                $parameter->getName(),
-                self::getFunctionName($parameter)
+                $parameter,
+                is_string($function) ? $function : self::getName($function)
             )
         );
     }
 
     /**
-     * Return the qualified name of the function this parameter applies to
+     * Return the fully qualified name of the reflected function
      *
-     * @param ReflectionParameter $parameter Function parameter information
-     * @return string                        Function/method name
+     * @param ReflectionFunctionAbstract $abstract Reflected function
+     * @return string                              Function name
      */
-    private static function getFunctionName(ReflectionParameter $parameter): string
-    {
-        $function = $parameter->getDeclaringFunction();
-        $class = $parameter->getDeclaringClass();
-        $name = $function->getName();
+    protected static function getName(
+        ReflectionFunctionAbstract $abstract
+    ): string {
+        $name = $abstract->getName();
 
-        if ($class) {
-            $name = "{$class->getName()}::" . $name;
+        if ($abstract instanceof ReflectionMethod) {
+            $name = $abstract->getDeclaringClass()->getName() . '::' . $name;
         }
 
         return $name;
