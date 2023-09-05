@@ -7,56 +7,105 @@ use function in_array;
 /**
  * Stores information regarding a single service/entry in the service container
  *
- * @internal
- * @readonly
- * @template T
+ * @template T of object
  */
 final class Entry
 {
-    /** Unique service ID */
-    public string $id;
-
     /** @var class-string<T> $type */
     public string $type;
 
     /**
-     * @psalm-var (callable():T)|null $factory
-     * @var callable|null $factory
+     * @var null|callable():T $factory
      */
     public $factory;
 
     /** @var list<string> $tags */
     public array $tags;
 
+    /** @var array<string,mixed> $args Manually passed arguments */
+    public array $arguments;
+
     /**
      * Create a new entry in the register
      *
-     * @psalm-param (callable():T)|null $factory
-     * @param string $id             Service ID
+     * @psalm-param null|callable():T $factory
+     *
+     * @internal
      * @param class-string<T> $type  Fully qualified classname
      * @param callable|null $factory Service factory
      * @param list<string> $tags     Service tags
      */
     public function __construct(
-        string $id,
         string $type,
         ?callable $factory = null,
         array $tags = []
     ) {
-        $this->id = $id;
         $this->type = $type;
         $this->factory = $factory;
         $this->tags = $tags;
+        $this->arguments = [];
     }
 
     /**
      * Determine if this entry has a given tag
      *
+     * @internal
      * @param string $tag Tag name
      * @return bool       Entry has tag
      */
     public function hasTag(string $tag): bool
     {
         return in_array($tag, $this->tags, true);
+    }
+
+    /**
+     * Set the tags that apply to this service entry
+     *
+     * @api
+     * @param list<string> $tags Service tags
+     * @return self              Chainable interface
+     */
+    public function setTags(array $tags): self
+    {
+        $this->tags = $tags;
+
+        return $this;
+    }
+
+    /**
+     * Pass initialization arguments manually
+     *
+     * @api
+     * @param array<string,mixed> $arguments Manual factory arguments
+     * @return self                          Chainable interface
+     */
+    public function setArguments(array $arguments): self
+    {
+        $this->arguments = $arguments;
+
+        return $this;
+    }
+
+    /**
+     * Create a new service entry from a pre-existing object instance
+     *
+     * @template K of object
+     * @param class-string<K> $type Fully qualified classname
+     * @param K $instance           Object instance
+     * @param list<string> $tags    Service tags
+     * @return self<K>              Service entry
+     */
+    public static function fromInstance(
+        string $type,
+        object $instance,
+        array $tags = []
+    ): self {
+        return new self(
+            $type,
+            static function () use ($instance): object {
+                return $instance;
+            },
+            $tags
+        );
     }
 }
