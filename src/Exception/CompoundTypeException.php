@@ -10,6 +10,10 @@ use function sprintf;
 /**
  * Exception used to warn we do not yet support union/intersection types
  *
+ * Allowing the use of compound types would dramatically increase the complexity
+ * of the service container, so for the time being we only support functions and
+ * methods where each parameter has a single type.
+ *
  * @api
  */
 final class CompoundTypeException extends ReflectionException
@@ -23,9 +27,9 @@ final class CompoundTypeException extends ReflectionException
     {
         parent::__construct(
             sprintf(
-                "Failed resolving union/intersection type for parameter \$%s of %s",
+                "Could not resolve complex type of parameter \$%s to %s",
                 $parameter->getName(),
-                $this->getFunctionName($parameter)
+                self::getFunctionName($parameter)
             )
         );
     }
@@ -36,7 +40,7 @@ final class CompoundTypeException extends ReflectionException
      * @param ReflectionParameter $parameter Function parameter information
      * @return string                        Function/method name
      */
-    private function getFunctionName(ReflectionParameter $parameter): string
+    private static function getFunctionName(ReflectionParameter $parameter): string
     {
         $function = $parameter->getDeclaringFunction();
         $class = $parameter->getDeclaringClass();

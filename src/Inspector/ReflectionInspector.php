@@ -1,8 +1,8 @@
 <?php
 
-namespace Swiftly\Dependency\Resolver;
+namespace Swiftly\Dependency\Inspector;
 
-use Swiftly\Dependency\ResolverInterface;
+use Swiftly\Dependency\InspectorInterface;
 use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Exception\UndefinedClassException;
 use Swiftly\Dependency\Exception\UndefinedFunctionException;
@@ -21,14 +21,14 @@ use function get_class;
 use function class_exists;
 
 /**
- * Determines class/method/function parameters using reflection
+ * Determines class/method/function parameters using the PHP reflection API
  *
  * @api
  */
-class ReflectionResolver implements ResolverInterface
+class ReflectionInspector implements InspectorInterface
 {
     /** {@inheritDoc} */
-    public function resolveClass(string $class): array
+    public function inspectClass(string $class): array
     {
         try {
             $reflection = new ReflectionClass($class);
@@ -42,11 +42,11 @@ class ReflectionResolver implements ResolverInterface
             return [];
         }
 
-        return $this->resolveFromReflection($constructor);
+        return $this->inspectFromReflection($constructor);
     }
 
     /** {@inheritDoc} */
-    public function resolveMethod($class, string $method): array
+    public function inspectMethod($class, string $method): array
     {
         try {
             $reflection = new ReflectionMethod($class, $method);
@@ -60,11 +60,11 @@ class ReflectionResolver implements ResolverInterface
             }
         }
 
-        return $this->resolveFromReflection($reflection);
+        return $this->inspectFromReflection($reflection);
     }
 
     /** {@inheritDoc} */
-    public function resolveFunction($function): array
+    public function inspectFunction($function): array
     {
         try {
             $reflection = new ReflectionFunction($function);
@@ -73,7 +73,7 @@ class ReflectionResolver implements ResolverInterface
             throw new UndefinedFunctionException($function);
         }
 
-        return $this->resolveFromReflection($reflection);
+        return $this->inspectFromReflection($reflection);
     }
 
     /**
@@ -82,13 +82,13 @@ class ReflectionResolver implements ResolverInterface
      * @param ReflectionFunctionAbstract $reflection Reflected method
      * @return list<Parameter>                       Parameter information
      */
-    private function resolveFromReflection(
+    private function inspectFromReflection(
         ReflectionFunctionAbstract $reflection
     ): array {
         $parameters = [];
 
         foreach ($reflection->getParameters() as $parameter) {
-            $parameters[] = $this->resolveParameter($parameter);
+            $parameters[] = $this->inspectParameter($parameter);
         }
 
         return $parameters;
@@ -102,7 +102,7 @@ class ReflectionResolver implements ResolverInterface
      * @param ReflectionParameter $reflected Reflected parameter
      * @return Parameter                     Parameter information
      */
-    private function resolveParameter(ReflectionParameter $reflected): Parameter
+    private function inspectParameter(ReflectionParameter $reflected): Parameter
     {
         $type = $reflected->getType();
 

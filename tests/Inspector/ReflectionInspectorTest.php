@@ -1,10 +1,10 @@
 <?php
 
-namespace Swiftly\Dependency\Tests\Resolver
+namespace Swiftly\Dependency\Tests\Inspector
 {
 
 use PHPUnit\Framework\TestCase;
-use Swiftly\Dependency\Resolver\ReflectionResolver;
+use Swiftly\Dependency\Inspector\ReflectionInspector;
 use Swiftly\Dependency\Parameter;
 use Closure;
 use ReflectionClass;
@@ -17,16 +17,16 @@ use function count;
 use function dirname;
 
 /**
- * @covers \Swiftly\Dependency\Resolver\ReflectionResolver
+ * @covers \Swiftly\Dependency\Inspector\ReflectionInspector
  * @uses \Swiftly\Dependency\Parameter
  */
-final class ReflectionResolverTest extends TestCase
+final class ReflectionInspectorTest extends TestCase
 {
-    private ReflectionResolver $resolver;
+    private ReflectionInspector $inspector;
 
     public function setUp(): void
     {
-        $this->resolver = new ReflectionResolver();
+        $this->inspector = new ReflectionInspector();
     }
 
     public function exampleFunctionProvider(): array
@@ -131,7 +131,7 @@ final class ReflectionResolverTest extends TestCase
         string $function,
         array $parameters
     ): void {
-        $resolved = $this->resolver->resolveFunction($function);
+        $resolved = $this->inspector->inspectFunction($function);
 
         self::checkParameters($parameters, $resolved);
     }
@@ -143,7 +143,7 @@ final class ReflectionResolverTest extends TestCase
         string $function,
         array $parameters
     ): void {
-        $resolved = $this->resolver->resolveFunction(
+        $resolved = $this->inspector->inspectFunction(
             Closure::fromCallable($function)
         );
 
@@ -155,7 +155,7 @@ final class ReflectionResolverTest extends TestCase
      */
     public function testCanResolveClass(string $class, array $parameters): void
     {
-        $resolved = $this->resolver->resolveClass($class);
+        $resolved = $this->inspector->inspectClass($class);
 
         self::checkParameters($parameters, $resolved);
     }
@@ -169,7 +169,7 @@ final class ReflectionResolverTest extends TestCase
         string $method,
         array $parameters
     ): void {
-        $resolved = $this->resolver->resolveMethod($classname, $method);
+        $resolved = $this->inspector->inspectMethod($classname, $method);
 
         self::checkParameters($parameters, $resolved);
     }
@@ -183,7 +183,7 @@ final class ReflectionResolverTest extends TestCase
         string $method,
         array $parameters
     ): void {
-        $resolved = $this->resolver->resolveMethod(
+        $resolved = $this->inspector->inspectMethod(
             (new ReflectionClass($classname))->newInstanceWithoutConstructor(),
             $method
         );
@@ -198,7 +198,7 @@ final class ReflectionResolverTest extends TestCase
     {
         self::expectException(UndefinedFunctionException::class);
 
-        $this->resolver->resolveFunction('example_function_4');
+        $this->inspector->inspectFunction('example_function_4');
     }
 
     /**
@@ -208,7 +208,7 @@ final class ReflectionResolverTest extends TestCase
     {
         self::expectException(UndefinedClassException::class);
 
-        $this->resolver->resolveClass('MyNewClass');
+        $this->inspector->inspectClass('MyNewClass');
     }
 
     /**
@@ -219,7 +219,7 @@ final class ReflectionResolverTest extends TestCase
     {
         self::expectException(UndefinedClassException::class);
 
-        $this->resolver->resolveMethod('MyNewClass', 'someMethod');
+        $this->inspector->inspectMethod('MyNewClass', 'someMethod');
     }
 
     /**
@@ -229,7 +229,7 @@ final class ReflectionResolverTest extends TestCase
     {
         self::expectException(UndefinedMethodException::class);
 
-        $this->resolver->resolveMethod(\ExampleClass::class, 'someMethod');
+        $this->inspector->inspectMethod(\ExampleClass::class, 'someMethod');
     }
 
     /**
@@ -243,7 +243,7 @@ final class ReflectionResolverTest extends TestCase
         // Tests union/intersection types so only include file if PHP >= 8
         require_once dirname(__DIR__) . '/Php8Example.inc';
 
-        $this->resolver->resolveMethod(\Php8Example::class, 'setValue');
+        $this->inspector->inspectMethod(\Php8Example::class, 'setValue');
     }
 }
 };

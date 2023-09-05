@@ -4,13 +4,13 @@ namespace Swiftly\Dependency\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Parameter;
-use Swiftly\Dependency\ResolverInterface;
+use Swiftly\Dependency\InspectorInterface;
 use stdClass;
-use Swiftly\Dependency\Resolver\ReflectionResolver;
+use Swiftly\Dependency\Inspector\ReflectionInspector;
 
 /**
  * @covers \Swiftly\Dependency\Parameter
- * @uses \Swiftly\Dependency\ResolverInterface
+ * @uses \Swiftly\Dependency\InspectorInterface
  */
 final class ParameterTest extends TestCase
 {
@@ -58,11 +58,11 @@ final class ParameterTest extends TestCase
                 ]
             ],
             'interface parameter' => [
-                new Parameter('resolver', ResolverInterface::class, null, false),
+                new Parameter('inspector', InspectorInterface::class, null, false),
                 [
                     'numeric' => false,
                     'invalid' => 1000,
-                    'valid' => new ReflectionResolver()
+                    'valid' => new ReflectionInspector()
                 ]
             ]
         ];
