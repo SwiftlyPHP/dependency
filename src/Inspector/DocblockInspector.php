@@ -32,8 +32,8 @@ use const PREG_SET_ORDER;
  * `InspectorInterface` could be used for non-reflection based parameter
  * inspection. In almost all cases we recommend using either the
  * `ReflectionInspector` or `CachedInspector` classes instead, as relying on
- * (potentially incorrect) docblocks instead of utilizing language level
- * type-hints is a recipe for disaster.
+ * (potentially incorrect) docblocks over language level type-hints is almost
+ * certainly a recipe for disaster.
  *
  * @api
  */

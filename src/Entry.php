@@ -5,7 +5,7 @@ namespace Swiftly\Dependency;
 use function in_array;
 
 /**
- * Stores information regarding a single service/entry in the service container
+ * Stores information regarding a single service entry in the service container
  *
  * @template T of object
  */
