@@ -28,6 +28,13 @@ use const PREG_SET_ORDER;
 /**
  * Determines parameters by analysing developer authored docblocks
  *
+ * This class was created mostly as a proof-of-concept and an example of how the
+ * `InspectorInterface` could be used for non-reflection based parameter
+ * inspection. In almost all cases we recommend using either the
+ * `ReflectionInspector` or `CachedInspector` classes instead, as relying on
+ * (potentially incorrect) docblocks instead of utilizing language level
+ * type-hints is a recipe for disaster.
+ *
  * @api
  */
 class DocblockInspector implements InspectorInterface
