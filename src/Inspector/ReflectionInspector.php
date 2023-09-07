@@ -16,6 +16,7 @@ use Swiftly\Dependency\Parameter\NumericParameter;
 use Swiftly\Dependency\Parameter\StringParameter;
 use Swiftly\Dependency\Parameter\ObjectParameter;
 use Swiftly\Dependency\Parameter\NamedClassParameter;
+use Swiftly\Dependency\Type;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -166,7 +167,7 @@ class ReflectionInspector implements InspectorInterface
                 /** @var null|callable():object $default */
                 return new ObjectParameter($name, $nullable, $default);
             default:
-                if (!class_exists($type_name)) {
+                if (!Type::isClassname($type_name)) {
                     throw new UnknownTypeException($name, $type_name);
                 }
                 /** @var null|callable():object $default */
