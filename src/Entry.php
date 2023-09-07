@@ -19,21 +19,21 @@ final class Entry
      */
     public $factory;
 
-    /** @var list<string> $tags */
+    /** @var list<non-empty-string> $tags */
     public array $tags;
 
-    /** @var array<string,mixed> $args Manually passed arguments */
+    /** @var array<non-empty-string,mixed> $args Manually passed arguments */
     public array $arguments;
 
     /**
      * Create a new entry in the register
      *
-     * @psalm-param null|callable():T $factory
      *
      * @internal
-     * @param class-string<T> $type  Fully qualified classname
-     * @param callable|null $factory Service factory
-     * @param list<string> $tags     Service tags
+     * @psalm-param null|callable():T $factory
+     * @param class-string<T> $type        Fully qualified classname
+     * @param callable|null $factory       Service factory
+     * @param list<non-empty-string> $tags Service tags
      */
     public function __construct(
         string $type,
@@ -62,8 +62,8 @@ final class Entry
      * Set the tags that apply to this service entry
      *
      * @api
-     * @param list<string> $tags Service tags
-     * @return self              Chainable interface
+     * @param list<non-empty-string> $tags Service tags
+     * @return self                        Chainable interface
      */
     public function setTags(array $tags): self
     {
@@ -76,8 +76,8 @@ final class Entry
      * Pass initialization arguments manually
      *
      * @api
-     * @param array<string,mixed> $arguments Manual factory arguments
-     * @return self                          Chainable interface
+     * @param array<non-empty-string,mixed> $arguments Manual factory arguments
+     * @return self                                    Chainable interface
      */
     public function setArguments(array $arguments): self
     {
@@ -89,11 +89,12 @@ final class Entry
     /**
      * Create a new service entry from a pre-existing object instance
      *
+     * @internal
      * @template K of object
-     * @param class-string<K> $type Fully qualified classname
-     * @param K $instance           Object instance
-     * @param list<string> $tags    Service tags
-     * @return self<K>              Service entry
+     * @param class-string<K> $type        Fully qualified classname
+     * @param K $instance                  Object instance
+     * @param list<non-empty-string> $tags Service tags
+     * @return self<K>                     Service entry
      */
     public static function fromInstance(
         string $type,
