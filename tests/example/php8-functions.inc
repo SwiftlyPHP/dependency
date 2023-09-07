@@ -9,8 +9,11 @@
  * @internal
  */
 
-final class Php8Example
-{
-    public function unionType(int|float $value): void {}
-    public function mixedType(mixed $value): void {}
-}
+/**
+ * @param int|float $value Example union param
+ */
+function exampleUnion(int|float $value): void {}
+/**
+ * @param mixed $value Example mixed param
+ */
+function exampleMixed(mixed $value): void {}

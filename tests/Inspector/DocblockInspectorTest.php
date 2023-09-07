@@ -182,6 +182,6 @@ final class DocblockInspectorTest extends AbstractInspectorTest
     {
         self::expectException(CompoundTypeException::class);
 
-        $this->inspector->inspectMethod(\Php8Example::class, 'unionType');
+        $this->inspector->inspectFunction('exampleUnion');
     }
 }
