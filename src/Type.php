@@ -10,6 +10,7 @@ use function is_array;
 use function method_exists;
 use function is_string;
 use function class_exists;
+use function interface_exists;
 
 /**
  * Utility class containing static methods used for type inspection
@@ -58,7 +59,7 @@ abstract class Type
     }
 
     /**
-     * Determine if the subject is a valid class name
+     * Determine if the subject is a valid class or interface name
      *
      * @template T of object
      * @psalm-assert-if-true class-string<T> $subject
@@ -67,6 +68,8 @@ abstract class Type
      */
     final public static function isClassname($subject): bool
     {
-        return (is_string($subject) && class_exists($subject));
+        return (is_string($subject)
+            && (class_exists($subject) || interface_exists($subject))
+        );
     }
 }

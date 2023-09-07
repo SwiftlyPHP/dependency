@@ -1,26 +1,32 @@
 <?php
 
-namespace Swiftly\Dependency\Tests\Inspector
-{
+namespace Swiftly\Dependency\Tests\Inspector;
 
-use PHPUnit\Framework\TestCase;
+use Swiftly\Dependency\Tests\AbstractInspectorTest;
 use Swiftly\Dependency\Inspector\ReflectionInspector;
 use Swiftly\Dependency\Parameter;
-use Closure;
-use ReflectionClass;
+use Swiftly\Dependency\Parameter\ArrayParameter;
+use Swiftly\Dependency\Parameter\MixedParameter;
+use Swiftly\Dependency\Parameter\StringParameter;
 use Swiftly\Dependency\Exception\UndefinedFunctionException;
 use Swiftly\Dependency\Exception\UndefinedClassException;
 use Swiftly\Dependency\Exception\UndefinedMethodException;
 use Swiftly\Dependency\Exception\CompoundTypeException;
-
-use function count;
-use function dirname;
+use Swiftly\Dependency\Exception\UnknownTypeException;
 
 /**
  * @covers \Swiftly\Dependency\Inspector\ReflectionInspector
  * @uses \Swiftly\Dependency\Parameter
+ * @uses \Swiftly\Dependency\Parameter\ArrayParameter
+ * @uses \Swiftly\Dependency\Parameter\BooleanParameter
+ * @uses \Swiftly\Dependency\Parameter\MixedParameter
+ * @uses \Swiftly\Dependency\Parameter\NamedClassParameter
+ * @uses \Swiftly\Dependency\Parameter\NumericParameter
+ * @uses \Swiftly\Dependency\Parameter\ObjectParameter
+ * @uses \Swiftly\Dependency\Parameter\StringParameter
+ * @uses \Swiftly\Dependency\Type
  */
-final class ReflectionInspectorTest extends TestCase
+final class ReflectionInspectorTest extends AbstractInspectorTest
 {
     private ReflectionInspector $inspector;
 
@@ -29,166 +35,91 @@ final class ReflectionInspectorTest extends TestCase
         $this->inspector = new ReflectionInspector();
     }
 
-    public function exampleFunctionProvider(): array
+    /**
+     * @dataProvider exampleFunctionTrait
+     * @testdox Can inspect single parameter of type $_dataName
+     * @param callable $function                 Function to inspect
+     * @param string $name                       Expected parameter name
+     * @param class-string<Parameter> $classname Expected parameter class
+     * @param string $type                       Expected parameter type
+     */
+    public function testCanInspectSingleParameter(callable $function, string $name, string $classname, string $type): void
     {
-        return [
-            'example function 1' => [
-                'example_function_1',
-                [
-                    ['name', 'string'],
-                    ['age', 'int']
-                ]
-            ],
-            'example function 2' => [
-                'example_function_2',
-                [
-                    ['email', 'string'],
-                    ['is_admin', 'bool']
-                ]
-            ],
-            'example function 3' => [
-                'example_function_3',
-                [
-                    ['name', 'string'],
-                    ['test', TestCase::class],
-                    ['timeout', 'float'],
-                ]
-            ]
-        ];
-    }
+        list($parameter) = $this->inspector->inspectFunction($function);
 
-    public function exampleClassProvider(): array
-    {
-        return [
-            'std class' => [
-                \stdClass::class,
-                []
-            ],
-            'example class' => [
-                \ExampleClass::class,
-                [
-                    ['name', 'string'],
-                    ['start', \DateTime::class],
-                    ['length', \DateInterval::class]
-                ]
-            ],
-            'derived class' => [
-                \DerivedClass::class,
-                [
-                    ['name', 'string'],
-                    ['start', \DateTime::class],
-                    ['length', \DateInterval::class]
-                ]
-            ]
-        ];
-    }
+        $expected = self::expectedParam($name, $classname, $type);
 
-    public function exampleMethodProvider(): array
-    {
-        return [
-            'ExampleClass::method1()' => [
-                \ExampleClass::class,
-                'method1',
-                [
-                    ['duration', \DateInterval::class],
-                    ['changelog', 'array']
-                ]
-            ],
-            'DerivedClass::method1()' => [
-                \DerivedClass::class,
-                'method1',
-                [
-                    ['duration', \DateInterval::class],
-                    ['changelog', 'array']
-                ]
-
-            ],
-            'DerivedClass::method2()' => [
-                \DerivedClass::class,
-                'method2',
-                [
-                    ['updates', \stdClass::class],
-                    ['reason', 'string']
-                ]
-            ]
-        ];
-    }
-
-    private function checkParameters(array $expected, array $actual): void
-    {
-        self::assertCount(count($expected), $actual);
-        self::assertContainsOnlyInstancesOf(Parameter::class, $actual);
-        foreach ($expected as $index => [$name, $type]) {
-            self::assertSame($name, $actual[$index]->name);
-            self::assertSame($type, $actual[$index]->type);
-        }
+        self::assertParameter($expected, $parameter);
     }
 
     /**
-     * @dataProvider exampleFunctionProvider
+     * @php:8.0 Delete this and uncomment entry in exampleTypeProvider
+     * @testdox Can inspect single parameter of type mixed
+     * @requires PHP >= 8.0
      */
-    public function testCanResolveFunctionByName(
-        string $function,
-        array $parameters
-    ): void {
-        $resolved = $this->inspector->inspectFunction($function);
-
-        self::checkParameters($parameters, $resolved);
+    public function testCanInspectSingleMixedParameter(): void
+    {
+        $this->testCanInspectSingleParameter('exampleMixed', 'value', MixedParameter::class, 'mixed');
     }
 
-    /**
-     * @dataProvider exampleFunctionProvider
-     */
-    public function testCanResolveClosure(
-        string $function,
-        array $parameters
-    ): void {
-        $resolved = $this->inspector->inspectFunction(
-            Closure::fromCallable($function)
-        );
+    public function testCanInspectNullableParameter(): void
+    {
+        list($parameter) = $this->inspector->inspectFunction('exampleNullable');
 
-        self::checkParameters($parameters, $resolved);
+        $expected = self::expectedParam('value', ArrayParameter::class, 'array');
+
+        self::assertParameter($expected, $parameter);
+        self::assertTrue($parameter->isNullable());
     }
+
+    public function testCanInspectDefaultParameter(): void
+    {
+        list($parameter) = $this->inspector->inspectFunction('exampleDefault');
+
+        $expected = self::expectedParam('value', StringParameter::class, 'string');
+
+        self::assertParameter($expected, $parameter);
+        self::assertTrue($parameter->hasDefault());
+        self::assertSame('Hi!', $parameter->getDefault());
+    }    
+
+
 
     /**
      * @dataProvider exampleClassProvider
+     * @testdox Can inspect constructor of $_dataName
      */
-    public function testCanResolveClass(string $class, array $parameters): void
+    public function testCanInspectConstructorParameters(string $classname, array $expected): void
     {
-        $resolved = $this->inspector->inspectClass($class);
+        $parameters = $this->inspector->inspectClass($classname);
 
-        self::checkParameters($parameters, $resolved);
+        self::assertParameters($expected, $parameters);
     }
 
     /**
      * @dataProvider exampleMethodProvider
-     * @testdox Can resolve method (class name)
+     * @testdox Can inspect $example->$_dataName method parameters
      */
-    public function testCanResolveMethodClassName(
-        string $classname,
-        string $method,
-        array $parameters
-    ): void {
-        $resolved = $this->inspector->inspectMethod($classname, $method);
+    public function testCanInspectInstanceMethodParameters(string $method, array $expected): void
+    {
+        $class = new \ExampleClass($this);
 
-        self::checkParameters($parameters, $resolved);
+        $parameters = $this->inspector->inspectMethod($class, $method);
+
+        self::assertParameters($expected, $parameters);
     }
 
     /**
      * @dataProvider exampleMethodProvider
-     * @testdox Can resolve method (class instance)
+     * @testdox Can inspect ExampleClass::$_dataName method parameters
      */
-    public function testCanResolveMethodClassInstance(
-        string $classname,
-        string $method,
-        array $parameters
-    ): void {
-        $resolved = $this->inspector->inspectMethod(
-            (new ReflectionClass($classname))->newInstanceWithoutConstructor(),
-            $method
-        );
+    public function testCanInspectClassnameMethodParameters(string $method, array $expected): void
+    {
+        $class = \ExampleClass::class;
 
-        self::checkParameters($parameters, $resolved);
+        $parameters = $this->inspector->inspectMethod($class, $method);
+
+        self::assertParameters($expected, $parameters);
     }
 
     /**
@@ -198,7 +129,7 @@ final class ReflectionInspectorTest extends TestCase
     {
         self::expectException(UndefinedFunctionException::class);
 
-        $this->inspector->inspectFunction('example_function_4');
+        $this->inspector->inspectFunction('my_function');
     }
 
     /**
@@ -208,7 +139,7 @@ final class ReflectionInspectorTest extends TestCase
     {
         self::expectException(UndefinedClassException::class);
 
-        $this->inspector->inspectClass('MyNewClass');
+        $this->inspector->inspectClass('UnknownClass');
     }
 
     /**
@@ -219,7 +150,7 @@ final class ReflectionInspectorTest extends TestCase
     {
         self::expectException(UndefinedClassException::class);
 
-        $this->inspector->inspectMethod('MyNewClass', 'someMethod');
+        $this->inspector->inspectMethod('UnknownClass', 'unknownMethod');
     }
 
     /**
@@ -229,7 +160,17 @@ final class ReflectionInspectorTest extends TestCase
     {
         self::expectException(UndefinedMethodException::class);
 
-        $this->inspector->inspectMethod(\ExampleClass::class, 'someMethod');
+        $this->inspector->inspectMethod($this, 'unknownMethod');
+    }
+
+    /**
+     * @covers \Swiftly\Dependency\Exception\UnknownTypeException
+     */
+    public function testThrowsIfParameterExpectsUnknownClass(): void
+    {
+        self::expectException(UnknownTypeException::class);
+
+        $this->inspector->inspectFunction('exampleUnknown');
     }
 
     /**
@@ -239,33 +180,7 @@ final class ReflectionInspectorTest extends TestCase
     public function testThrowsIfCompoundType(): void
     {
         self::expectException(CompoundTypeException::class);
-        
-        // Tests union/intersection types so only include file if PHP >= 8
-        require_once dirname(__DIR__) . '/Php8Example.inc';
 
-        $this->inspector->inspectMethod(\Php8Example::class, 'setValue');
-    }
-}
-};
-
-/**
- * Example functions for the tests above
- */
-namespace {
-    use PHPUnit\Framework\TestCase;
-
-    function example_function_1(string $name, int $age) {}
-    function example_function_2(string $email, bool $is_admin) {}
-    function example_function_3(string $name, TestCase $test, float $timeout) {}
-
-    class ExampleClass
-    {
-        public function __construct(string $name, DateTime $start, DateInterval $length) {}
-        public function method1(DateInterval $duration, array $changelog) {}
-    }
-
-    class DerivedClass extends ExampleClass
-    {
-        public function method2(stdClass $updates, ?string $reason = null) {}
+        $this->inspector->inspectMethod(\Php8Example::class, 'unionType');
     }
 }
