@@ -2,112 +2,131 @@
 
 namespace Swiftly\Dependency;
 
-use function is_object;
-use function gettype;
-use function is_numeric;
-use function in_array;
+use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 
 /**
- * Holds information regarding a single function/method parameter
+ * Base class from which all parameter types inherit
  *
- * @internal
- * @readonly
  * @template T
+ * @internal
  */
-final class Parameter
+abstract class Parameter
 {
-    /** Parameter name */
-    public string $name;
+    /** @var non-empty-string $name Case-sensitive parameter name */
+    protected string $name;
 
-    /** Parameter datatype */
-    public ?string $type;
+    /** Allows nullable arguments? */
+    protected bool $is_nullable;
 
-    /** @var T|null $default Default parameter value */
-    public $default;
-
-    /** Is native datatype */
-    public bool $builtin;
+    /**
+     * Declared default value for this parameter
+     *
+     * The default value is now wrapped in a callable because (since PHP 8.1) it
+     * is possible to construct an object using `new` in default parameters. By
+     * hiding the default behind a callable we can lazily evaluate the value,
+     * therefore delaying any potentially expensive initialization.
+     *
+     * @var null|callable():T $default
+     */
+    protected $default;
 
     /**
      * Create a new parameter definition
-     * 
-     * @param string $name    Parameter name
-     * @param ?string $type   Parameter data type
-     * @param T|null $default Parameter default value
-     * @param bool $builtin   Is native datatype
+     *
+     * Extending classes are strongly encouraged to implement their own
+     * constructors and then pass any neccessary values to
+     * `parent::__construct`.
+     *
+     * @psalm-param null|callable():T $default
+     * @param non-empty-string $name Case-sensitive parameter name
+     * @param bool $is_nullable      Parameter allows null values?
+     * @param null|callable $default Default value provider function
      */
     public function __construct(
         string $name,
-        ?string $type,
-        $default,
-        bool $builtin
+        bool $is_nullable,
+        $default = null
     ) {
         $this->name = $name;
-        $this->type = ($type ? self::mapType($type) : $type);
+        $this->is_nullable = $is_nullable;
         $this->default = $default;
-        $this->builtin = $builtin;
     }
 
     /**
-     * Determine if a given value would satisfy this parameter
+     * Return the name of this parameter
      *
-     * @psalm-assert-if-true T $value
-     *
-     * @param mixed $value Subject parameter value
-     * @param bool $strict Use strict type comparison
-     * @return bool        Satisfies parameter
+     * @return non-empty-string Parameter name
      */
-    public function validate($value, bool $strict = false): bool
+    public function getName(): string
     {
-        if (is_object($value)) {
-            return ($value instanceof $this->type);
+        return $this->name;
+    }
+
+    /**
+     * Determine whether or not this parameter accepts null values
+     *
+     * @return bool Accepts null?
+     */
+    public function isNullable(): bool
+    {
+        return $this->is_nullable;
+    }
+
+    /**
+     * Determine whether or not this parameter has a default value
+     *
+     * @psalm-assert-if-true !null $this->default
+     * @return bool Default value available?
+     */
+    public function hasDefault(): bool
+    {
+        return $this->default !== null;
+    }
+
+    /**
+     * Return the default value declared for this parameter
+     *
+     * @throws UndefinedDefaultValueException If no default value is available
+     *
+     * @psalm-assert !null $this->default
+     * @return T Provided default value
+     */
+    public function getDefault() // : mixed
+    {
+        if ($this->default === null) {
+            throw new UndefinedDefaultValueException($this->name);
         }
 
-        $type = gettype($value);
-        $type = self::mapType($type);
-
-        switch($type) {
-            case 'bool':
-            case 'array':
-                return $type === $this->type;
-            case 'int':
-            case 'float':
-                return $strict
-                    ? $this->type === $type
-                    : $this->isNumeric();
-            case 'string':
-                return $strict
-                    ? $this->type === $type
-                    : ($this->type === $type
-                        || ($this->isNumeric() && is_numeric($value)));
-            default:
-                return false;
-        }
+        return ($this->default)();
     }
 
     /**
-     * Determine if this parameter is numeric
+     * Return the datatype this parameter accepts
      *
-     * @return bool Parameter is numeric
+     * @return non-empty-string Parameter datatype
      */
-    public function isNumeric(): bool 
-    {
-        return in_array($this->type, ['int', 'float'], true);
-    }
+    abstract function getType(): string;
 
     /**
-     * Maps some of the older longhand type names to their newer variants
+     * Determine if this parameter accepts a native/non-compound datatype
      *
-     * @php:8.0 Swap to using match statement
-     * @param string $type Datatype name
-     * @return string      Datatype name
+     * The naming here is slightly ambiguous as this method is meant to resemble
+     * the {@see \ReflectionNamedType::isBuiltin()} on which it relies. In the
+     * context of this library however, built-in refers to any non-compound
+     * datatype which in essence means any type that is not an object, resource
+     * or array.
+     *
+     * @psalm-assert-if-true scalar $this<T>
+     * @return bool Accepts a built-in type?
      */
-    private static function mapType(string $type): string
-    {
-        return [
-            'integer' => 'int',
-            'double'  => 'float',
-            'boolean' => 'bool'
-        ][$type] ?? $type;
-    }
+    abstract function isBuiltin(): bool;
+
+    /**
+     * Determine if the given value would satisfy this parameter
+     *
+     * @psalm-assert-if-true T $subject
+     * @param mixed $subject Subject value
+     * @return bool          Would satisfy parameter?
+     */
+    abstract function accepts($subject): bool;
 }

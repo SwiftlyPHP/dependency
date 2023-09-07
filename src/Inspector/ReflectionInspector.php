@@ -3,11 +3,18 @@
 namespace Swiftly\Dependency\Inspector;
 
 use Swiftly\Dependency\InspectorInterface;
-use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Exception\UndefinedClassException;
 use Swiftly\Dependency\Exception\UndefinedFunctionException;
 use Swiftly\Dependency\Exception\UndefinedMethodException;
 use Swiftly\Dependency\Exception\CompoundTypeException;
+use Swiftly\Dependency\Parameter;
+use Swiftly\Dependency\Parameter\ArrayParameter;
+use Swiftly\Dependency\Parameter\BooleanParameter;
+use Swiftly\Dependency\Parameter\MixedParameter;
+use Swiftly\Dependency\Parameter\NumericParameter;
+use Swiftly\Dependency\Parameter\StringParameter;
+use Swiftly\Dependency\Parameter\ObjectParameter;
+use Swiftly\Dependency\Parameter\NamedClassParameter;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -105,7 +112,7 @@ class ReflectionInspector implements InspectorInterface
     private function inspectParameter(ReflectionParameter $reflected): Parameter
     {
         $type = $reflected->getType();
-
+        
         if ($type !== null && !($type instanceof ReflectionNamedType)) {
             throw new CompoundTypeException(
                 $reflected->getName(),
@@ -113,19 +120,66 @@ class ReflectionInspector implements InspectorInterface
             );
         }
 
-        if ($reflected->isDefaultValueAvailable()) {
-            /** @psalm-suppress MixedAssignment */
-            $default = $reflected->getDefaultValue();
-        } else {
-            $default = null;
-        }
+        return $this->parameterFromReflection($reflected, $type);
+    }
 
-        return new Parameter(
-            $reflected->getName(),
-            ($type ? $type->getName() : $type),
-            $default,
-            // No type so we must assume it's a native type
-            ($type ? $type->isBuiltin() : true)
+    /**
+     * Return the appropriate Parameter subclass to represent this parameter
+     *
+     * @php:8.0 Swap to using `match()` statement
+     * @param ReflectionParameter $parameter Parameter information
+     * @param ?ReflectionNamedType $type     Parameter type information
+     */
+    private function parameterFromReflection(
+        ReflectionParameter $parameter,
+        ?ReflectionNamedType $type
+    ): Parameter {
+        $type_name = $type ? $type->getName() : 'mixed';
+        $name = $parameter->getName();
+        $nullable = $parameter->allowsNull();
+        $default = $this->prepareDefaultCallback($parameter);
+
+        switch ($type_name) {
+            case 'array':
+                return new ArrayParameter($name, $nullable, $default);
+            case 'bool':
+                return new BooleanParameter($name, $nullable, $default);
+            case 'mixed':
+                return new MixedParameter($name, $default);
+            case 'int':
+            case 'float':
+                return new NumericParameter(
+                    $name,
+                    $type_name,
+                    $nullable,
+                    $default
+                );
+            case 'string':
+                return new StringParameter($name, $nullable, $default);
+            case 'object':
+                return new ObjectParameter($name, $nullable, $default);
+            default:
+                return new NamedClassParameter(
+                    $name,
+                    $type_name,
+                    $nullable,
+                    $default
+                );
+        }
+    }
+
+    /**
+     * Create the callback used to provide the default value
+     *
+     * @param ReflectionParameter $parameter Parameter information
+     * @return null|callable                 Default value provider
+     */
+    private function prepareDefaultCallback(
+        ReflectionParameter $parameter
+    ): ?callable {
+        return ($parameter->isDefaultValueAvailable()
+            ? [$parameter, 'getDefaultValue']
+            : null
         );
     }
 }
