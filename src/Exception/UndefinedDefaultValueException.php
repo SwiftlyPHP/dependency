@@ -7,14 +7,14 @@ use Swiftly\Dependency\ParameterException;
 use function sprintf;
 
 /**
- * Exception used to indicate the parsing of a docblock param failed
+ * Exception used to indicate a parameter has no default value
  *
- * @internal
+ * @api
  */
-final class DocblockParseException extends ParameterException
+final class UndefinedDefaultValueException extends ParameterException
 {
     /**
-     * Indicate that a parsing error occurred while inspecting a parameter
+     * Indicate a parameter does not have a default value
      *
      * @param non-empty-string $parameter Parameter name
      */
@@ -24,7 +24,7 @@ final class DocblockParseException extends ParameterException
 
         parent::__construct(
             sprintf(
-                "Could not parse docblock comment for parameter \$%s",
+                "Could not determine a default value for parameter '\$%s'",
                 $parameter
             )
         );

@@ -2,7 +2,7 @@
 
 namespace Swiftly\Dependency\Exception;
 
-use ReflectionException;
+use Swiftly\Dependency\ParameterException;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
 
@@ -18,16 +18,18 @@ use function is_string;
  *
  * @api
  */
-final class CompoundTypeException extends ReflectionException
+final class CompoundTypeException extends ParameterException
 {
     /**
      * Warn that a function parameter is compound and cannot be reflected
      *
-     * @param string $parameter                           Parameter name
+     * @param non-empty-string $parameter                 Parameter name
      * @param string|ReflectionFunctionAbstract $function Function or method
      */
     public function __construct(string $parameter, $function)
     {
+        $this->parameter = $parameter;
+
         parent::__construct(
             sprintf(
                 "Could not resolve complex type of parameter \$%s to %s",
@@ -41,7 +43,7 @@ final class CompoundTypeException extends ReflectionException
      * Return the fully qualified name of the reflected function
      *
      * @param ReflectionFunctionAbstract $abstract Reflected function
-     * @return string                              Function name
+     * @return non-empty-string                    Function name
      */
     protected static function getName(
         ReflectionFunctionAbstract $abstract
