@@ -7,6 +7,7 @@ use Swiftly\Dependency\Exception\UndefinedClassException;
 use Swiftly\Dependency\Exception\UndefinedFunctionException;
 use Swiftly\Dependency\Exception\UndefinedMethodException;
 use Swiftly\Dependency\Exception\CompoundTypeException;
+use Swiftly\Dependency\Exception\UnknownTypeException;
 use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\ArrayParameter;
 use Swiftly\Dependency\Parameter\BooleanParameter;
@@ -141,13 +142,17 @@ class ReflectionInspector implements InspectorInterface
 
         switch ($type_name) {
             case 'array':
+                /** @var null|callable():array $default */
                 return new ArrayParameter($name, $nullable, $default);
             case 'bool':
+                /** @var null|callable():bool $default */
                 return new BooleanParameter($name, $nullable, $default);
             case 'mixed':
+                /** @var null|callable():mixed $default */
                 return new MixedParameter($name, $default);
             case 'int':
             case 'float':
+                /** @var null|callable():(int|float) $default */
                 return new NumericParameter(
                     $name,
                     $type_name,
@@ -155,10 +160,16 @@ class ReflectionInspector implements InspectorInterface
                     $default
                 );
             case 'string':
+                /** @var null|callable():string $default */
                 return new StringParameter($name, $nullable, $default);
             case 'object':
+                /** @var null|callable():object $default */
                 return new ObjectParameter($name, $nullable, $default);
             default:
+                if (!class_exists($type_name)) {
+                    throw new UnknownTypeException($name, $type_name);
+                }
+                /** @var null|callable():object $default */
                 return new NamedClassParameter(
                     $name,
                     $type_name,

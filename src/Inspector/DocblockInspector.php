@@ -8,7 +8,15 @@ use Swiftly\Dependency\Exception\UndefinedMethodException;
 use Swiftly\Dependency\Exception\UndefinedFunctionException;
 use Swiftly\Dependency\Exception\DocblockParseException;
 use Swiftly\Dependency\Exception\CompoundTypeException;
+use Swiftly\Dependency\Exception\UnknownTypeException;
 use Swiftly\Dependency\Parameter;
+use Swiftly\Dependency\Parameter\ArrayParameter;
+use Swiftly\Dependency\Parameter\BooleanParameter;
+use Swiftly\Dependency\Parameter\MixedParameter;
+use Swiftly\Dependency\Parameter\NumericParameter;
+use Swiftly\Dependency\Parameter\StringParameter;
+use Swiftly\Dependency\Parameter\ObjectParameter;
+use Swiftly\Dependency\Parameter\NamedClassParameter;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -21,7 +29,6 @@ use function class_exists;
 use function preg_match_all;
 use function strpos;
 use function substr;
-use function in_array;
 
 use const PREG_SET_ORDER;
 
@@ -131,14 +138,14 @@ class DocblockInspector implements InspectorInterface
             return [];
         }
 
-        /** @var list<array{0:string,1:string,2:string}> $matches */
+        /** @var list<array{1:non-empty-string, 2:non-empty-string}> $matches */
         return $this->parseParameters($matches);
     }
 
     /**
      * Parse the parameter information returned by the regex match
      *
-     * @param list<array{0:string,1:string,2:string}> $parameters
+     * @param list<array{1:non-empty-string, 2:non-empty-string}> $parameters
      * @return list<Parameter> Stripped parameter information
      */
     private function parseParameters(array $parameters): array
@@ -155,11 +162,12 @@ class DocblockInspector implements InspectorInterface
     /**
      * Parse the given type and parameter name
      *
+     * @php:8.0 swap to using `match()` statement
      * @throws DocblockParseException If the given type is compound
      *
-     * @param string $type Type string
-     * @param string $name Parameter name
-     * @return Parameter   Parameter information
+     * @param non-empty-string $type Type string
+     * @param non-empty-string $name Parameter name
+     * @return Parameter             Parameter information
      */
     private function parseParameter(string $type, string $name): Parameter
     {
@@ -168,14 +176,30 @@ class DocblockInspector implements InspectorInterface
             throw new DocblockParseException($name);
         }
 
-        // Strip nullable (?) modifier if present
-        $type = (strpos($type, '?') === 0 ? substr($type, 1) : $type);
+        $is_nullable = strpos($type, '?') === 0;
 
-        return new Parameter(
-            $name,
-            $type,
-            null, // Can't determine default from docblock
-            in_array($type, self::BUILTIN)
-        );
+        /** @var non-empty-string $type */
+        $type = $is_nullable ? substr($type, 1) : $type;
+
+        switch ($type) {
+            case 'array':
+                return new ArrayParameter($name, $is_nullable);
+            case 'bool':
+                return new BooleanParameter($name, $is_nullable);
+            case 'mixed':
+                return new MixedParameter($name);
+            case 'int':
+            case 'float':
+                return new NumericParameter($name, $type, $is_nullable);
+            case 'string':
+                return new StringParameter($name, $is_nullable);
+            case 'object':
+                return new ObjectParameter($name, $is_nullable);
+            default:
+                if (!class_exists($type)) {
+                    throw new UnknownTypeException($name, $type);
+                }
+                return new NamedClassParameter($name, $type, $is_nullable);
+        }
     }
 }
