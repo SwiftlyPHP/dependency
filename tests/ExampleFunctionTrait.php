@@ -97,6 +97,14 @@ trait ExampleFunctionTrait
                     StringParameter::class,
                     'string'
                 )
+            ],
+            'any' => [
+                'exampleAny',
+                ...self::expectedParam(
+                    'value',
+                    MixedParameter::class,
+                    'mixed'
+                )
             ]
         ];
     }

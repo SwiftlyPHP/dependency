@@ -3,11 +3,10 @@
 namespace Swiftly\Dependency\Tests\Inspector;
 
 use Swiftly\Dependency\Tests\AbstractInspectorTest;
-use Swiftly\Dependency\Inspector\ReflectionInspector;
+use Swiftly\Dependency\Inspector\DocblockInspector;
 use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\ArrayParameter;
 use Swiftly\Dependency\Parameter\MixedParameter;
-use Swiftly\Dependency\Parameter\StringParameter;
 use Swiftly\Dependency\Exception\UndefinedFunctionException;
 use Swiftly\Dependency\Exception\UndefinedClassException;
 use Swiftly\Dependency\Exception\UndefinedMethodException;
@@ -16,7 +15,7 @@ use Swiftly\Dependency\Exception\UnknownTypeException;
 use ExampleClass;
 
 /**
- * @covers \Swiftly\Dependency\Inspector\ReflectionInspector
+ * @covers \Swiftly\Dependency\Inspector\DocblockInspector
  * @uses \Swiftly\Dependency\Parameter
  * @uses \Swiftly\Dependency\Parameter\ArrayParameter
  * @uses \Swiftly\Dependency\Parameter\BooleanParameter
@@ -27,13 +26,13 @@ use ExampleClass;
  * @uses \Swiftly\Dependency\Parameter\StringParameter
  * @uses \Swiftly\Dependency\Type
  */
-final class ReflectionInspectorTest extends AbstractInspectorTest
+final class DocblockInspectorTest extends AbstractInspectorTest
 {
-    private ReflectionInspector $inspector;
+    private DocblockInspector $inspector;
 
     public function setUp(): void
     {
-        $this->inspector = new ReflectionInspector();
+        $this->inspector = new DocblockInspector();
     }
 
     /**
@@ -73,17 +72,6 @@ final class ReflectionInspectorTest extends AbstractInspectorTest
         self::assertTrue($parameter->isNullable());
     }
 
-    public function testCanInspectDefaultParameter(): void
-    {
-        list($parameter) = $this->inspector->inspectFunction('exampleDefault');
-
-        $expected = self::expectedParam('value', StringParameter::class, 'string');
-
-        self::assertParameter($expected, $parameter);
-        self::assertTrue($parameter->hasDefault());
-        self::assertSame('Hi!', $parameter->getDefault());
-    }    
-
     /**
      * @dataProvider exampleClassProvider
      * @testdox Can inspect constructor of $_dataName
@@ -119,6 +107,20 @@ final class ReflectionInspectorTest extends AbstractInspectorTest
         $parameters = $this->inspector->inspectMethod($class, $method);
 
         self::assertParameters($expected, $parameters);
+    }
+
+    public function testCanRecoverIfDocblockMalformed(): void
+    {
+        $parameters = $this->inspector->inspectFunction('exampleMalformedDocblock');
+
+        self::assertSame([], $parameters);
+    }
+
+    public function testCanRecoverIfDocblockMissing(): void
+    {
+        $parameters = $this->inspector->inspectFunction('exampleNoDocblock');
+
+        self::assertSame([], $parameters);
     }
 
     /**

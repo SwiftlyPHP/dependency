@@ -17,6 +17,7 @@ use Swiftly\Dependency\Parameter\NumericParameter;
 use Swiftly\Dependency\Parameter\StringParameter;
 use Swiftly\Dependency\Parameter\ObjectParameter;
 use Swiftly\Dependency\Parameter\NamedClassParameter;
+use Swiftly\Dependency\Type;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -46,9 +47,9 @@ use const PREG_SET_ORDER;
  */
 class DocblockInspector implements InspectorInterface
 {
-    private const TYPE = '[A-Za-z\_\?][A-Za-z0-9\_\|]+';
-    private const IDENTIFIER = '[A-Za-z\_][A-Za-z0-9\_]+';
-    private const DOCBLOCK = '/^[* ]+@(?:param|var)\s+('.self::TYPE.')\s+\$('.self::IDENTIFIER.')/m';
+    private const TYPE = '\\\?[A-Za-z\_\?][A-Za-z0-9\_\\\\|]*';
+    private const IDENTIFIER = '[A-Za-z\_][A-Za-z0-9\_]*';
+    private const DOCBLOCK = '/^[* ]+@(?:param|var)(?:\s+('.self::TYPE.'))?\s+\$('.self::IDENTIFIER.')/m';
     private const BUILTIN = ['int', 'integer', 'float', 'double', 'bool', 'boolean', 'string'];
 
     /** {@inheritDoc} */
@@ -138,14 +139,14 @@ class DocblockInspector implements InspectorInterface
             return [];
         }
 
-        /** @var list<array{1:non-empty-string, 2:non-empty-string}> $matches */
+        /** @var list<array{1:string, 2:non-empty-string}> $matches */
         return $this->parseParameters($matches);
     }
 
     /**
      * Parse the parameter information returned by the regex match
      *
-     * @param list<array{1:non-empty-string, 2:non-empty-string}> $parameters
+     * @param list<array{1:string, 2:non-empty-string}> $parameters
      * @return list<Parameter> Stripped parameter information
      */
     private function parseParameters(array $parameters): array
@@ -153,7 +154,10 @@ class DocblockInspector implements InspectorInterface
         $parsed = [];
 
         foreach ($parameters as $parameter) {
-            $parsed[] = $this->parseParameter($parameter[1], $parameter[2]);
+            $parsed[] = $this->parseParameter(
+                $parameter[1] ?: 'mixed',
+                $parameter[2]
+            );
         }
 
         return $parsed;
@@ -196,7 +200,7 @@ class DocblockInspector implements InspectorInterface
             case 'object':
                 return new ObjectParameter($name, $is_nullable);
             default:
-                if (!class_exists($type)) {
+                if (!Type::isClassname($type)) {
                     throw new UnknownTypeException($name, $type);
                 }
                 return new NamedClassParameter($name, $type, $is_nullable);

@@ -55,6 +55,16 @@ function exampleDefault(string $value = 'Hi!'): void {}
  * @param MyClass $value Example undefined class param
  */
 function exampleUnknown(MyClass $value): void {}
+/**
+ * @param $value
+ */
+function exampleAny($value): void {}
+/**
+ * @see \Swiftly\Dependency\Tests\Inspector\DockblockInspectorTest::testCanRecoverIfDocblockMalformed()
+ * @param MyClass
+ */
+function exampleMalformedDocblock($value): void {}
+function exampleNoDocblock(): void {}
 
 /**
  * File contains union and mixed type hints, only include on PHP >= 8
