@@ -175,7 +175,9 @@ final class DocblockInspectorTest extends AbstractInspectorTest
     }
 
     /**
+     * @covers \Swiftly\Dependency\Exception\DocblockParseException
      * @covers \Swiftly\Dependency\Exception\CompoundTypeException
+     * @uses \Swiftly\Dependency\ParameterException
      * @requires PHP >= 8.0
      */
     public function testThrowsIfCompoundType(): void
