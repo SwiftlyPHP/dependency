@@ -4,6 +4,7 @@ namespace Swiftly\Dependency\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Type;
+use Iterator;
 
 /**
  * @covers \Swiftly\Dependency\Type
@@ -42,7 +43,7 @@ final class TypeTest extends TestCase
         self::assertFalse(Type::isInvokable(null));
     }
 
-    public function testCanTellIfVariableIsClassname(): void
+    public function testCanTellIfVariableIsClassName(): void
     {
         self::assertTrue(Type::isClassname(TestCase::class));
         self::assertTrue(Type::isClassname('stdClass'));
@@ -50,5 +51,10 @@ final class TypeTest extends TestCase
         self::assertFalse(Type::isClassname('UnknownClass'));
         self::assertFalse(Type::isClassname('strlen'));
         self::assertFalse(Type::isClassname(null));
+    }
+
+    public function testCanTellIfVariableIsInterfaceName(): void
+    {
+        self::assertTrue(Type::isClassname(Iterator::class));
     }
 }
