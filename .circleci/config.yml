@@ -21,7 +21,7 @@ jobs:
       - run:
           name: "Unit Tests"
           command: |
-              XDEBUG_MODE=coverage ./vendor/bin/phpunit --config=phpunit.xml.dist
+              XDEBUG_MODE=coverage ./vendor/bin/phpunit --config=phpunit.ci.xml
               ./vendor/bin/php-coveralls --config .circleci/.coveralls.yml
 workflows:
   version: 2
