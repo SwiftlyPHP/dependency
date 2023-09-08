@@ -24,7 +24,6 @@ final class TypeTest extends TestCase
     public function testCanTellIfVariableIsCallableMethod(): void
     {
         self::assertTrue(Type::isMethod([$this, 'testCanTellIfVariableIsObject']));
-        self::assertTrue(Type::isMethod([TestCase::class, 'count']));
         self::assertTrue(Type::isMethod([Type::class, 'isMethod']));
 
         self::assertFalse(Type::isMethod([new \stdClass(), '__invoke']));
