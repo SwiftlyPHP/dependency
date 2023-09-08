@@ -15,7 +15,7 @@ use function interface_exists;
 /**
  * Utility class containing static methods used for type inspection
  *
- * @psalm-type ArrayCallable = callable-array&array{0:class-string|object,1:string}
+ * @psalm-type MethodCall = callable-array&array{0:class-string|object,1:string}
  * @internal
  */
 abstract class Type
@@ -37,7 +37,7 @@ abstract class Type
     /**
      * Determine if the subject is a class method callable
      *
-     * @psalm-assert-if-true ArrayCallable $subject
+     * @psalm-assert-if-true MethodCall $subject
      * @param mixed $subject Callable variable
      * @return bool          Is method call?
      */
