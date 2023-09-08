@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    bootstrap="vendor/autoload.php"
+    cacheResult="false"
+    noInteraction="true">
+    <testsuites>
+        <testsuite name="unit">
+            <directory suffix=".php">tests</directory>
+            <exclude>tests/example</exclude>
+        </testsuite>
+    </testsuites>
+    <coverage>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <report>
+            <clover outputFile="reports/clover.xml"/>
+        </report>
+    </coverage>
+</phpunit>
