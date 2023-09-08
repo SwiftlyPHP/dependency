@@ -7,8 +7,8 @@
     phpVersion="7.4"
     allowNamedArgumentCalls="false"
     checkForThrowsDocblock="true"
-    findUnusedCode="true"
-    findUnusedBaselineEntry="false"
+    findUnusedCode="false"
+    findUnusedBaselineEntry="true"
     findUnusedVariablesAndParams="true"
 >
     <projectFiles>
