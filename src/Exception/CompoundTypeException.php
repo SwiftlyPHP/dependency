@@ -32,7 +32,7 @@ final class CompoundTypeException extends ParameterException
 
         parent::__construct(
             sprintf(
-                "Could not resolve complex type of parameter \$%s to %s",
+                "Could not resolve complex type of parameter '\$%s' to %s()",
                 $parameter,
                 is_string($function) ? $function : self::getName($function)
             )
