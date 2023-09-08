@@ -6,6 +6,10 @@ use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Parameter\ArrayParameter;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 
+/**
+ * @covers \Swiftly\Dependency\Parameter
+ * @covers \Swiftly\Dependency\Parameter\ArrayParameter
+ */
 final class ArrayParameterTest extends TestCase
 {
     private ArrayParameter $parameter;
@@ -58,6 +62,9 @@ final class ArrayParameterTest extends TestCase
         self::assertFalse($this->parameter->accepts(null));
     }
 
+    /**
+     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
+     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);

@@ -6,6 +6,10 @@ use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Parameter\BooleanParameter;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 
+/**
+ * @covers \Swiftly\Dependency\Parameter
+ * @covers \Swiftly\Dependency\Parameter\BooleanParameter
+ */
 final class BooleanParameterTest extends TestCase
 {
     private BooleanParameter $parameter;
@@ -67,6 +71,9 @@ final class BooleanParameterTest extends TestCase
         self::assertTrue($this->parameter->accepts(3.14));
     }
 
+    /**
+     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
+     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);

@@ -6,6 +6,10 @@ use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Parameter\StringParameter;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 
+/**
+ * @covers \Swiftly\Dependency\Parameter
+ * @covers \Swiftly\Dependency\Parameter\StringParameter
+ */
 final class StringParameterTest extends TestCase
 {
     private StringParameter $parameter;
@@ -65,6 +69,9 @@ final class StringParameterTest extends TestCase
         self::assertTrue($this->parameter->accepts(3.14));
     }
 
+    /**
+     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
+     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);

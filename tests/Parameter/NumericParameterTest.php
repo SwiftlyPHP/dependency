@@ -6,6 +6,10 @@ use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Parameter\NumericParameter;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 
+/**
+ * @covers \Swiftly\Dependency\Parameter
+ * @covers \Swiftly\Dependency\Parameter\NumericParameter
+ */
 final class NumericParameterTest extends TestCase
 {
     private NumericParameter $parameter;
@@ -72,6 +76,9 @@ final class NumericParameterTest extends TestCase
         self::assertFalse($this->parameter->accepts(''));
     }
 
+    /**
+     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
+     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);

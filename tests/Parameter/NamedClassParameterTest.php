@@ -7,6 +7,10 @@ use Swiftly\Dependency\Parameter\NamedClassParameter;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 use stdClass;
 
+/**
+ * @covers \Swiftly\Dependency\Parameter
+ * @covers \Swiftly\Dependency\Parameter\NamedClassParameter
+ */
 final class NamedClassParameterTest extends TestCase
 {
     private NamedClassParameter $parameter;
@@ -64,6 +68,9 @@ final class NamedClassParameterTest extends TestCase
         self::assertFalse($this->parameter->accepts(null));
     }
 
+    /**
+     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
+     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);

@@ -7,6 +7,10 @@ use Swiftly\Dependency\Parameter\MixedParameter;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 use stdClass;
 
+/**
+ * @covers \Swiftly\Dependency\Parameter
+ * @covers \Swiftly\Dependency\Parameter\MixedParameter
+ */
 final class MixedParameterTest extends TestCase
 {
     private MixedParameter $parameter;
@@ -61,6 +65,9 @@ final class MixedParameterTest extends TestCase
         self::assertTrue($this->parameter->accepts(new stdClass));
     }   
 
+    /**
+     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
+     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);
