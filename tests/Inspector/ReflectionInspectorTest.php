@@ -81,7 +81,8 @@ final class ReflectionInspectorTest extends AbstractInspectorTest
 
         self::assertParameter($expected, $parameter);
         self::assertTrue($parameter->hasDefault());
-        self::assertSame('Hi!', $parameter->getDefault());
+        self::assertIsCallable($parameter->getDefaultCallback());
+        self::assertSame('Hi!', ($parameter->getDefaultCallback())());
     }    
 
     /**

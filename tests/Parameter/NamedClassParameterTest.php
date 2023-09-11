@@ -52,7 +52,8 @@ final class NamedClassParameterTest extends TestCase
 
     public function testCanGetDefaultValue(): void
     {
-        self::assertSame($this, $this->parameter->getDefault());
+        self::assertIsCallable($this->parameter->getDefaultCallback());
+        self::assertSame($this, ($this->parameter->getDefaultCallback())());
     }
 
     public function testCanCheckAcceptableInput(): void
@@ -75,6 +76,6 @@ final class NamedClassParameterTest extends TestCase
     {
         self::expectException(UndefinedDefaultValueException::class);
 
-        (new NamedClassParameter('value', stdClass::class, false))->getDefault();
+        (new NamedClassParameter('value', stdClass::class, false))->getDefaultCallback();
     }
 }

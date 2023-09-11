@@ -51,7 +51,8 @@ final class ObjectParameterTest extends TestCase
 
     public function testCanGetDefaultValue(): void
     {
-        self::assertSame($this, $this->parameter->getDefault());
+        self::assertIsCallable($this->parameter->getDefaultCallback());
+        self::assertSame($this, ($this->parameter->getDefaultCallback())());
     }
 
     public function testCanCheckAcceptableInput(): void
@@ -75,6 +76,6 @@ final class ObjectParameterTest extends TestCase
     {
         self::expectException(UndefinedDefaultValueException::class);
 
-        (new ObjectParameter('value', false))->getDefault();
+        (new ObjectParameter('value', false))->getDefaultCallback();
     }
 }

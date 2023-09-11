@@ -50,7 +50,8 @@ final class MixedParameterTest extends TestCase
 
     public function testCanGetDefaultValue(): void
     {
-        self::assertSame($this, $this->parameter->getDefault());
+        self::assertIsCallable($this->parameter->getDefaultCallback());
+        self::assertSame($this, ($this->parameter->getDefaultCallback())());
     }
 
     public function testCanAcceptAllTypes(): void
@@ -72,6 +73,6 @@ final class MixedParameterTest extends TestCase
     {
         self::expectException(UndefinedDefaultValueException::class);
 
-        (new MixedParameter('value'))->getDefault();
+        (new MixedParameter('value'))->getDefaultCallback();
     }
 }

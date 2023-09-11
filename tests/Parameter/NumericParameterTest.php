@@ -51,7 +51,8 @@ final class NumericParameterTest extends TestCase
 
     public function testCanGetDefaultValue(): void
     {
-        self::assertSame(3.14, $this->parameter->getDefault());
+        self::assertIsCallable($this->parameter->getDefaultCallback());
+        self::assertSame(3.14, ($this->parameter->getDefaultCallback())());
     }
 
     public function testCanCheckAcceptableInput(): void
@@ -83,6 +84,6 @@ final class NumericParameterTest extends TestCase
     {
         self::expectException(UndefinedDefaultValueException::class);
 
-        (new NumericParameter('value', 'float', false))->getDefault();
+        (new NumericParameter('value', 'float', false))->getDefaultCallback();
     }
 }

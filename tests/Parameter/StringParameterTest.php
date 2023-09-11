@@ -50,7 +50,8 @@ final class StringParameterTest extends TestCase
 
     public function testCanGetDefaultValue(): void
     {
-        self::assertSame('Hi!', $this->parameter->getDefault());
+        self::assertIsCallable($this->parameter->getDefaultCallback());
+        self::assertSame('Hi!', ($this->parameter->getDefaultCallback())());
     }
 
     public function testCanCheckAcceptableInput(): void
@@ -76,6 +77,6 @@ final class StringParameterTest extends TestCase
     {
         self::expectException(UndefinedDefaultValueException::class);
 
-        (new StringParameter('value', false))->getDefault();
+        (new StringParameter('value', false))->getDefaultCallback();
     }
 }

@@ -50,7 +50,8 @@ final class ArrayParameterTest extends TestCase
 
     public function testCanGetDefaultValue(): void
     {
-        self::assertSame(['Hi!'], $this->parameter->getDefault());
+        self::assertIsCallable($this->parameter->getDefaultCallback());
+        self::assertSame(['Hi!'], ($this->parameter->getDefaultCallback())());
     }
 
     public function testCanCheckAcceptableInput(): void
@@ -69,6 +70,6 @@ final class ArrayParameterTest extends TestCase
     {
         self::expectException(UndefinedDefaultValueException::class);
 
-        (new ArrayParameter('value', false))->getDefault();
+        (new ArrayParameter('value', false))->getDefaultCallback();
     }
 }

@@ -50,7 +50,8 @@ final class BooleanParameterTest extends TestCase
 
     public function testCanGetDefaultValue(): void
     {
-        self::assertSame(true, $this->parameter->getDefault());
+        self::assertIsCallable($this->parameter->getDefaultCallback());
+        self::assertSame(true, ($this->parameter->getDefaultCallback())());
     }
 
     public function testCanCheckAcceptableInput(): void
@@ -78,6 +79,6 @@ final class BooleanParameterTest extends TestCase
     {
         self::expectException(UndefinedDefaultValueException::class);
 
-        (new BooleanParameter('value', false))->getDefault();
+        (new BooleanParameter('value', false))->getDefaultCallback();
     }
 }
