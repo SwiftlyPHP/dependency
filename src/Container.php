@@ -32,6 +32,9 @@ final class Container
     /** @var array<class-string,Entry> $entries */
     private array $entries;
 
+    /** @var array<class-string,class-string> $aliases */
+    private array $aliases;
+
     /**
      * Create a container that uses the given `$inspector` to resolve parameters
      *
@@ -41,6 +44,7 @@ final class Container
     {
         $this->inspector = $inspector;
         $this->entries = [];
+        $this->aliases = [];
     }
 
     /**
@@ -67,6 +71,28 @@ final class Container
     }
 
     /**
+     * Create an alias mapping between one service and another
+     *
+     * @throws UndefinedServiceException
+     *          If trying to alias a service that doesn't exist
+     *
+     * @template T of object
+     * @param class-string<T> $service Service name
+     * @param class-string<T> $alias   Alias
+     * @return self                    Chainable interface
+     */
+    public function alias(string $service, string $alias): self
+    {
+        if (!isset($this->entries[$service])) {
+            throw new UndefinedServiceException($service);
+        }
+
+        $this->aliases[$alias] = $service;
+
+        return $this;
+    }
+
+    /**
      * Determine if the given service has been registered
      *
      * @template T of object
@@ -76,7 +102,7 @@ final class Container
      */
     public function has(string $service): bool
     {
-        return isset($this->entries[$service]);
+        return isset($this->entries[$this->aliases[$service] ?? $service]);
     }
 
     /**
@@ -100,7 +126,7 @@ final class Container
         }
 
         // Get the service definition
-        $entry = $this->entries[$service];
+        $entry = $this->entries[$this->aliases[$service] ?? $service];
 
         // Get factory (or class constructor)
         $factory_or_class = self::factoryOrClass($entry);
@@ -115,15 +141,43 @@ final class Container
 
         // Create the object!
         $instance = self::create($factory_or_class, $parameters);
-
-        if (!($instance instanceof $service)) {
-            throw new UnexpectedTypeException(
-                $service,
-                Type::getName($instance)
-            );
-        }
+        self::assertType($instance, $service);
 
         return $instance;
+    }
+
+    /**
+     * Return all services with a given tag
+     *
+     * The optional `$type` argument can be used to pass a interface/class
+     * constraint that all services must adhere to.
+     *
+     * @template T of object
+     * @psalm-param null|class-string<T> $type
+     * @psalm-return ($type is class-string ? list<T> : list<object>)
+     * @param non-empty-string $tag   Service tag
+     * @param null|class-string $type Interface or class constraint
+     * @return object[]               Tagged services
+     */
+    public function tagged(string $tag, ?string $type = null): array
+    {
+        $resolved = [];
+
+        foreach ($this->entries as $name => $entry) {
+            if (!$entry->hasTag($tag)) {
+                continue;
+            }
+
+            $service = $this->get($name);
+
+            if ($type) {
+                self::assertType($service, $type);
+            }
+
+            $resolved[] = $service;
+        }
+
+        return $resolved;
     }
 
     /**
@@ -280,5 +334,28 @@ final class Container
     private static function initialise(string $class, array $arguments): object
     {
         return (new ReflectionClass($class))->newInstanceArgs($arguments);
+    }
+
+    /**
+     * Validate that the given object meets a type constaint
+     *
+     * @throws UnexpectedTypeException
+     *          If the `$service` is not of type `$constraint`
+     *
+     * @template T of object
+     * @template K of object
+     * @psalm-param class-string<K> $constraint
+     * @psalm-assert T&K $service
+     * @param T $service               Service instance
+     * @param class-string $constraint Interface or class constaint
+     * @return void
+     */
+    private static function assertType(object $service, string $constraint): void
+    {
+        if (!($service instanceof $constraint))
+            throw new UnexpectedTypeException(
+                $constraint,
+                Type::getName($service)
+            );
     }
 }

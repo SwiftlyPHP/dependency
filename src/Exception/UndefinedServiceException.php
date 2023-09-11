@@ -22,7 +22,7 @@ final class UndefinedServiceException extends RuntimeException
     {
         parent::__construct(
             sprintf(
-                "Could not resolve '%s' no matching service definitions found",
+                "Could not find service '%s' no matching definitions found",
                 $service
             )
         );
