@@ -114,7 +114,7 @@ class ReflectionInspector implements InspectorInterface
     private function inspectParameter(ReflectionParameter $reflected): Parameter
     {
         $type = $reflected->getType();
-        
+
         if ($type !== null && !($type instanceof ReflectionNamedType)) {
             throw new CompoundTypeException(
                 $reflected->getName(),

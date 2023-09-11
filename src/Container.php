@@ -210,10 +210,8 @@ final class Container
             return $this->inspector->inspectClass($class_or_callable);
         } else if (Type::isMethod($class_or_callable)) {
             return $this->inspector->inspectMethod($class_or_callable[0], $class_or_callable[1]);
-        } else if (Type::isInvokable($class_or_callable)) {
-            return $this->inspector->inspectMethod($class_or_callable, '__invoke');
         } else {
-            /** @psalm-suppress PossiblyInvalidArgument */
+            /** @psalm-suppress ArgumentTypeCoercion */
             return $this->inspector->inspectFunction($class_or_callable);
         }
     }
@@ -277,7 +275,7 @@ final class Container
             try {
                 return $this->get($type);
             } catch (Exception $e) {
-                throw new NestedServiceException($type, $e);
+                throw new NestedServiceException($e);
             }
         }
 

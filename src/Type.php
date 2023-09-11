@@ -52,12 +52,16 @@ abstract class Type
      * Determine if the subject is an invokable object
      *
      * @psalm-assert-if-true callable-object $subject
+     * @psalm-assert-if-true !Closure $subject
      * @param mixed $subject Subject variable
      * @return bool          Is invokable object?
      */
-    final public static function isInvokable($subject): bool
+    final public static function isInvokableObject($subject): bool
     {
-        return (is_object($subject) && method_exists($subject, '__invoke'));
+        return (is_object($subject)
+            && !($subject instanceof Closure)
+            && method_exists($subject, '__invoke')
+        );
     }
 
     /**
