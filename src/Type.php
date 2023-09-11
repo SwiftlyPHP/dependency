@@ -17,7 +17,7 @@ use function gettype;
 /**
  * Utility class containing static methods used for type inspection
  *
- * @psalm-type callable-method = callable-array&list{class-string|object,non-empty-string}
+ * @psalm-type callable-method = list{class-string|object,non-empty-string}
  * @internal
  */
 abstract class Type
@@ -39,7 +39,7 @@ abstract class Type
     /**
      * Determine if the subject is a class method callable
      *
-     * @psalm-assert-if-true callable-method $subject
+     * @psalm-assert-if-true callable-array&callable-method $subject
      * @param mixed $subject Callable variable
      * @return bool          Is method call?
      */

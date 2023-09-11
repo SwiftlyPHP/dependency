@@ -201,8 +201,6 @@ final class Container
      * @throws ParameterException
      * @throws UndefinedStructureException
      *
-     * @psalm-type callable-method = list{class-string|object,non-empty-string}
-     * @psalm-param class-string|callable-string|callable-method|\Closure $class_or_callable
      * @param class-string|callable $class_or_callable Class FQN or callable
      * @return list<Parameter>                         Parameters
      */
@@ -212,7 +210,10 @@ final class Container
             return $this->inspector->inspectClass($class_or_callable);
         } else if (Type::isMethod($class_or_callable)) {
             return $this->inspector->inspectMethod($class_or_callable[0], $class_or_callable[1]);
+        } else if (Type::isInvokable($class_or_callable)) {
+            return $this->inspector->inspectMethod($class_or_callable, '__invoke');
         } else {
+            /** @psalm-suppress PossiblyInvalidArgument */
             return $this->inspector->inspectFunction($class_or_callable);
         }
     }
@@ -319,6 +320,7 @@ final class Container
         if (Type::isClassname($factory_or_class)) {
             return self::initialise($factory_or_class, $arguments);
         } else {
+            /** @psalm-suppress TooManyArguments */
             return call_user_func_array($factory_or_class, $arguments);
         }
     }
