@@ -17,7 +17,7 @@ jobs:
       - run:
           name: "Code Quality"
           command: |
-              ./vendor/bin/psalm
+              ./vendor/bin/psalm --shepherd
       - run:
           name: "Unit Tests"
           command: |
