@@ -2,7 +2,7 @@
 
 namespace Swiftly\Dependency\Exception;
 
-use ReflectionException;
+use Swiftly\Dependency\UndefinedStructureException;
 
 use function sprintf;
 
@@ -11,7 +11,7 @@ use function sprintf;
  *
  * @api
  */
-final class UndefinedFunctionException extends ReflectionException
+final class UndefinedFunctionException extends UndefinedStructureException
 {
     /**
      * Indicate given named function does not exists
