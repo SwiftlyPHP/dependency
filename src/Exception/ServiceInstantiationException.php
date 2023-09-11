@@ -44,7 +44,7 @@ final class ServiceInstantiationException extends RuntimeException
      */
     private static function unwrapReason(Exception $reason): string
     {
-        $depth = 0;
+        $depth = 1;
         $messages = [];
 
         do {
@@ -56,6 +56,6 @@ final class ServiceInstantiationException extends RuntimeException
             $messages[] = str_repeat("\t", $depth) . $reason->getMessage();
         } while (($reason = $reason->getPrevious()) !== null);
 
-        return implode("\t", $messages);
+        return implode("\n", $messages);
     }
 }
