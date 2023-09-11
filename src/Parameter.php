@@ -7,8 +7,9 @@ use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 /**
  * Base class from which all parameter types inherit
  *
+ * @api
+ * @psalm-immutable
  * @template T
- * @internal
  */
 abstract class Parameter
 {
@@ -84,20 +85,20 @@ abstract class Parameter
     }
 
     /**
-     * Return the default value declared for this parameter
+     * Return a callback that resolves to the default value
      *
      * @throws UndefinedDefaultValueException If no default value is available
      *
-     * @psalm-assert !null $this->default
-     * @return T Provided default value
+     * @psalm-return callable():T
+     * @return callable Default value provider
      */
-    public function getDefault() // : mixed
+    public function getDefaultCallback(): callable
     {
         if ($this->default === null) {
             throw new UndefinedDefaultValueException($this->name);
         }
 
-        return ($this->default)();
+        return $this->default;
     }
 
     /**
@@ -116,7 +117,8 @@ abstract class Parameter
      * datatype which in essence means any type that is not an object, resource
      * or array.
      *
-     * @psalm-assert-if-true scalar $this<T>
+     * @psalm-pure
+     * @psalm-assert-if-false class-string<T> $this->getType()
      * @return bool Accepts a built-in type?
      */
     abstract function isBuiltin(): bool;

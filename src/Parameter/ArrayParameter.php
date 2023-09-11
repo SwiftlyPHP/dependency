@@ -10,6 +10,7 @@ use function is_array;
  * Function parameter that expects array values
  *
  * @api
+ * @psalm-immutable
  * @extends Parameter<array>
  */
 class ArrayParameter extends Parameter

@@ -19,6 +19,7 @@ use function is_scalar;
  * not validate how reasonable or correct the value seems.
  *
  * @api
+ * @psalm-immutable
  * @extends Parameter<string>
  */
 class StringParameter extends Parameter

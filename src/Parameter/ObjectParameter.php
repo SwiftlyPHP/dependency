@@ -10,6 +10,7 @@ use function is_object;
  * Function parameter that expects an object
  *
  * @api
+ * @psalm-immutable
  * @extends Parameter<object>
  */
 class ObjectParameter extends Parameter

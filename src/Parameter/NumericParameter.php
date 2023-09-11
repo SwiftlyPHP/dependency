@@ -14,6 +14,7 @@ use function is_numeric;
  * expecting an int can recieve a float and vice-versa.
  *
  * @api
+ * @psalm-immutable
  * @extends Parameter<int|float>
  */
 class NumericParameter extends Parameter

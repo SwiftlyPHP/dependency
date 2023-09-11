@@ -13,6 +13,7 @@ use function is_scalar;
  * parameters, hence the call to `is_scalar`.
  *
  * @api
+ * @psalm-immutable
  * @extends Parameter<bool>
  */
 class BooleanParameter extends Parameter

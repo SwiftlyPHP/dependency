@@ -22,12 +22,11 @@ final class Entry
     /** @var list<non-empty-string> $tags */
     public array $tags;
 
-    /** @var array<non-empty-string,mixed> $args Manually passed arguments */
+    /** @var array<non-empty-string,mixed> $arguments Manually passed arguments */
     public array $arguments;
 
     /**
      * Create a new entry in the register
-     *
      *
      * @internal
      * @psalm-param null|callable():T $factory
@@ -73,7 +72,7 @@ final class Entry
     }
 
     /**
-     * Pass initialization arguments manually
+     * Pass initialization arguments as a key-value array
      *
      * @api
      * @param array<non-empty-string,mixed> $arguments Manual factory arguments

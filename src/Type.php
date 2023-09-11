@@ -11,11 +11,13 @@ use function method_exists;
 use function is_string;
 use function class_exists;
 use function interface_exists;
+use function get_class;
+use function gettype;
 
 /**
  * Utility class containing static methods used for type inspection
  *
- * @psalm-type MethodCall = callable-array&array{0:class-string|object,1:string}
+ * @psalm-type callable-method = callable-array&list{class-string|object,non-empty-string}
  * @internal
  */
 abstract class Type
@@ -23,7 +25,7 @@ abstract class Type
     /**
      * Determine if the subject is a service factory or service instance
      *
-     * @template T
+     * @template T of object
      * @psalm-assert-if-true T $subject
      * @psalm-param T|callable():T $subject
      * @param object|callable $subject Service factory or instance
@@ -37,7 +39,7 @@ abstract class Type
     /**
      * Determine if the subject is a class method callable
      *
-     * @psalm-assert-if-true MethodCall $subject
+     * @psalm-assert-if-true callable-method $subject
      * @param mixed $subject Callable variable
      * @return bool          Is method call?
      */
@@ -61,8 +63,7 @@ abstract class Type
     /**
      * Determine if the subject is a valid class or interface name
      *
-     * @template T of object
-     * @psalm-assert-if-true class-string<T> $subject
+     * @psalm-assert-if-true class-string $subject
      * @param mixed $subject Subject variable
      * @return bool          Is class name?
      */
@@ -71,5 +72,18 @@ abstract class Type
         return (is_string($subject)
             && (class_exists($subject) || interface_exists($subject))
         );
+    }
+
+    /**
+     * Return a user-friendly type descriptor
+     *
+     * @php:8.0 Swap to using `get_debug_type`
+     * @psalm-return ($subject is object ? class-string : string)
+     * @param mixed $subject Subject variable
+     * @return string        Type name
+     */
+    final public static function getName($subject): string
+    {
+        return (is_object($subject) ? get_class($subject) : gettype($subject));
     }
 }

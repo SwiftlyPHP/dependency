@@ -10,6 +10,7 @@ use function is_object;
  * Function parameter that expects an object of a given type/interface
  *
  * @api
+ * @psalm-immutable
  * @template T of object
  * @extends Parameter<T>
  */

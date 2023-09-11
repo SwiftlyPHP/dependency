@@ -8,6 +8,7 @@ use Swiftly\Dependency\Parameter;
  * Function parameter that has no specific type requirements
  *
  * @api
+ * @psalm-immutable
  * @extends Parameter<mixed>
  */
 final class MixedParameter extends Parameter
