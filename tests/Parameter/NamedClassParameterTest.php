@@ -69,6 +69,14 @@ final class NamedClassParameterTest extends TestCase
         self::assertFalse($this->parameter->accepts(null));
     }
 
+    public function testCanAcceptNullWhenNullable(): void
+    {
+        $parameter = new NamedClassParameter('param', TestCase::class, true);
+
+        self::assertTrue($parameter->isNullable());
+        self::assertTrue($parameter->accepts(null));
+    }
+
     /**
      * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
      */

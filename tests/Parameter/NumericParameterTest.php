@@ -77,6 +77,14 @@ final class NumericParameterTest extends TestCase
         self::assertFalse($this->parameter->accepts(''));
     }
 
+    public function testCanAcceptNullWhenNullable(): void
+    {
+        $parameter = new NumericParameter('param', 'int', true);
+
+        self::assertTrue($parameter->isNullable());
+        self::assertTrue($parameter->accepts(null));
+    }
+
     /**
      * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
      */

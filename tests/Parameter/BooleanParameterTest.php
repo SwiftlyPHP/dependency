@@ -72,6 +72,14 @@ final class BooleanParameterTest extends TestCase
         self::assertTrue($this->parameter->accepts(3.14));
     }
 
+    public function testCanAcceptNullWhenNullable(): void
+    {
+        $parameter = new BooleanParameter('param', true);
+
+        self::assertTrue($parameter->isNullable());
+        self::assertTrue($parameter->accepts(null));
+    }
+
     /**
      * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
      */

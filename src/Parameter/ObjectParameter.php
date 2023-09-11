@@ -32,6 +32,8 @@ class ObjectParameter extends Parameter
     /** {@inheritDoc} */
     public function accepts($subject): bool
     {
-        return is_object($subject);
+        return (is_object($subject)
+            || ($this->isNullable() && $subject === null)
+        );
     }
 }

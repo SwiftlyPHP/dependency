@@ -39,6 +39,8 @@ class StringParameter extends Parameter
     /** {@inheritDoc} */
     public function accepts($subject): bool
     {
-        return is_scalar($subject);
+        return (is_scalar($subject)
+            || ($this->isNullable() && $subject === null)
+        );
     }
 }

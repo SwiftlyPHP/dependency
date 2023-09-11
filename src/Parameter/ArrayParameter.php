@@ -30,6 +30,8 @@ class ArrayParameter extends Parameter
     /** {@inheritDoc} */
     public function accepts($subject): bool
     {
-        return is_array($subject);
+        return (is_array($subject)
+            || ($this->isNullable() && $subject === null)
+        );
     }
 }

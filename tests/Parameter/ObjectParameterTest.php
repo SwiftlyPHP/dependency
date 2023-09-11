@@ -69,6 +69,14 @@ final class ObjectParameterTest extends TestCase
         self::assertFalse($this->parameter->accepts(null));
     }
 
+    public function testCanAcceptNullWhenNullable(): void
+    {
+        $parameter = new ObjectParameter('param', true);
+
+        self::assertTrue($parameter->isNullable());
+        self::assertTrue($parameter->accepts(null));
+    }
+
     /**
      * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
      */

@@ -57,6 +57,8 @@ class NumericParameter extends Parameter
     /** {@inheritDoc} */
     public function accepts($subject): bool
     {
-        return is_numeric($subject);
+        return (is_numeric($subject)
+            || ($this->isNullable() && $subject === null)
+        );
     }
 }

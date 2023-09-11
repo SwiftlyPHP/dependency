@@ -58,6 +58,9 @@ class NamedClassParameter extends Parameter
     /** {@inheritDoc} */
     public function accepts($subject): bool
     {
-        return (is_object($subject) && $subject instanceof $this->type);
+        return (
+            (is_object($subject) && $subject instanceof $this->type)
+            || ($this->isNullable() && $subject === null)
+        );
     }
 }
