@@ -2,57 +2,31 @@
 
 namespace Swiftly\Dependency\Exception;
 
-use UnexpectedValueException;
+use RuntimeException;
 
 use function sprintf;
-use function is_object;
-use function get_class;
-use function gettype;
 
 /**
- * Exception thrown if a resolved service is not of the expected type
+ * Exception used to indicate the container resolved a class of the wrong type
  *
- * @template TActual
- *
- * @author clvarley
+ * @api
  */
-Final Class UnexpectedTypeException Extends UnexpectedValueException
+final class UnexpectedTypeException extends RuntimeException
 {
-
     /**
-     * @psalm-var TActual
+     * Indicate service resolution broke class/interface contract
      *
-     * @var mixed $actual
+     * @param class-string $expected Expected service type
+     * @param class-string $actual   Resolved type
      */
-    private $actual;
-
-    /**
-     * @psalm-param class-string $expected
-     * @psalm-param TActual $actual
-     *
-     * @param string $expected Expected class
-     * @param mixed $actual    Actual result
-     */
-    public function __construct( string $expected, $actual )
+    public function __construct(string $expected, string $actual)
     {
-        $this->actual = $actual;
-
         parent::__construct(
             sprintf(
-                'Container expected to resolve a dependency of type (%s), but instead resolved (%s)',
+                "Could not resolve service of type '%s' found '%s' instead",
                 $expected,
-                is_object( $actual ) ? get_class( $actual ) : gettype( $actual )
+                $actual
             )
         );
-    }
-
-    /**
-     * @psalm-return TActual
-     *
-     * @return mixed Actual result
-     */
-    public function getActual() // : mixed
-    {
-        return $this->actual;
     }
 }

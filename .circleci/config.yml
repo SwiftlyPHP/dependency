@@ -1,0 +1,30 @@
+version: 2.1
+jobs:
+  test:
+    docker:
+      - image: circleci/php:8.0
+    steps:
+      - checkout
+      - run:
+          name: "System Setup"
+          command: |
+              sudo apt update
+      - run:
+          name: "Composer Install"
+          command: |
+              composer install -n
+              composer require --dev -W php-coveralls/php-coveralls
+      - run:
+          name: "Code Quality"
+          command: |
+              ./vendor/bin/psalm
+      - run:
+          name: "Unit Tests"
+          command: |
+              XDEBUG_MODE=coverage ./vendor/bin/phpunit --config=phpunit.ci.xml
+              ./vendor/bin/php-coveralls --config .circleci/.coveralls.yml
+workflows:
+  version: 2
+  testing:
+    jobs:
+      - test
