@@ -36,7 +36,7 @@ together in a way that is easy to reason about and is composable.
 Over time however, you'll likely end up with a lot of classes. Objects will
 start to rely on other objects. You end up with constructors that require two or
 three objects, whose own constructors take the same again, quickly spirally into
-a hierarchy that is unreasonable to manage.
+a hierarchy that is complicated to manage.
 
 Enter the service container:
 
@@ -51,7 +51,7 @@ $container = new Container();
 The service container is a registry into which you can enter details about the
 classes in your application.
 
-For example, let's say we have a class like the following.
+For example, let's say we have a class like the following:
 
 ```php
 <?php // MyClass.php
@@ -104,7 +104,7 @@ The benefit of this is that our object is only constructed when we explicitly
 ask for it. If we never request it from the container it is never created,
 saving on potentially expensive instantiation.
 
-## Object Hierarchies
+### Object Hierarchies
 
 Now that we've squared away the basics, let's see how we can use the container
 to make creating object hierarchies easier.
@@ -150,7 +150,7 @@ class Employee
 }
 ```
 
-Here we have 3 classes, where the construction of `Employee` requires both a
+Here we have 4 classes, where the construction of `Employee` requires both a
 reference to a `Person` and a `Job`, and `Job` has it's own dependency in the
 form of a `Salary` object.
 
@@ -194,7 +194,7 @@ needed. The container inspects the constructors of each class, going down the
 hierarchy as far as necessary and resolving each of their requirements if it is
 able to do so. (Or throwing a helpful exception if not).
 
-## Factories
+### Factories
 
 Sometimes when creating an object you may need to perform some additional setup,
 such as opening a database connection or reading a config file. This is where
@@ -269,7 +269,7 @@ Here we've uncovered 2 key points:
 2. The container will resolve [type hinted](https://www.php.net/manual/en/language.types.declarations.php)
     factory arguments where possible.
 
-## Tagging
+### Tagging
 
 Tagging allows you to apply custom string tags to a service, letting you collate
 all services that have certain tags applied using the `tagged()` method.
@@ -356,4 +356,6 @@ foreach ($container->tagged('task', TaskInterface::class) as $task) {
 }
 ```
 
+If any of the returned services don't match `TaskInterface` an exception will be
+thrown explaining as much.
 
