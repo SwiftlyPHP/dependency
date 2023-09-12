@@ -3,6 +3,7 @@
 namespace Swiftly\Dependency;
 
 use Swiftly\Dependency\InspectorInterface;
+use Swiftly\Dependency\Inspector\ReflectionInspector;
 use Swiftly\Dependency\Entry;
 use Swiftly\Dependency\Type;
 use Swiftly\Dependency\Parameter;
@@ -36,13 +37,16 @@ final class Container
     private array $aliases;
 
     /**
-     * Create a container that uses the given `$inspector` to resolve parameters
+     * Create a new service container
      *
-     * @param InspectorInterface $inspector Parameter inspector
+     * By default the `ReflectionInspector` is used, but if you need to supply
+     * your own inspector you may pass it in here.
+     *
+     * @param ?InspectorInterface $inspector Parameter inspector
      */
-    public function __construct(InspectorInterface $inspector)
+    public function __construct(InspectorInterface $inspector = null)
     {
-        $this->inspector = $inspector;
+        $this->inspector = $inspector ?: new ReflectionInspector();
         $this->entries = [];
         $this->aliases = [];
     }
