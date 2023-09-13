@@ -25,6 +25,9 @@ final class Entry
     /** @var array<non-empty-string,mixed> $arguments Manually passed arguments */
     public array $arguments;
 
+    /** Should only be instantiated once? */
+    public bool $once;
+
     /**
      * Create a new entry in the register
      *
@@ -43,6 +46,7 @@ final class Entry
         $this->factory = $factory;
         $this->tags = $tags;
         $this->arguments = [];
+        $this->once = true;
     }
 
     /**
@@ -81,6 +85,25 @@ final class Entry
     public function setArguments(array $arguments): self
     {
         $this->arguments = $arguments;
+
+        return $this;
+    }
+
+    /**
+     * Set whether or not the container is allowed to cache this service
+     *
+     * By default repeated calls to {@see \Swiftly\Dependency\Container::get()}
+     * will return the same object instance each time. If however you need a new
+     * instance each time, you can toggle this flag to `false` - ensuring the
+     * container will create and return a fresh object each time.
+     *
+     * @api
+     * @param bool $once Allow container caching?
+     * @return self      Chainable interface
+     */
+    public function setOnce(bool $once): self
+    {
+        $this->once = $once;
 
         return $this;
     }

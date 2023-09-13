@@ -69,4 +69,18 @@ final class EntryTest extends TestCase
         self::assertArrayHasKey('age', $this->entry->arguments);
         self::assertSame(42, $this->entry->arguments['age']);
     }
+
+    public function testCanSetCacheableFlag(): void
+    {
+        $return = $this->entry->setOnce(false);
+
+        // The chainable return value is part of the API
+        self::assertSame($this->entry, $return);
+        self::assertFalse($this->entry->once);
+    }
+
+    public function testIsCacheableByDefault(): void
+    {
+        self::assertTrue($this->entry->once);
+    }
 }
