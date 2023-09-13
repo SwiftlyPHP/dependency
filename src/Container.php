@@ -26,7 +26,7 @@ use function call_user_func_array;
  *
  * @api
  */
-final class Container
+class Container
 {
     private InspectorInterface $inspector;
 
@@ -192,7 +192,7 @@ final class Container
      * @param Entry<T> $entry Service definition
      * @return class-string|callable
      */
-    private static function factoryOrClass(Entry $entry)// : string|callable
+    protected static function factoryOrClass(Entry $entry)// : string|callable
     {
         return $entry->factory ?: $entry->type;
     }
@@ -208,7 +208,7 @@ final class Container
      * @param class-string|callable $class_or_callable Class FQN or callable
      * @return list<Parameter>                         Parameters
      */
-    private function inspect($class_or_callable): array
+    protected function inspect($class_or_callable): array
     {
         if (Type::isClassname($class_or_callable)) {
             return $this->inspector->inspectClass($class_or_callable);
@@ -232,7 +232,7 @@ final class Container
      * @param array<non-empty-string,mixed> $arguments Provided arguments
      * @return list<T>                                 Resolved arguments
      */
-    private function prepare(array $parameters, array $arguments): array
+    protected function prepare(array $parameters, array $arguments): array
     {
         $prepared = [];
 
@@ -271,7 +271,7 @@ final class Container
      * @param Parameter<T> $parameter Parameter definition
      * @return null|T                 Resolved argument value
      */
-    private function findValue(Parameter $parameter)// : mixed
+    protected function findValue(Parameter $parameter)// : mixed
     {
         if (!$parameter->isBuiltin()
             && $this->has(($type = $parameter->getType()))
@@ -300,7 +300,7 @@ final class Container
      * @param Parameter<T> $parameter Parameter definition
      * @return null|T                 Default value
      */
-    private static function defaultValue(Parameter $parameter)// : mixed
+    protected static function defaultValue(Parameter $parameter)// : mixed
     {
         return ($parameter->hasDefault()
             ? ($parameter->getDefaultCallback())()
@@ -317,7 +317,7 @@ final class Container
      * @param list<mixed> $arguments                  Arguments
      * @return T
      */
-    private static function create($factory_or_class, array $arguments): object
+    protected static function create($factory_or_class, array $arguments): object
     {
         if (Type::isClassname($factory_or_class)) {
             return self::initialise($factory_or_class, $arguments);
@@ -335,7 +335,7 @@ final class Container
      * @param list<mixed> $arguments Constructor arguments
      * @return T                     Initialised class
      */
-    private static function initialise(string $class, array $arguments): object
+    protected static function initialise(string $class, array $arguments): object
     {
         return (new ReflectionClass($class))->newInstanceArgs($arguments);
     }
@@ -354,7 +354,7 @@ final class Container
      * @param class-string $constraint Interface or class constaint
      * @return void
      */
-    private static function assertType(object $service, string $constraint): void
+    protected static function assertType(object $service, string $constraint): void
     {
         if (!($service instanceof $constraint))
             throw new UnexpectedTypeException(
