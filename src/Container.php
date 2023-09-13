@@ -36,6 +36,9 @@ class Container
     /** @var array<class-string,class-string> $aliases */
     private array $aliases;
 
+    /** @var array<class-string,object> $cache */
+    private array $cache;
+
     /**
      * Create a new service container
      *
@@ -49,6 +52,7 @@ class Container
         $this->inspector = $inspector ?: new ReflectionInspector();
         $this->entries = [];
         $this->aliases = [];
+        $this->cache = [];
     }
 
     /**
@@ -130,7 +134,15 @@ class Container
         }
 
         // Get the service definition
-        $entry = $this->entries[$this->aliases[$service] ?? $service];
+        $service = $this->aliases[$service] ?? $service;
+        $entry = $this->entries[$service];
+
+        // Allowed to return cached copy?
+        if (isset($this->cache[$service]) && $entry->once) {
+            $instance = $this->cache[$service];
+            self::assertType($instance, $service);
+            return $instance;
+        }
 
         // Get factory (or class constructor)
         $factory_or_class = self::factoryOrClass($entry);
@@ -146,6 +158,7 @@ class Container
         // Create the object!
         $instance = self::create($factory_or_class, $parameters);
         self::assertType($instance, $service);
+        $this->cache[$service] = $instance;
 
         return $instance;
     }
