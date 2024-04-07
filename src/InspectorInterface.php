@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency;
 
@@ -7,6 +7,7 @@ use Swiftly\Dependency\Exception\UndefinedClassException;
 use Swiftly\Dependency\Exception\UndefinedFunctionException;
 use Swiftly\Dependency\Exception\UndefinedMethodException;
 use Swiftly\Dependency\Exception\CompoundTypeException;
+use Closure;
 
 /**
  * Defines methods used to inspect the types of function parameters
@@ -45,7 +46,7 @@ interface InspectorInterface
      * @throws UndefinedFunctionException If the given function is undefined
      * @throws CompoundTypeException      If the function takes a compound type
      *
-     * @param \Closure|callable-string $function Function name or closure
+     * @param Closure|callable-string $function Function name or closure
      * @return list<Parameter>                   Parameter information
      */
     public function inspectFunction($function): array;

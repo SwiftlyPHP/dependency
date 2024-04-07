@@ -15,6 +15,10 @@ jobs:
               composer install -n
               composer require --dev -W php-coveralls/php-coveralls
       - run:
+          name: "Code Style"
+          command: |
+              ./vendor/bin/php-cs-fixer check --diff
+      - run:
           name: "Code Quality"
           command: |
               ./vendor/bin/psalm
@@ -22,7 +26,7 @@ jobs:
           name: "Unit Tests"
           command: |
               XDEBUG_MODE=coverage ./vendor/bin/phpunit --config=phpunit.ci.xml
-              ./vendor/bin/php-coveralls --config .circleci/.coveralls.yml
+              ./vendor/bin/php-coveralls --config .circleci/coveralls.yml
 workflows:
   version: 2
   testing:

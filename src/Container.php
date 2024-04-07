@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency;
 
@@ -225,7 +225,7 @@ class Container
     {
         if (Type::isClassname($class_or_callable)) {
             return $this->inspector->inspectClass($class_or_callable);
-        } else if (Type::isMethod($class_or_callable)) {
+        } elseif (Type::isMethod($class_or_callable)) {
             return $this->inspector->inspectMethod($class_or_callable[0], $class_or_callable[1]);
         } else {
             /** @psalm-suppress ArgumentTypeCoercion */
@@ -369,10 +369,11 @@ class Container
      */
     protected static function assertType(object $service, string $constraint): void
     {
-        if (!($service instanceof $constraint))
+        if (!($service instanceof $constraint)) {
             throw new UnexpectedTypeException(
                 $constraint,
                 Type::getName($service)
             );
+        }
     }
 }

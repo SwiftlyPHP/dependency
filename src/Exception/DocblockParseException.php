@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Exception;
 
@@ -24,7 +24,7 @@ final class DocblockParseException extends ParameterException
 
         parent::__construct(
             sprintf(
-                "Could not parse docblock comment for parameter \$%s",
+                'Could not parse docblock comment for parameter $%s',
                 $parameter
             )
         );

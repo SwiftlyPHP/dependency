@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Parameter;
 
@@ -12,7 +12,7 @@ use function is_scalar;
  * While the check to `is_scalar` may seem problematic (as it means boolean
  * values are considered valid) this mirrors the behaviour of PHP in non-strict
  * mode.
- * 
+ *
  * The guarantee the {@see Parameter} contract provides is merely that any value
  * that satisfies the {@see Parameter::accepts} condition will not cause a
  * runtime error when passed as an argument to the inspected function, it does
