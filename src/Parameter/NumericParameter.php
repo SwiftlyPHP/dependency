@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Parameter;
 
@@ -29,7 +29,7 @@ class NumericParameter extends Parameter
      * @param non-empty-string $name Parameter name
      * @param "int"|"float" $subtype Numeric type
      * @param bool $is_nullable      Parameter allows null values?
-     * @param null|callable $default Default value provider function   
+     * @param null|callable $default Default value provider function
      */
     public function __construct(
         string $name,

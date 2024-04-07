@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Exception;
 
@@ -38,7 +38,7 @@ final class ServiceInstantiationException extends RuntimeException
 
     /**
      * Unwrap the exception stack and generate a readable string
-     * 
+     *
      * @param Exception $reason Top-most reason
      * @return string           Reason message
      */

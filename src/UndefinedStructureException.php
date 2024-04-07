@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency;
 
@@ -9,4 +9,6 @@ use RuntimeException;
  *
  * @api
  */
-abstract class UndefinedStructureException extends RuntimeException {}
+abstract class UndefinedStructureException extends RuntimeException
+{
+}

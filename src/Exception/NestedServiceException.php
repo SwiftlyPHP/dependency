@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Exception;
 
@@ -17,6 +17,6 @@ final class NestedServiceException extends RuntimeException
      */
     public function __construct(Exception $reason)
     {
-        parent::__construct("", 0, $reason);
+        parent::__construct('', 0, $reason);
     }
 }

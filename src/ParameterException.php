@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency;
 
@@ -13,7 +13,7 @@ abstract class ParameterException extends RuntimeException
 {
     /** @var non-empty-string $parameter */
     protected string $parameter;
-    
+
     /**
      * Return the parameter we were inspecting when this exception occurred
      *

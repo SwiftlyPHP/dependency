@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency;
 
@@ -106,7 +106,7 @@ abstract class Parameter
      *
      * @return non-empty-string Parameter datatype
      */
-    abstract function getType(): string;
+    abstract public function getType(): string;
 
     /**
      * Determine if this parameter accepts a native/non-compound datatype
@@ -121,7 +121,7 @@ abstract class Parameter
      * @psalm-assert-if-false class-string<T> $this->getType()
      * @return bool Accepts a built-in type?
      */
-    abstract function isBuiltin(): bool;
+    abstract public function isBuiltin(): bool;
 
     /**
      * Determine if the given value would satisfy this parameter
@@ -130,5 +130,5 @@ abstract class Parameter
      * @param mixed $subject Subject value
      * @return bool          Would satisfy parameter?
      */
-    abstract function accepts($subject): bool;
+    abstract public function accepts($subject): bool;
 }
