@@ -159,6 +159,26 @@ final class ContainerTest extends TestCase
         self::assertContainsOnlyInstancesOf(TestCase::class, $resolved);
     }
 
+    public function testCanGetCachedService(): void
+    {
+        $this->container->register(ReflectionInspector::class);
+
+        $service1 = $this->container->get(ReflectionInspector::class);
+        $service2 = $this->container->get(ReflectionInspector::class);
+
+        self::assertSame($service1, $service2);
+    }
+
+    public function testCanDisableServiceCaching(): void
+    {
+        $this->container->register(ReflectionInspector::class)->setOnce(false);
+
+        $service1 = $this->container->get(ReflectionInspector::class);
+        $service2 = $this->container->get(ReflectionInspector::class);
+
+        self::assertNotSame($service1, $service2);
+    }
+
     /**
      * @covers \Swiftly\Dependency\Exception\UndefinedServiceException
      */
