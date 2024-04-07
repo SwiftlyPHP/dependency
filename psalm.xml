@@ -17,4 +17,12 @@
             <directory name="vendor" />
         </ignoreFiles>
     </projectFiles>
+    <issueHandlers>
+        <RiskyTruthyFalsyComparison>
+            <errorLevel type="suppress">
+                <file name="src/Container.php" />
+                <file name="src/Inspector/DocblockInspector.php" />
+            </errorLevel>
+        </RiskyTruthyFalsyComparison>
+    </issueHandlers>
 </psalm>

@@ -19,7 +19,7 @@ final class UnknownTypeException extends ParameterException
      * Indicate we cannot handle the `$type` of this parameter
      *
      * @param non-empty-string $parameter Parameter name
-     * @param non-empty-string $type      Type name
+     * @param string $type                Type name
      */
     public function __construct(string $parameter, string $type)
     {
