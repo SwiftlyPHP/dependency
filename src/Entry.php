@@ -14,9 +14,7 @@ final class Entry
     /** @var class-string<T> $type */
     public string $type;
 
-    /**
-     * @var null|callable():T $factory
-     */
+    /** @var null|callable():T $factory */
     public $factory;
 
     /** @var list<non-empty-string> $tags */

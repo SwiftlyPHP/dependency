@@ -3,9 +3,7 @@
 namespace Swiftly\Dependency\Inspector;
 
 use Swiftly\Dependency\InspectorInterface;
-use Swiftly\Dependency\Exception\UndefinedClassException;
-use Swiftly\Dependency\Exception\UndefinedFunctionException;
-use Swiftly\Dependency\Exception\UndefinedMethodException;
+use Swiftly\Dependency\Exception\UndefinedStructureException;
 use Swiftly\Dependency\Exception\CompoundTypeException;
 use Swiftly\Dependency\Exception\UnknownTypeException;
 use Swiftly\Dependency\Parameter;
@@ -42,7 +40,7 @@ class ReflectionInspector implements InspectorInterface
         try {
             $reflection = new ReflectionClass($class);
         } catch (ReflectionException $e) {
-            throw new UndefinedClassException($class);
+            throw UndefinedStructureException::createForClass($class);
         }
 
         $constructor = $reflection->getConstructor();
@@ -63,9 +61,12 @@ class ReflectionInspector implements InspectorInterface
             $class = is_object($class) ? get_class($class) : $class;
 
             if (!class_exists($class)) {
-                throw new UndefinedClassException($class);
+                throw UndefinedStructureException::createForClass($class);
             } else {
-                throw new UndefinedMethodException($class, $method);
+                throw UndefinedStructureException::createForMethod(
+                    $class,
+                    $method
+                );
             }
         }
 
@@ -79,7 +80,7 @@ class ReflectionInspector implements InspectorInterface
             $reflection = new ReflectionFunction($function);
         } catch (ReflectionException $e) {
             /** @var string $function */
-            throw new UndefinedFunctionException($function);
+            throw UndefinedStructureException::createForFunction($function);
         }
 
         return $this->inspectFromReflection($reflection);

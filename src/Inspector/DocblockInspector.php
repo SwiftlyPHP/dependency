@@ -3,9 +3,7 @@
 namespace Swiftly\Dependency\Inspector;
 
 use Swiftly\Dependency\InspectorInterface;
-use Swiftly\Dependency\Exception\UndefinedClassException;
-use Swiftly\Dependency\Exception\UndefinedMethodException;
-use Swiftly\Dependency\Exception\UndefinedFunctionException;
+use Swiftly\Dependency\Exception\UndefinedStructureException;
 use Swiftly\Dependency\Exception\DocblockParseException;
 use Swiftly\Dependency\Exception\CompoundTypeException;
 use Swiftly\Dependency\Exception\UnknownTypeException;
@@ -58,7 +56,7 @@ class DocblockInspector implements InspectorInterface
         try {
             $reflected = new ReflectionClass($class);
         } catch (ReflectionException $e) {
-            throw new UndefinedClassException($class);
+            throw UndefinedStructureException::createForClass($class);
         }
 
         $constructor = $reflected->getConstructor();
@@ -80,9 +78,12 @@ class DocblockInspector implements InspectorInterface
             $class = is_object($class) ? get_class($class) : $class;
 
             if (!class_exists($class)) {
-                throw new UndefinedClassException($class);
+                throw UndefinedStructureException::createForClass($class);
             } else {
-                throw new UndefinedMethodException($class, $method);
+                throw UndefinedStructureException::createForMethod(
+                    $class,
+                    $method
+                );
             }
         }
 
@@ -96,7 +97,7 @@ class DocblockInspector implements InspectorInterface
             $reflected = new ReflectionFunction($function);
         } catch (ReflectionException $e) {
             /** @var string $function */
-            throw new UndefinedFunctionException($function);
+            throw UndefinedStructureException::createForFunction($function);
         }
 
         return $this->inspect($reflected);

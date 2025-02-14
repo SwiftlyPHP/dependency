@@ -8,9 +8,7 @@ use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\ArrayParameter;
 use Swiftly\Dependency\Parameter\MixedParameter;
 use Swiftly\Dependency\Parameter\StringParameter;
-use Swiftly\Dependency\Exception\UndefinedFunctionException;
-use Swiftly\Dependency\Exception\UndefinedClassException;
-use Swiftly\Dependency\Exception\UndefinedMethodException;
+use Swiftly\Dependency\Exception\UndefinedStructureException;
 use Swiftly\Dependency\Exception\CompoundTypeException;
 use Swiftly\Dependency\Exception\UnknownTypeException;
 use ExampleClass;
@@ -123,42 +121,46 @@ final class ReflectionInspectorTest extends AbstractInspectorTest
     }
 
     /**
-     * @covers \Swiftly\Dependency\Exception\UndefinedFunctionException
+     * @covers \Swiftly\Dependency\Exception\UndefinedStructureException
      */
     public function testThrowsIfFunctionDoesNotExist(): void
     {
-        self::expectException(UndefinedFunctionException::class);
+        self::expectException(UndefinedStructureException::class);
+        self::expectExceptionMessage("function 'my_function()'");
 
         $this->inspector->inspectFunction('my_function');
     }
 
     /**
-     * @covers \Swiftly\Dependency\Exception\UndefinedClassException
+     * @covers \Swiftly\Dependency\Exception\UndefinedStructureException
      */
     public function testThrowsIfClassDoesNotExist(): void
     {
-        self::expectException(UndefinedClassException::class);
+        self::expectException(UndefinedStructureException::class);
+        self::expectExceptionMessage("class 'UnknownClass'");
 
         $this->inspector->inspectClass('UnknownClass');
     }
 
     /**
-     * @covers \Swiftly\Dependency\Exception\UndefinedClassException
+     * @covers \Swiftly\Dependency\Exception\UndefinedStructureException
      * @testdox Throws if class does not exist (when resolving method)
      */
     public function testThrowsIfClassDoesNotExistWhenResolvingMethod(): void
     {
-        self::expectException(UndefinedClassException::class);
+        self::expectException(UndefinedStructureException::class);
+        self::expectExceptionMessage("class 'UnknownClass'");
 
         $this->inspector->inspectMethod('UnknownClass', 'unknownMethod');
     }
 
     /**
-     * @covers \Swiftly\Dependency\Exception\UndefinedMethodException
+     * @covers \Swiftly\Dependency\Exception\UndefinedStructureException
      */
     public function testThrowsIfMethodDoesNotExist(): void
     {
-        self::expectException(UndefinedMethodException::class);
+        self::expectException(UndefinedStructureException::class);
+        self::expectExceptionMessage('ReflectionInspectorTest::unknownMethod()');
 
         $this->inspector->inspectMethod($this, 'unknownMethod');
     }
