@@ -3,6 +3,7 @@
 namespace Swiftly\Dependency\Parameter;
 
 use Swiftly\Dependency\Parameter;
+use Swiftly\Dependency\Type;
 
 use function is_object;
 
@@ -20,7 +21,7 @@ class ObjectParameter extends Parameter
      */
     public function getType(): string
     {
-        return 'object';
+        return Type::TYPE_OBJECT;
     }
 
     /** {@inheritDoc} */
@@ -32,8 +33,7 @@ class ObjectParameter extends Parameter
     /** {@inheritDoc} */
     public function accepts($subject): bool
     {
-        return (is_object($subject)
-            || ($this->isNullable() && $subject === null)
-        );
+        return is_object($subject)
+            || ($this->isNullable() && $subject === null);
     }
 }

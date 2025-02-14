@@ -112,10 +112,10 @@ abstract class Parameter
      * Determine if this parameter accepts a native/non-compound datatype
      *
      * The naming here is slightly ambiguous as this method is meant to resemble
-     * the {@see \ReflectionNamedType::isBuiltin()} on which it relies. In the
-     * context of this library however, built-in refers to any non-compound
-     * datatype which in essence means any type that is not an object, resource
-     * or array.
+     * the {@see \ReflectionNamedType::isBuiltin()} method on which it relies.
+     * In the context of this library however, built-in refers to any
+     * non-compound datatype which in essence means any type that is not an
+     * object, resource or array.
      *
      * @psalm-pure
      * @psalm-assert-if-false class-string<T> $this->getType()

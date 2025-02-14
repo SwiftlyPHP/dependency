@@ -3,6 +3,7 @@
 namespace Swiftly\Dependency\Parameter;
 
 use Swiftly\Dependency\Parameter;
+use Swiftly\Dependency\Type;
 
 use function is_scalar;
 
@@ -21,7 +22,7 @@ class BooleanParameter extends Parameter
     /** {@inheritDoc} */
     public function getType(): string
     {
-        return 'bool';
+        return Type::TYPE_BOOL;
     }
 
     /** {@inheritDoc} */
@@ -33,8 +34,7 @@ class BooleanParameter extends Parameter
     /** {@inheritDoc} */
     public function accepts($subject): bool
     {
-        return (is_scalar($subject)
-            || ($this->isNullable() && $subject === null)
-        );
+        return is_scalar($subject)
+            || ($this->isNullable() && $subject === null);
     }
 }

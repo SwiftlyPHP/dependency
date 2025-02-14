@@ -137,23 +137,23 @@ class ReflectionInspector implements InspectorInterface
         ReflectionParameter $parameter,
         ?ReflectionNamedType $type
     ): Parameter {
-        $type_name = $type ? $type->getName() : 'mixed';
+        $type_name = $type ? $type->getName() : Type::TYPE_MIXED;
         $name = $parameter->getName();
         $nullable = $parameter->allowsNull();
         $default = $this->prepareDefaultCallback($parameter);
 
         switch ($type_name) {
-            case 'array':
+            case Type::TYPE_ARRAY:
                 /** @var null|callable():array $default */
                 return new ArrayParameter($name, $nullable, $default);
-            case 'bool':
+            case Type::TYPE_BOOL:
                 /** @var null|callable():bool $default */
                 return new BooleanParameter($name, $nullable, $default);
-            case 'mixed':
+            case Type::TYPE_MIXED:
                 /** @var null|callable():mixed $default */
                 return new MixedParameter($name, $default);
-            case 'int':
-            case 'float':
+            case Type::TYPE_INT:
+            case Type::TYPE_FLOAT:
                 /** @var null|callable():(int|float) $default */
                 return new NumericParameter(
                     $name,
@@ -161,10 +161,10 @@ class ReflectionInspector implements InspectorInterface
                     $nullable,
                     $default
                 );
-            case 'string':
+            case Type::TYPE_STRING:
                 /** @var null|callable():string $default */
                 return new StringParameter($name, $nullable, $default);
-            case 'object':
+            case Type::TYPE_OBJECT:
                 /** @var null|callable():object $default */
                 return new ObjectParameter($name, $nullable, $default);
             default:

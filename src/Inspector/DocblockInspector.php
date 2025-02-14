@@ -48,7 +48,6 @@ class DocblockInspector implements InspectorInterface
     private const TYPE = '\\\?[A-Za-z\_\?][A-Za-z0-9\_\\\\|]*';
     private const IDENTIFIER = '[A-Za-z\_][A-Za-z0-9\_]*';
     private const DOCBLOCK = '/^[* ]+@(?:param|var)(?:\s+('.self::TYPE.'))?\s+\$('.self::IDENTIFIER.')/m';
-    private const BUILTIN = ['int', 'integer', 'float', 'double', 'bool', 'boolean', 'string'];
 
     /** {@inheritDoc} */
     public function inspectClass(string $class): array
@@ -156,7 +155,7 @@ class DocblockInspector implements InspectorInterface
 
         foreach ($parameters as $parameter) {
             $parsed[] = $this->parseParameter(
-                $parameter[1] ?: 'mixed',
+                $parameter[1] ?: Type::TYPE_MIXED,
                 $parameter[2]
             );
         }
@@ -187,18 +186,18 @@ class DocblockInspector implements InspectorInterface
         $type = $is_nullable ? substr($type, 1) : $type;
 
         switch ($type) {
-            case 'array':
+            case Type::TYPE_ARRAY:
                 return new ArrayParameter($name, $is_nullable);
-            case 'bool':
+            case Type::TYPE_BOOL:
                 return new BooleanParameter($name, $is_nullable);
-            case 'mixed':
+            case Type::TYPE_MIXED:
                 return new MixedParameter($name);
-            case 'int':
-            case 'float':
+            case Type::TYPE_INT:
+            case Type::TYPE_FLOAT:
                 return new NumericParameter($name, $type, $is_nullable);
-            case 'string':
+            case Type::TYPE_STRING:
                 return new StringParameter($name, $is_nullable);
-            case 'object':
+            case Type::TYPE_OBJECT:
                 return new ObjectParameter($name, $is_nullable);
             default:
                 if (!Type::isClassname($type)) {

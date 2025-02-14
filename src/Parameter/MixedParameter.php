@@ -3,6 +3,7 @@
 namespace Swiftly\Dependency\Parameter;
 
 use Swiftly\Dependency\Parameter;
+use Swiftly\Dependency\Type;
 
 /**
  * Function parameter that has no specific type requirements
@@ -28,7 +29,7 @@ final class MixedParameter extends Parameter
     /** {@inheritDoc} */
     public function getType(): string
     {
-        return 'mixed';
+        return Type::TYPE_MIXED;
     }
 
     /** {@inheritDoc} */

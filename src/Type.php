@@ -17,11 +17,22 @@ use function gettype;
 /**
  * Utility class containing static methods used for type inspection
  *
+ * The `TYPE_*` constants here should match the values returned by the
+ * {@see \ReflectionNamedType::getName} method.
+ *
  * @psalm-type callable-method = list{class-string|object,non-empty-string}
  * @internal
  */
 abstract class Type
 {
+    public const TYPE_ARRAY = 'array';
+    public const TYPE_BOOL = 'bool';
+    public const TYPE_MIXED = 'mixed';
+    public const TYPE_INT = 'int';
+    public const TYPE_FLOAT = 'float';
+    public const TYPE_STRING = 'string';
+    public const TYPE_OBJECT = 'object';
+
     /**
      * Determine if the subject is a service factory or service instance
      *
