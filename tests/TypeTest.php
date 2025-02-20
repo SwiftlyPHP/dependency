@@ -15,7 +15,7 @@ final class TypeTest extends TestCase
     public function testCanTellIfVariableIsObject(): void
     {
         self::assertTrue(Type::isServiceInstance($this));
-        self::assertTrue(Type::isServiceInstance(new \stdClass()));
+        self::assertTrue(Type::isServiceInstance(new stdClass()));
         
         self::assertFalse(Type::isServiceInstance(static function () {}));
         self::assertFalse(Type::isServiceInstance([]));
@@ -27,21 +27,10 @@ final class TypeTest extends TestCase
         self::assertTrue(Type::isMethod([$this, 'testCanTellIfVariableIsObject']));
         self::assertTrue(Type::isMethod([Type::class, 'isMethod']));
 
-        self::assertFalse(Type::isMethod([new \stdClass(), '__invoke']));
+        self::assertFalse(Type::isMethod([new stdClass(), '__invoke']));
         self::assertFalse(Type::isMethod(static function () {}));
         self::assertFalse(Type::isMethod('strlen'));
         self::assertFalse(Type::isMethod(null));
-    }
-
-    public function testCanTellIfVariableIsInvokableObject(): void
-    {
-        self::assertTrue(Type::isInvokableObject(new class {
-            function __invoke(): void {}
-        }));
-
-        self::assertFalse(Type::isInvokableObject($this));
-        self::assertFalse(Type::isInvokableObject(TestCase::class));
-        self::assertFalse(Type::isInvokableObject(null));
     }
 
     public function testCanTellIfVariableIsClassName(): void

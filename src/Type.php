@@ -7,7 +7,6 @@ use Closure;
 use function is_object;
 use function is_callable;
 use function is_array;
-use function method_exists;
 use function is_string;
 use function class_exists;
 use function interface_exists;
@@ -17,8 +16,8 @@ use function gettype;
 /**
  * Utility class containing static methods used for type inspection
  *
- * The `TYPE_*` constants here should match the values returned by the
- * {@see \ReflectionNamedType::getName} method.
+ * The `TYPE_*` constants here should match the names returned for the built-in
+ * types by the {@see \ReflectionNamedType::getName} method.
  *
  * @psalm-type callable-method = list{class-string|object,non-empty-string}
  * @internal
@@ -44,7 +43,7 @@ abstract class Type
      */
     final public static function isServiceInstance($subject): bool
     {
-        return (is_object($subject) && !($subject instanceof Closure));
+        return is_object($subject) && !($subject instanceof Closure);
     }
 
     /**
@@ -56,23 +55,7 @@ abstract class Type
      */
     final public static function isMethod($subject): bool
     {
-        return (is_callable($subject) && is_array($subject));
-    }
-
-    /**
-     * Determine if the subject is an invokable object
-     *
-     * @psalm-assert-if-true callable-object $subject
-     * @psalm-assert-if-true !Closure $subject
-     * @param mixed $subject Subject variable
-     * @return bool          Is invokable object?
-     */
-    final public static function isInvokableObject($subject): bool
-    {
-        return (is_object($subject)
-            && !($subject instanceof Closure)
-            && method_exists($subject, '__invoke')
-        );
+        return is_callable($subject) && is_array($subject);
     }
 
     /**
@@ -84,9 +67,8 @@ abstract class Type
      */
     final public static function isClassname($subject): bool
     {
-        return (is_string($subject)
-            && (class_exists($subject) || interface_exists($subject))
-        );
+        return is_string($subject)
+            && (class_exists($subject) || interface_exists($subject));
     }
 
     /**
@@ -99,6 +81,6 @@ abstract class Type
      */
     final public static function getName($subject): string
     {
-        return (is_object($subject) ? get_class($subject) : gettype($subject));
+        return is_object($subject) ? get_class($subject) : gettype($subject);
     }
 }
