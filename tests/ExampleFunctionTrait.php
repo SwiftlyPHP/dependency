@@ -16,6 +16,7 @@ use Iterator;
 /**
  * Trait used to provide example functions
  *
+ * @upgrade:phpunit10 Refactor to #[DataProviderExternal]
  * @mixin AbstractInspectorTest
  */
 trait ExampleFunctionTrait

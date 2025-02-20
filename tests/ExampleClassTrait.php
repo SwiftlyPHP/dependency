@@ -14,6 +14,7 @@ use stdClass;
 /**
  * Trait used to provide example class definitions
  *
+ * @upgrade:phpunit10 Refactor to #[DataProviderExternal]
  * @mixin AbstractInspectorTest
  */
 trait ExampleClassTrait

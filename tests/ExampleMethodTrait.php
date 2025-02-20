@@ -11,6 +11,7 @@ use Swiftly\Dependency\Parameter\BooleanParameter;
 /**
  * Trait used to provide example methods
  *
+ * @upgrade:phpunit10 Refactor to #[DataProviderExternal]
  * @mixin AbstractInspectorTest
  */
 trait ExampleMethodTrait

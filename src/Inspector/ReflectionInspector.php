@@ -129,7 +129,7 @@ class ReflectionInspector implements InspectorInterface
     /**
      * Return the appropriate Parameter subclass to represent this parameter
      *
-     * @php:8.0 Swap to using `match()` statement
+     * @upgrade:php8.0 Swap to using `match()` statement
      * @param ReflectionParameter $parameter Parameter information
      * @param ?ReflectionNamedType $type     Parameter type information
      */

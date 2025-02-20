@@ -166,7 +166,7 @@ class DocblockInspector implements InspectorInterface
     /**
      * Parse the given type and parameter name
      *
-     * @php:8.0 swap to using `match()` statement
+     * @upgrade:php8.0 swap to using `match()` statement
      * @throws DocblockParseException If the given type is compound
      *
      * @param non-empty-string $type Type string

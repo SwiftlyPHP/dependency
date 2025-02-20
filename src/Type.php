@@ -74,7 +74,7 @@ abstract class Type
     /**
      * Return a user-friendly type descriptor
      *
-     * @php:8.0 Swap to using `get_debug_type`
+     * @upgrade:php8.0 Swap to using `get_debug_type`
      * @psalm-return ($subject is object ? class-string : string)
      * @param mixed $subject Subject variable
      * @return string        Type name

@@ -279,7 +279,7 @@ class Container
      * @throws NestedServiceException
      * @throws MissingArgumentException
      *
-     * @php:8.0 Use mixed return type
+     * @upgrade:php8.0 Use mixed return type
      * @template T
      * @param Parameter<T> $parameter Parameter definition
      * @return null|T                 Resolved argument value
@@ -308,7 +308,7 @@ class Container
     /**
      * Return the default argument of a parameter
      *
-     * @php:8.0 Use mixed return type
+     * @upgrade:php8.0 Use mixed return type
      * @template T
      * @param Parameter<T> $parameter Parameter definition
      * @return null|T                 Default value
