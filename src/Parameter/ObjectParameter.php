@@ -8,7 +8,7 @@ use Swiftly\Dependency\Type;
 use function is_object;
 
 /**
- * Function parameter that expects an object
+ * Function parameter that expects an object.
  *
  * @api
  * @psalm-immutable
@@ -31,7 +31,7 @@ class ObjectParameter extends Parameter
     }
 
     /** {@inheritDoc} */
-    public function accepts($subject): bool
+    public function accepts(mixed $subject): bool
     {
         return is_object($subject)
             || ($this->isNullable() && $subject === null);

@@ -6,7 +6,7 @@ use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Type;
 
 /**
- * Function parameter that has no specific type requirements
+ * Function parameter that has no specific type requirements.
  *
  * @api
  * @psalm-immutable
@@ -15,11 +15,11 @@ use Swiftly\Dependency\Type;
 final class MixedParameter extends Parameter
 {
     /**
-     * Create a parameter that accepts any type
+     * Create a parameter that accepts any type.
      *
-     * @psalm-param null|callable():mixed $default
      * @param non-empty-string $name Parameter name
      * @param null|callable $default Default value provider function
+     * @psalm-param null|callable():mixed $default
      */
     public function __construct(string $name, $default = null)
     {
@@ -39,7 +39,7 @@ final class MixedParameter extends Parameter
     }
 
     /** {@inheritDoc} */
-    public function accepts($subject): bool
+    public function accepts(mixed $subject): bool
     {
         return true;
     }

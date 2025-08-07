@@ -2,70 +2,74 @@
 
 namespace Swiftly\Dependency;
 
-use Swiftly\Dependency\InspectorInterface;
-use Swiftly\Dependency\Inspector\ReflectionInspector;
+use Exception;
+use ReflectionClass;
 use Swiftly\Dependency\Entry;
-use Swiftly\Dependency\Type;
-use Swiftly\Dependency\Parameter;
-use Swiftly\Dependency\ParameterException;
-use Swiftly\Dependency\Exception\UndefinedServiceException;
-use Swiftly\Dependency\Exception\UndefinedStructureException;
-use Swiftly\Dependency\Exception\ServiceInstantiationException;
-use Swiftly\Dependency\Exception\UnexpectedTypeException;
 use Swiftly\Dependency\Exception\InvalidArgumentException;
 use Swiftly\Dependency\Exception\MissingArgumentException;
 use Swiftly\Dependency\Exception\NestedServiceException;
-use Exception;
-use ReflectionClass;
+use Swiftly\Dependency\Exception\ServiceInstantiationException;
+use Swiftly\Dependency\Exception\UndefinedServiceException;
+use Swiftly\Dependency\Exception\UndefinedStructureException;
+use Swiftly\Dependency\Exception\UnexpectedTypeException;
+use Swiftly\Dependency\Inspector\ReflectionInspector;
+use Swiftly\Dependency\InspectorInterface;
+use Swiftly\Dependency\Parameter;
+use Swiftly\Dependency\ParameterException;
+use Swiftly\Dependency\Type;
 
 use function array_key_exists;
 use function call_user_func_array;
 
 /**
- * Container responsible for storing and creating services
+ * Container responsible for storing and creating services.
  *
  * @api
+ *
+ * @upgrade:php8.1 Drop null hint and use `new` in constructor
  */
 class Container
 {
     private InspectorInterface $inspector;
 
-    /** @var array<class-string,Entry> $entries */
+    /** @var array<class-string, Entry> $entries */
     private array $entries;
 
-    /** @var array<class-string,class-string> $aliases */
+    /** @var array<class-string, class-string> $aliases */
     private array $aliases;
 
-    /** @var array<class-string,object> $cache */
+    /** @var array<class-string, object> $cache */
     private array $cache;
 
     /**
-     * Create a new service container
+     * Create a new service container.
      *
      * By default the `ReflectionInspector` is used, but if you need to supply
      * your own inspector you may pass it in here.
      *
-     * @param ?InspectorInterface $inspector Parameter inspector
+     * @param InspectorInterface|null $inspector Parameter inspector.
      */
-    public function __construct(InspectorInterface $inspector = null)
+    public function __construct(?InspectorInterface $inspector = null)
     {
-        $this->inspector = $inspector ?: new ReflectionInspector();
+        $this->inspector = $inspector ?? new ReflectionInspector();
         $this->entries = [];
         $this->aliases = [];
         $this->cache = [];
     }
 
     /**
-     * Register a new service with the container
+     * Register a new service with the container.
      *
      * If provided, the `$factory` argument should either be a service object or
      * a callable that creates and returns a service object.
      *
      * @template T of object
+     *
+     * @param class-string<T> $service Service type.
+     * @param null|T|callable $factory Service provider/factory.
      * @psalm-param null|T|callable():T $factory
-     * @param class-string<T> $service Service type
-     * @param null|T|callable $factory Service provider/factory
-     * @return Entry<T>                Service entry definition
+     *
+     * @return Entry<T>                Service entry definition.
      */
     public function register(string $service, $factory = null): Entry
     {
@@ -79,15 +83,17 @@ class Container
     }
 
     /**
-     * Create an alias mapping between one service and another
+     * Create an alias mapping between one service and another.
      *
-     * @throws UndefinedServiceException
-     *          If trying to alias a service that doesn't exist
      *
      * @template T of object
-     * @param class-string<T> $service Service name
-     * @param class-string<T> $alias   Alias
-     * @return self                    Chainable interface
+     *
+     * @param class-string<T> $service Service name.
+     * @param class-string<T> $alias   Alias.
+     * @throws UndefinedServiceException
+     *          If trying to alias a service that doesn't exist.
+     *
+     * @return self                    Chainable interface.
      */
     public function alias(string $service, string $alias): self
     {
@@ -101,11 +107,13 @@ class Container
     }
 
     /**
-     * Determine if the given service has been registered
+     * Determine if the given service has been registered.
      *
      * @template T of object
      * @psalm-assert-if-true T $this->entries[$service]
-     * @param class-string<T> $service Service type
+     *
+     * @param class-string<T> $service Service type.
+     *
      * @return bool                    Service is registered?
      */
     public function has(string $service): bool
@@ -114,18 +122,20 @@ class Container
     }
 
     /**
-     * Return a service of the given type
+     * Return a service of the given type.
      *
-     * @throws UndefinedServiceException
-     *          If no definition is found for the given service
-     * @throws ServiceInstantiationException
-     *          If an error occured while resolving service requirements
-     * @throws UnexpectedTypeException
-     *          If a service was created but did not meet the type constraints
      *
      * @template T of object
-     * @param class-string<T> $service Service type
-     * @return T                       Service object
+     *
+     * @param class-string<T> $service Service type.
+     * @throws UndefinedServiceException
+     *          If no definition is found for the given service.
+     * @throws ServiceInstantiationException
+     *          If an error occured while resolving service requirements.
+     * @throws UnexpectedTypeException
+     *          If a service was created but did not meet the type constraints.
+     *
+     * @return T                       Service object.
      */
     public function get(string $service): object
     {
@@ -164,17 +174,18 @@ class Container
     }
 
     /**
-     * Return all services with a given tag
+     * Return all services with a given tag.
      *
      * The optional `$type` argument can be used to pass a interface/class
      * constraint that all services must adhere to.
      *
      * @template T of object
+     *
+     * @param non-empty-string $tag   Service tag.
+     * @param null|class-string $type Interface or class constraint.
      * @psalm-param null|class-string<T> $type
+     * @return object[]               Tagged services.
      * @psalm-return ($type is class-string ? list<T> : list<object>)
-     * @param non-empty-string $tag   Service tag
-     * @param null|class-string $type Interface or class constraint
-     * @return object[]               Tagged services
      */
     public function tagged(string $tag, ?string $type = null): array
     {
@@ -198,28 +209,30 @@ class Container
     }
 
     /**
-     * Return the factory - or if not available the FQN - for this service
+     * Return the factory - or if not available the FQN - for this service.
      *
      * @template T of object
-     * @psalm-return class-string<T>|callable():T
+     *
      * @param Entry<T> $entry Service definition
      * @return class-string|callable
+     * @psalm-return class-string<T>|callable():T
      */
-    protected static function factoryOrClass(Entry $entry)// : string|callable
+    protected static function factoryOrClass(Entry $entry): callable|string
     {
-        return $entry->factory ?: $entry->type;
+        return $entry->factory ?? $entry->type;
     }
 
     /**
-     * Inspect the parameters of a class, method or function
+     * Inspect the parameters of a class, method or function.
      *
      * Accepts class names and all callable types apart from invokable objects.
      *
+     *
+     * @param class-string|callable $class_or_callable Class FQN or callable.
      * @throws ParameterException
      * @throws UndefinedStructureException
      *
-     * @param class-string|callable $class_or_callable Class FQN or callable
-     * @return list<Parameter>                         Parameters
+     * @return list<Parameter>
      */
     protected function inspect($class_or_callable): array
     {
@@ -234,16 +247,16 @@ class Container
     }
 
     /**
-     * Prepares arguments required for a function call
+     * Prepares arguments required for a function call.
      *
+     *
+     * @template T
+     * @param list<Parameter<T>> $parameters           Parameter information.
+     * @param array<non-empty-string,mixed> $arguments Provided arguments.
      * @throws NestedServiceException
      * @throws InvalidArgumentException
      * @throws MissingArgumentException
-     *
-     * @template T
-     * @param list<Parameter<T>> $parameters           Parameter information
-     * @param array<non-empty-string,mixed> $arguments Provided arguments
-     * @return list<T>                                 Resolved arguments
+     * @return list<T>                                 Resolved arguments.
      */
     protected function prepare(array $parameters, array $arguments): array
     {
@@ -274,17 +287,18 @@ class Container
     }
 
     /**
-     * Attempts to find a suitable value for the given parameter
+     * Attempts to find a suitable value for the given parameter.
      *
+     *
+     * @template T
+     *
+     * @param Parameter<T> $parameter
      * @throws NestedServiceException
      * @throws MissingArgumentException
      *
-     * @upgrade:php8.0 Use mixed return type
-     * @template T
-     * @param Parameter<T> $parameter Parameter definition
-     * @return null|T                 Resolved argument value
+     * @return null|T
      */
-    protected function findValue(Parameter $parameter)// : mixed
+    protected function findValue(Parameter $parameter): mixed
     {
         if (!$parameter->isBuiltin()
             && $this->has(($type = $parameter->getType()))
@@ -306,14 +320,15 @@ class Container
     }
 
     /**
-     * Return the default argument of a parameter
+     * Return the default argument of a parameter.
      *
-     * @upgrade:php8.0 Use mixed return type
      * @template T
-     * @param Parameter<T> $parameter Parameter definition
-     * @return null|T                 Default value
+     *
+     * @param Parameter<T> $parameter
+     *
+     * @return null|T
      */
-    protected static function defaultValue(Parameter $parameter)// : mixed
+    protected static function defaultValue(Parameter $parameter): mixed
     {
         return ($parameter->hasDefault()
             ? ($parameter->getDefaultCallback())()
@@ -322,12 +337,12 @@ class Container
     }
 
     /**
-     * Create a service, either by calling the factory or creating an object
+     * Create a service, either by calling the factory or creating an object.
      *
      * @template T of object
+     * @param class-string|callable $factory_or_class Factory or class FQN.
+     * @param list<mixed> $arguments                  Arguments.
      * @psalm-param class-string<T>|callable():T $factory_or_class
-     * @param class-string|callable $factory_or_class Factory or class FQN
-     * @param list<mixed> $arguments                  Arguments
      * @return T
      */
     protected static function create($factory_or_class, array $arguments): object
@@ -341,12 +356,12 @@ class Container
     }
 
     /**
-     * Initialise a new service instance with the given parameters
+     * Initialise a new service instance with the given parameters.
      *
      * @template T of object
-     * @param class-string<T> $class Class FQN
-     * @param list<mixed> $arguments Constructor arguments
-     * @return T                     Initialised class
+     * @param class-string<T> $class Class FQN.
+     * @param list<mixed> $arguments Constructor arguments.
+     * @return T                     Initialised class.
      */
     protected static function initialise(string $class, array $arguments): object
     {
@@ -354,17 +369,17 @@ class Container
     }
 
     /**
-     * Validate that the given object meets a type constaint
+     * Validate that the given object meets a type constaint.
      *
-     * @throws UnexpectedTypeException
-     *          If the `$service` is not of type `$constraint`
      *
      * @template T of object
      * @template K of object
-     * @psalm-param class-string<K> $constraint
      * @psalm-assert T&K $service
-     * @param T $service               Service instance
-     * @param class-string $constraint Interface or class constaint
+     * @param T $service               Service instance.
+     * @param class-string $constraint Interface or class constaint.
+     * @psalm-param class-string<K> $constraint
+     * @throws UnexpectedTypeException
+     *          If the `$service` is not of type `$constraint`
      * @return void
      */
     protected static function assertType(object $service, string $constraint): void

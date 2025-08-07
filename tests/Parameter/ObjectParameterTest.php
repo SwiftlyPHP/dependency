@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Tests\Parameter;
 
 use PHPUnit\Framework\TestCase;
-use Swiftly\Dependency\Parameter\ObjectParameter;
-use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 use stdClass;
+use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
+use Swiftly\Dependency\Parameter\ObjectParameter;
 
 /**
  * @covers \Swiftly\Dependency\Parameter
@@ -59,8 +59,8 @@ final class ObjectParameterTest extends TestCase
     {
         self::assertTrue($this->parameter->accepts($this));
         self::assertTrue($this->parameter->accepts((object)[]));
-        self::assertTrue($this->parameter->accepts(new stdClass));
-        self::assertTrue($this->parameter->accepts(new class {}));
+        self::assertTrue($this->parameter->accepts(new stdClass()));
+        self::assertTrue($this->parameter->accepts(new class () {}));
 
         self::assertFalse($this->parameter->accepts('Hi!'));
         self::assertFalse($this->parameter->accepts(42));

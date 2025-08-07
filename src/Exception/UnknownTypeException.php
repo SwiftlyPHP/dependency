@@ -7,7 +7,7 @@ use Swiftly\Dependency\ParameterException;
 use function sprintf;
 
 /**
- * Exception used to indicate we cannot determine the type a parameter takes
+ * Exception used to indicate we cannot determine the type a parameter takes.
  *
  * @api
  */
@@ -16,7 +16,7 @@ final class UnknownTypeException extends ParameterException
     private string $type;
 
     /**
-     * Indicate we cannot handle the `$type` of this parameter
+     * Indicate we cannot handle the `$type` of this parameter.
      *
      * @param non-empty-string $parameter Parameter name
      * @param string $type                Type name
@@ -35,7 +35,7 @@ final class UnknownTypeException extends ParameterException
     }
 
     /**
-     * Return the type name we encountered that caused this exception
+     * Return the type name we encountered that caused this exception.
      *
      * @return string Type name
      */

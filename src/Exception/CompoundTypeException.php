@@ -2,15 +2,15 @@
 
 namespace Swiftly\Dependency\Exception;
 
-use Swiftly\Dependency\ParameterException;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
+use Swiftly\Dependency\ParameterException;
 
-use function sprintf;
 use function is_string;
+use function sprintf;
 
 /**
- * Exception used to warn we do not yet support union/intersection types
+ * Exception used to warn we do not yet support union/intersection types.
  *
  * Allowing the use of compound types would dramatically increase the complexity
  * of the service container, so for the time being we only support functions and
@@ -21,7 +21,7 @@ use function is_string;
 final class CompoundTypeException extends ParameterException
 {
     /**
-     * Warn that a function parameter is compound and cannot be reflected
+     * Warn that a function parameter is compound and cannot be reflected.
      *
      * @param non-empty-string $parameter                 Parameter name
      * @param string|ReflectionFunctionAbstract $function Function or method
@@ -40,7 +40,7 @@ final class CompoundTypeException extends ParameterException
     }
 
     /**
-     * Return the fully qualified name of the reflected function
+     * Return the fully qualified name of the reflected function.
      *
      * @param ReflectionFunctionAbstract $abstract Reflected function
      * @return non-empty-string                    Function name

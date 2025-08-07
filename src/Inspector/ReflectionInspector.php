@@ -2,35 +2,38 @@
 
 namespace Swiftly\Dependency\Inspector;
 
-use Swiftly\Dependency\InspectorInterface;
-use Swiftly\Dependency\Exception\UndefinedStructureException;
+use Closure;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionFunction;
+use ReflectionFunctionAbstract;
+use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionParameter;
 use Swiftly\Dependency\Exception\CompoundTypeException;
+use Swiftly\Dependency\Exception\UndefinedStructureException;
 use Swiftly\Dependency\Exception\UnknownTypeException;
+use Swiftly\Dependency\InspectorInterface;
 use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\ArrayParameter;
 use Swiftly\Dependency\Parameter\BooleanParameter;
 use Swiftly\Dependency\Parameter\MixedParameter;
-use Swiftly\Dependency\Parameter\NumericParameter;
-use Swiftly\Dependency\Parameter\StringParameter;
-use Swiftly\Dependency\Parameter\ObjectParameter;
 use Swiftly\Dependency\Parameter\NamedClassParameter;
+use Swiftly\Dependency\Parameter\NumericParameter;
+use Swiftly\Dependency\Parameter\ObjectParameter;
+use Swiftly\Dependency\Parameter\StringParameter;
 use Swiftly\Dependency\Type;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionMethod;
-use ReflectionFunction;
-use ReflectionFunctionAbstract;
-use ReflectionParameter;
-use ReflectionNamedType;
 
-use function is_object;
-use function get_class;
 use function class_exists;
+use function get_class;
+use function is_object;
 
 /**
- * Determines class/method/function parameters using the PHP reflection API
+ * Determines class/method/function parameters using the PHP reflection API.
  *
  * @api
+ *
+ * @upgrade:php8.3 Apply #[Override] attribute
  */
 class ReflectionInspector implements InspectorInterface
 {
@@ -53,7 +56,7 @@ class ReflectionInspector implements InspectorInterface
     }
 
     /** {@inheritDoc} */
-    public function inspectMethod($class, string $method): array
+    public function inspectMethod(Object|string $class, string $method): array
     {
         try {
             $reflection = new ReflectionMethod($class, $method);
@@ -74,7 +77,7 @@ class ReflectionInspector implements InspectorInterface
     }
 
     /** {@inheritDoc} */
-    public function inspectFunction($function): array
+    public function inspectFunction(Closure|string $function): array
     {
         try {
             $reflection = new ReflectionFunction($function);
@@ -87,13 +90,13 @@ class ReflectionInspector implements InspectorInterface
     }
 
     /**
-     * Return information about the given reflected method or function
+     * Return information about the given reflected method or function.
      *
-     * @param ReflectionFunctionAbstract $reflection Reflected method
-     * @return list<Parameter>                       Parameter information
+     * @param ReflectionFunctionAbstract $reflection
+     * @return list<Parameter>
      */
     private function inspectFromReflection(
-        ReflectionFunctionAbstract $reflection
+        ReflectionFunctionAbstract $reflection,
     ): array {
         $parameters = [];
 
@@ -105,12 +108,13 @@ class ReflectionInspector implements InspectorInterface
     }
 
     /**
-     * Returns information about a single method or function parameter
+     * Returns information about a single method or function parameter.
      *
-     * @throws CompoundTypeException If we encounter a union/intersection type
      *
-     * @param ReflectionParameter $reflected Reflected parameter
-     * @return Parameter                     Parameter information
+     * @param ReflectionParameter $reflected
+     * @throws CompoundTypeException If we encounter a union/intersection type.
+     *
+     * @return Parameter
      */
     private function inspectParameter(ReflectionParameter $reflected): Parameter
     {
@@ -127,72 +131,59 @@ class ReflectionInspector implements InspectorInterface
     }
 
     /**
-     * Return the appropriate Parameter subclass to represent this parameter
+     * Return the appropriate Parameter subclass to represent this parameter.
      *
-     * @upgrade:php8.0 Swap to using `match()` statement
-     * @param ReflectionParameter $parameter Parameter information
-     * @param ?ReflectionNamedType $type     Parameter type information
+     * @param ReflectionParameter $parameter
+     * @param ReflectionNamedType|null $type
      */
     private function parameterFromReflection(
         ReflectionParameter $parameter,
-        ?ReflectionNamedType $type
+        ReflectionNamedType|null $type,
     ): Parameter {
         $type_name = $type ? $type->getName() : Type::TYPE_MIXED;
         $name = $parameter->getName();
         $nullable = $parameter->allowsNull();
         $default = $this->prepareDefaultCallback($parameter);
 
-        switch ($type_name) {
-            case Type::TYPE_ARRAY:
-                /** @var null|callable():array $default */
-                return new ArrayParameter($name, $nullable, $default);
-            case Type::TYPE_BOOL:
-                /** @var null|callable():bool $default */
-                return new BooleanParameter($name, $nullable, $default);
-            case Type::TYPE_MIXED:
-                /** @var null|callable():mixed $default */
-                return new MixedParameter($name, $default);
-            case Type::TYPE_INT:
-            case Type::TYPE_FLOAT:
-                /** @var null|callable():(int|float) $default */
-                return new NumericParameter(
-                    $name,
-                    $type_name,
-                    $nullable,
-                    $default
-                );
-            case Type::TYPE_STRING:
-                /** @var null|callable():string $default */
-                return new StringParameter($name, $nullable, $default);
-            case Type::TYPE_OBJECT:
-                /** @var null|callable():object $default */
-                return new ObjectParameter($name, $nullable, $default);
-            default:
-                if (!Type::isClassname($type_name)) {
-                    throw new UnknownTypeException($name, $type_name);
-                }
-                /** @var null|callable():object $default */
-                return new NamedClassParameter(
-                    $name,
-                    $type_name,
-                    $nullable,
-                    $default
-                );
-        }
+        return match ($type_name) {
+            /** @var null|callable():array $default */
+            Type::TYPE_ARRAY => new ArrayParameter($name, $nullable, $default),
+
+            /** @var null|callable():bool $default */
+            Type::TYPE_BOOL => new BooleanParameter($name, $nullable, $default),
+
+            /** @var null|callable():mixed $default */
+            Type::TYPE_MIXED => new MixedParameter($name, $default),
+
+            /** @var null|callable():(int|float) $default */
+            Type::TYPE_INT,
+            Type::TYPE_FLOAT =>
+                new NumericParameter($name, $type_name, $nullable, $default),
+
+            /** @var null|callable():string $default */
+            Type::TYPE_STRING => new StringParameter($name, $nullable, $default),
+
+            /** @var null|callable():object $default */
+            Type::TYPE_OBJECT => new ObjectParameter($name, $nullable, $default),
+
+            /** @var null|callable():object $default */
+            default => Type::isClassname($type_name)
+                ? new NamedClassParameter($name, $type_name, $nullable, $default)
+                : throw new UnknownTypeException($name, $type_name),
+        };
     }
 
     /**
-     * Create the callback used to provide the default value
+     * Create the callback used to provide the default value.
      *
-     * @param ReflectionParameter $parameter Parameter information
-     * @return null|callable                 Default value provider
+     * @param ReflectionParameter $parameter Parameter information.
+     * @return null|callable                 Default value provider.
      */
     private function prepareDefaultCallback(
         ReflectionParameter $parameter
     ): ?callable {
-        return ($parameter->isDefaultValueAvailable()
+        return $parameter->isDefaultValueAvailable()
             ? [$parameter, 'getDefaultValue']
-            : null
-        );
+            : null;
     }
 }

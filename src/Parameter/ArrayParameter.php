@@ -8,7 +8,7 @@ use Swiftly\Dependency\Type;
 use function is_array;
 
 /**
- * Function parameter that expects array values
+ * Function parameter that expects array values.
  *
  * @api
  * @psalm-immutable
@@ -29,7 +29,7 @@ class ArrayParameter extends Parameter
     }
 
     /** {@inheritDoc} */
-    public function accepts($subject): bool
+    public function accepts(mixed $subject): bool
     {
         return is_array($subject) || ($this->isNullable() && $subject === null);
     }

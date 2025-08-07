@@ -1,8 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Tests;
 
-use Swiftly\Dependency\Tests\AbstractInspectorTest;
+use Iterator;
+use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Parameter\ArrayParameter;
 use Swiftly\Dependency\Parameter\BooleanParameter;
 use Swiftly\Dependency\Parameter\MixedParameter;
@@ -10,11 +11,10 @@ use Swiftly\Dependency\Parameter\NamedClassParameter;
 use Swiftly\Dependency\Parameter\NumericParameter;
 use Swiftly\Dependency\Parameter\ObjectParameter;
 use Swiftly\Dependency\Parameter\StringParameter;
-use PHPUnit\Framework\TestCase;
-use Iterator;
+use Swiftly\Dependency\Tests\AbstractInspectorTest;
 
 /**
- * Trait used to provide example functions
+ * Trait used to provide example functions.
  *
  * @upgrade:phpunit10 Refactor to #[DataProviderExternal]
  * @mixin AbstractInspectorTest

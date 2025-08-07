@@ -2,23 +2,23 @@
 
 namespace Swiftly\Dependency\Exception;
 
-use Swiftly\Dependency\Exception\NestedServiceException;
-use RuntimeException;
 use Exception;
+use RuntimeException;
+use Swiftly\Dependency\Exception\NestedServiceException;
 
+use function implode;
 use function sprintf;
 use function str_repeat;
-use function implode;
 
 /**
- * Exception used to indicate an error occured while instantiating a service
+ * Exception used to indicate an error occured while instantiating a service.
  *
  * @api
  */
 final class ServiceInstantiationException extends RuntimeException
 {
     /**
-     * Indicate an error occured while creating this service
+     * Indicate an error occured while creating this service.
      *
      * @param non-empty-string $service Service name
      * @param Exception $reason         Failure reason
@@ -37,7 +37,7 @@ final class ServiceInstantiationException extends RuntimeException
     }
 
     /**
-     * Unwrap the exception stack and generate a readable string
+     * Unwrap the exception stack and generate a readable string.
      *
      * @param Exception $reason Top-most reason
      * @return string           Reason message

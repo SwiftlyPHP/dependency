@@ -1,15 +1,15 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Tests;
 
-use Swiftly\Dependency\Tests\AbstractInspectorTest;
 use Swiftly\Dependency\Parameter\ArrayParameter;
+use Swiftly\Dependency\Parameter\BooleanParameter;
 use Swiftly\Dependency\Parameter\NumericParameter;
 use Swiftly\Dependency\Parameter\StringParameter;
-use Swiftly\Dependency\Parameter\BooleanParameter;
+use Swiftly\Dependency\Tests\AbstractInspectorTest;
 
 /**
- * Trait used to provide example methods
+ * Trait used to provide example methods.
  *
  * @upgrade:phpunit10 Refactor to #[DataProviderExternal]
  * @mixin AbstractInspectorTest

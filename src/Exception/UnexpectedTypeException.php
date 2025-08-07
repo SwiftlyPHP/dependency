@@ -7,14 +7,14 @@ use RuntimeException;
 use function sprintf;
 
 /**
- * Exception used to indicate the container resolved a class of the wrong type
+ * Exception used to indicate the container resolved a class of the wrong type.
  *
  * @api
  */
 final class UnexpectedTypeException extends RuntimeException
 {
     /**
-     * Indicate service resolution broke class/interface contract
+     * Indicate service resolution broke class/interface contract.
      *
      * @param class-string $expected Expected service type
      * @param class-string $actual   Resolved type

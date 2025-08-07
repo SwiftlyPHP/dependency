@@ -8,7 +8,7 @@ use Swiftly\Dependency\Type;
 use function is_scalar;
 
 /**
- * Function parameter that expects string values
+ * Function parameter that expects string values.
  *
  * While the check to `is_scalar` may seem problematic (as it means boolean
  * values are considered valid) this mirrors the behaviour of PHP in non-strict
@@ -38,7 +38,7 @@ class StringParameter extends Parameter
     }
 
     /** {@inheritDoc} */
-    public function accepts($subject): bool
+    public function accepts(mixed $subject): bool
     {
         return is_scalar($subject)
             || ($this->isNullable() && $subject === null);

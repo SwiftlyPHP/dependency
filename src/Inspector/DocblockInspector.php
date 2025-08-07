@@ -2,29 +2,29 @@
 
 namespace Swiftly\Dependency\Inspector;
 
-use Swiftly\Dependency\InspectorInterface;
-use Swiftly\Dependency\Exception\UndefinedStructureException;
-use Swiftly\Dependency\Exception\DocblockParseException;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionFunction;
+use ReflectionFunctionAbstract;
+use ReflectionMethod;
 use Swiftly\Dependency\Exception\CompoundTypeException;
+use Swiftly\Dependency\Exception\DocblockParseException;
+use Swiftly\Dependency\Exception\UndefinedStructureException;
 use Swiftly\Dependency\Exception\UnknownTypeException;
+use Swiftly\Dependency\InspectorInterface;
 use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\ArrayParameter;
 use Swiftly\Dependency\Parameter\BooleanParameter;
 use Swiftly\Dependency\Parameter\MixedParameter;
-use Swiftly\Dependency\Parameter\NumericParameter;
-use Swiftly\Dependency\Parameter\StringParameter;
-use Swiftly\Dependency\Parameter\ObjectParameter;
 use Swiftly\Dependency\Parameter\NamedClassParameter;
+use Swiftly\Dependency\Parameter\NumericParameter;
+use Swiftly\Dependency\Parameter\ObjectParameter;
+use Swiftly\Dependency\Parameter\StringParameter;
 use Swiftly\Dependency\Type;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionMethod;
-use ReflectionFunction;
-use ReflectionFunctionAbstract;
 
-use function is_object;
-use function get_class;
 use function class_exists;
+use function get_class;
+use function is_object;
 use function preg_match_all;
 use function strpos;
 use function substr;
@@ -32,14 +32,13 @@ use function substr;
 use const PREG_SET_ORDER;
 
 /**
- * Determines parameters by analysing developer authored docblocks
+ * Determines parameters by analysing developer authored docblocks.
  *
  * This class was created mostly as a proof-of-concept and an example of how the
  * `InspectorInterface` could be used for non-reflection based parameter
- * inspection. In almost all cases we recommend using either the
- * `ReflectionInspector` or `CachedInspector` classes instead, as relying on
- * (potentially incorrect) docblocks over language level type-hints is almost
- * certainly a recipe for disaster.
+ * inspection. In almost all cases we recommend using the `ReflectionInspector`
+ * class instead, as relying on (potentially incorrect) docblocks over language
+ * level type-hints is almost certainly a recipe for disaster.
  *
  * @api
  */
@@ -103,11 +102,11 @@ class DocblockInspector implements InspectorInterface
     }
 
     /**
-     * Inspect a callable (of any type) to determine it's parameters
+     * Inspect a callable (of any type) to determine it's parameters.
      *
-     * @throws CompoundTypeException If docblock contains a compound type
      *
      * @param ReflectionFunctionAbstract $abstract Reflected function
+     * @throws CompoundTypeException If docblock contains a compound type
      * @return list<Parameter>                     Parsed parameters
      */
     private function inspect(ReflectionFunctionAbstract $abstract): array
@@ -126,7 +125,7 @@ class DocblockInspector implements InspectorInterface
     }
 
     /**
-     * Parses parameter type information from the given docblock comment
+     * Parses parameter type information from the given docblock comment.
      *
      * @param string $docblock Docblock comment
      * @return list<Parameter> Parsed parameters
@@ -144,7 +143,7 @@ class DocblockInspector implements InspectorInterface
     }
 
     /**
-     * Parse the parameter information returned by the regex match
+     * Parse the parameter information returned by the regex match.
      *
      * @param list<array{1:string, 2:non-empty-string}> $parameters
      * @return list<Parameter> Stripped parameter information
@@ -164,13 +163,13 @@ class DocblockInspector implements InspectorInterface
     }
 
     /**
-     * Parse the given type and parameter name
+     * Parse the given type and parameter name.
      *
      * @upgrade:php8.0 swap to using `match()` statement
-     * @throws DocblockParseException If the given type is compound
      *
      * @param non-empty-string $type Type string
      * @param non-empty-string $name Parameter name
+     * @throws DocblockParseException If the given type is compound
      * @return Parameter             Parameter information
      */
     private function parseParameter(string $type, string $name): Parameter

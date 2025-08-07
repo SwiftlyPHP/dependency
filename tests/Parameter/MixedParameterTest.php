@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Tests\Parameter;
 
 use PHPUnit\Framework\TestCase;
-use Swiftly\Dependency\Parameter\MixedParameter;
-use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 use stdClass;
+use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
+use Swiftly\Dependency\Parameter\MixedParameter;
 
 /**
  * @covers \Swiftly\Dependency\Parameter
@@ -63,8 +63,8 @@ final class MixedParameterTest extends TestCase
         self::assertTrue($this->parameter->accepts(3.14));
         self::assertTrue($this->parameter->accepts(null));
         self::assertTrue($this->parameter->accepts([]));
-        self::assertTrue($this->parameter->accepts(new stdClass));
-    }   
+        self::assertTrue($this->parameter->accepts(new stdClass()));
+    }
 
     /**
      * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException

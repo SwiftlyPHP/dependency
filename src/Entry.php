@@ -5,7 +5,7 @@ namespace Swiftly\Dependency;
 use function in_array;
 
 /**
- * Stores information regarding a single service entry in the service container
+ * Stores information regarding a single service entry in the service container.
  *
  * @template T of object
  */
@@ -27,13 +27,13 @@ final class Entry
     public bool $once;
 
     /**
-     * Create a new entry in the register
+     * Create a new entry in the register.
      *
      * @internal
-     * @psalm-param null|callable():T $factory
      * @param class-string<T> $type        Fully qualified classname
      * @param callable|null $factory       Service factory
      * @param list<non-empty-string> $tags Service tags
+     * @psalm-param null|callable():T $factory
      */
     public function __construct(
         string $type,
@@ -48,11 +48,11 @@ final class Entry
     }
 
     /**
-     * Determine if this entry has a given tag
+     * Determine if this entry has a given tag.
      *
      * @internal
-     * @param string $tag Tag name
-     * @return bool       Entry has tag
+     * @param string $tag Tag name.
+     * @return bool       Entry has tag.
      */
     public function hasTag(string $tag): bool
     {
@@ -60,11 +60,11 @@ final class Entry
     }
 
     /**
-     * Set the tags that apply to this service entry
+     * Set the tags that apply to this service entry.
      *
      * @api
-     * @param list<non-empty-string> $tags Service tags
-     * @return self                        Chainable interface
+     * @param list<non-empty-string> $tags Service tags.
+     * @return self                        Chainable interface.
      */
     public function setTags(array $tags): self
     {
@@ -74,11 +74,11 @@ final class Entry
     }
 
     /**
-     * Pass initialization arguments as a key-value array
+     * Pass initialization arguments as a key-value array.
      *
      * @api
-     * @param array<non-empty-string,mixed> $arguments Manual factory arguments
-     * @return self                                    Chainable interface
+     * @param array<non-empty-string,mixed> $arguments Manual factory arguments.
+     * @return self                                    Chainable interface.
      */
     public function setArguments(array $arguments): self
     {
@@ -88,7 +88,7 @@ final class Entry
     }
 
     /**
-     * Set whether or not the container is allowed to cache this service
+     * Set whether or not the container is allowed to cache this service.
      *
      * By default repeated calls to {@see \Swiftly\Dependency\Container::get()}
      * will return the same object instance each time. If however you need a new
@@ -107,7 +107,7 @@ final class Entry
     }
 
     /**
-     * Create a new service entry from a pre-existing object instance
+     * Create a new service entry from a pre-existing object instance.
      *
      * @internal
      * @template K of object
@@ -119,7 +119,7 @@ final class Entry
     public static function fromInstance(
         string $type,
         object $instance,
-        array $tags = []
+        array $tags = [],
     ): self {
         return new self(
             $type,

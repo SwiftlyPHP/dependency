@@ -1,14 +1,14 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Container;
+use Swiftly\Dependency\Exception\ServiceInstantiationException;
+use Swiftly\Dependency\Exception\UndefinedServiceException;
+use Swiftly\Dependency\Exception\UnexpectedTypeException;
 use Swiftly\Dependency\Inspector\ReflectionInspector;
 use Swiftly\Dependency\InspectorInterface;
-use Swiftly\Dependency\Exception\UndefinedServiceException;
-use Swiftly\Dependency\Exception\ServiceInstantiationException;
-use Swiftly\Dependency\Exception\UnexpectedTypeException;
 
 /**
  * @covers \Swiftly\Dependency\Container
@@ -26,12 +26,12 @@ final class ContainerTest extends TestCase
 
     public function setUp(): void
     {
-        $this->container = new Container(new ReflectionInspector);
+        $this->container = new Container(new ReflectionInspector());
     }
 
     public function exampleMethod(): object
     {
-        return new ReflectionInspector;
+        return new ReflectionInspector();
     }
 
     public function exampleServiceProvider(): array
@@ -43,7 +43,7 @@ final class ContainerTest extends TestCase
             ],
             'closure' => [
                 InspectorInterface::class,
-                fn() => new ReflectionInspector()
+                fn () => new ReflectionInspector()
             ],
             'method' => [
                 InspectorInterface::class,
@@ -58,6 +58,7 @@ final class ContainerTest extends TestCase
 
     /**
      * @dataProvider exampleServiceProvider
+     * @param mixed $factory_or_instance
      */
     public function testCanRegisterService(string $service, $factory_or_instance): void
     {
@@ -269,7 +270,7 @@ final class ContainerTest extends TestCase
 
         $this->container->register(ReflectionInspector::class)
             ->setTags(['inspector']);
-        $this->container->register(InspectorInterface::class, fn() => new ReflectionInspector)
+        $this->container->register(InspectorInterface::class, fn () => new ReflectionInspector())
             ->setTags(['inspector']);
         $this->container->register(TestCase::class, $this)
             ->setTags(['inspector']);

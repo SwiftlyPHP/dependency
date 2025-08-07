@@ -1,18 +1,18 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Tests;
 
-use Swiftly\Dependency\Tests\AbstractInspectorTest;
-use Swiftly\Dependency\Parameter\NamedClassParameter;
-use Swiftly\Dependency\Parameter\ObjectParameter;
-use Swiftly\Dependency\Parameter\NumericParameter;
-use PHPUnit\Framework\TestCase;
 use ExampleClass;
 use FakeClass;
+use PHPUnit\Framework\TestCase;
 use stdClass;
+use Swiftly\Dependency\Parameter\NamedClassParameter;
+use Swiftly\Dependency\Parameter\NumericParameter;
+use Swiftly\Dependency\Parameter\ObjectParameter;
+use Swiftly\Dependency\Tests\AbstractInspectorTest;
 
 /**
- * Trait used to provide example class definitions
+ * Trait used to provide example class definitions.
  *
  * @upgrade:phpunit10 Refactor to #[DataProviderExternal]
  * @mixin AbstractInspectorTest

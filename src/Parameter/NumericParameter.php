@@ -7,7 +7,7 @@ use Swiftly\Dependency\Parameter;
 use function is_numeric;
 
 /**
- * Function parameter that expects either an int or float value
+ * Function parameter that expects either an int or float value.
  *
  * This class exists - over having seperate int and float variants - to mirror
  * the behaviour of PHP's type coercion in non-strict mode. Any function
@@ -23,13 +23,13 @@ class NumericParameter extends Parameter
     private string $subtype;
 
     /**
-     * Create a new NumericParameter instance, specifying the underlying type
+     * Create a new NumericParameter instance, specifying the underlying type.
      *
-     * @psalm-param null|callable():(int|float) $default
      * @param non-empty-string $name Parameter name
      * @param "int"|"float" $subtype Numeric type
      * @param bool $is_nullable      Parameter allows null values?
      * @param null|callable $default Default value provider function
+     * @psalm-param null|callable():(int|float) $default
      */
     public function __construct(
         string $name,
@@ -55,7 +55,7 @@ class NumericParameter extends Parameter
     }
 
     /** {@inheritDoc} */
-    public function accepts($subject): bool
+    public function accepts(mixed $subject): bool
     {
         return is_numeric($subject)
             || ($this->isNullable() && $subject === null);

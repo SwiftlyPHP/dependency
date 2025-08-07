@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Tests;
 
-use PHPUnit\Framework\TestCase;
-use Swiftly\Dependency\Type;
 use Iterator;
+use PHPUnit\Framework\TestCase;
 use stdClass;
+use Swiftly\Dependency\Type;
 
 /**
  * @covers \Swiftly\Dependency\Type
@@ -16,7 +16,7 @@ final class TypeTest extends TestCase
     {
         self::assertTrue(Type::isServiceInstance($this));
         self::assertTrue(Type::isServiceInstance(new stdClass()));
-        
+
         self::assertFalse(Type::isServiceInstance(static function () {}));
         self::assertFalse(Type::isServiceInstance([]));
         self::assertFalse(Type::isServiceInstance(null));
@@ -52,10 +52,10 @@ final class TypeTest extends TestCase
     {
         self::assertSame('array', Type::getName([]));
         self::assertSame('string', Type::getName('Hi!'));
-        self::assertSame('integer', Type::getName(42));
-        self::assertSame('double', Type::getName(3.14));
-        self::assertSame('NULL', Type::getName(null));
-        self::assertSame(stdClass::class, Type::getName(new stdClass));
+        self::assertSame('int', Type::getName(42));
+        self::assertSame('float', Type::getName(3.14));
+        self::assertSame('null', Type::getName(null));
+        self::assertSame(stdClass::class, Type::getName(new stdClass()));
         self::assertSame(self::class, Type::getName($this));
     }
 }

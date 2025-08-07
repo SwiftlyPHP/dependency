@@ -1,16 +1,16 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Tests\Inspector;
 
-use Swiftly\Dependency\Tests\AbstractInspectorTest;
+use ExampleClass;
+use Swiftly\Dependency\Exception\CompoundTypeException;
+use Swiftly\Dependency\Exception\UndefinedStructureException;
+use Swiftly\Dependency\Exception\UnknownTypeException;
 use Swiftly\Dependency\Inspector\DocblockInspector;
 use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\ArrayParameter;
 use Swiftly\Dependency\Parameter\MixedParameter;
-use Swiftly\Dependency\Exception\UndefinedStructureException;
-use Swiftly\Dependency\Exception\CompoundTypeException;
-use Swiftly\Dependency\Exception\UnknownTypeException;
-use ExampleClass;
+use Swiftly\Dependency\Tests\AbstractInspectorTest;
 
 /**
  * @covers \Swiftly\Dependency\Inspector\DocblockInspector
@@ -43,7 +43,7 @@ final class DocblockInspectorTest extends AbstractInspectorTest
      */
     public function testCanInspectSingleParameter(callable $function, string $name, string $classname, string $type): void
     {
-        list($parameter) = $this->inspector->inspectFunction($function);
+        [$parameter] = $this->inspector->inspectFunction($function);
 
         $expected = self::expectedParam($name, $classname, $type);
 
@@ -62,7 +62,7 @@ final class DocblockInspectorTest extends AbstractInspectorTest
 
     public function testCanInspectNullableParameter(): void
     {
-        list($parameter) = $this->inspector->inspectFunction('exampleNullable');
+        [$parameter] = $this->inspector->inspectFunction('exampleNullable');
 
         $expected = self::expectedParam('value', ArrayParameter::class, 'array');
 

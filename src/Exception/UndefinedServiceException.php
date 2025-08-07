@@ -7,14 +7,14 @@ use RuntimeException;
 use function sprintf;
 
 /**
- * Exception used to indicate that a named service is undefined
+ * Exception used to indicate that a named service is undefined.
  *
  * @api
  */
 final class UndefinedServiceException extends RuntimeException
 {
     /**
-     * Indicate the given service is undefined
+     * Indicate the given service is undefined.
      *
      * @param class-string $service Fully qualified name
      */

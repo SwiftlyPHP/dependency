@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Tests\Parameter;
 
 use PHPUnit\Framework\TestCase;
-use Swiftly\Dependency\Parameter\NamedClassParameter;
-use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 use stdClass;
+use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
+use Swiftly\Dependency\Parameter\NamedClassParameter;
 
 /**
  * @covers \Swiftly\Dependency\Parameter
@@ -59,13 +59,13 @@ final class NamedClassParameterTest extends TestCase
     public function testCanCheckAcceptableInput(): void
     {
         self::assertTrue($this->parameter->accepts($this));
-        self::assertTrue($this->parameter->accepts(new class extends TestCase {}));
+        self::assertTrue($this->parameter->accepts(new class () extends TestCase {}));
 
         self::assertFalse($this->parameter->accepts('Hi!'));
         self::assertFalse($this->parameter->accepts(42));
         self::assertFalse($this->parameter->accepts(3.14));
         self::assertFalse($this->parameter->accepts([]));
-        self::assertFalse($this->parameter->accepts(new stdClass));
+        self::assertFalse($this->parameter->accepts(new stdClass()));
         self::assertFalse($this->parameter->accepts(null));
     }
 

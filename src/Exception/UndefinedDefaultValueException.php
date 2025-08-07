@@ -7,14 +7,14 @@ use Swiftly\Dependency\ParameterException;
 use function sprintf;
 
 /**
- * Exception used to indicate a parameter has no default value
+ * Exception used to indicate a parameter has no default value.
  *
  * @api
  */
 final class UndefinedDefaultValueException extends ParameterException
 {
     /**
-     * Indicate a parameter does not have a default value
+     * Indicate a parameter does not have a default value.
      *
      * @param non-empty-string $parameter Parameter name
      */

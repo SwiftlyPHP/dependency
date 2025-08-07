@@ -7,7 +7,7 @@ use RuntimeException;
 use function sprintf;
 
 /**
- * Interface for all exceptions that occur when a code structure is undefined
+ * Interface for all exceptions that occur when a code structure is undefined.
  *
  * Is thrown when the container encounters the following:
  * * When trying to resolve a class that doesn't exist

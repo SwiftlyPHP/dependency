@@ -7,14 +7,14 @@ use RuntimeException;
 use function sprintf;
 
 /**
- * Exception used to indicate a provided function argument was invalid
+ * Exception used to indicate a provided function argument was invalid.
  *
  * @api
  */
 final class InvalidArgumentException extends RuntimeException
 {
     /**
-     * Indicate parameter expected type of `$expected` but received `$provided`
+     * Indicate parameter expected type of `$expected` but received `$provided`.
      *
      * @param non-empty-string $parameter Parameter name
      * @param non-empty-string $expected  Expected parameter type

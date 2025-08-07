@@ -7,7 +7,7 @@ use Swiftly\Dependency\Parameter;
 use function is_object;
 
 /**
- * Function parameter that expects an object of a given type/interface
+ * Function parameter that expects an object of a given type/interface.
  *
  * @api
  * @psalm-immutable
@@ -20,13 +20,13 @@ class NamedClassParameter extends Parameter
     private string $type;
 
     /**
-     * Create a new parameter constrained to the given class/interface
+     * Create a new parameter constrained to the given class/interface.
      *
-     * @psalm-param null|callable():T $default
      * @param non-empty-string $name Parameter name
      * @param class-string<T> $type  Fully qualified class/interface name
      * @param bool $is_nullable      Parameter allows null values?
      * @param null|callable $default Default value provider function
+     * @psalm-param null|callable():T $default
      */
     public function __construct(
         string $name,
@@ -56,9 +56,9 @@ class NamedClassParameter extends Parameter
     }
 
     /** {@inheritDoc} */
-    public function accepts($subject): bool
+    public function accepts(mixed $subject): bool
     {
-        return  (is_object($subject) && $subject instanceof $this->type)
+        return (is_object($subject) && $subject instanceof $this->type)
             || ($this->isNullable() && $subject === null);
     }
 }

@@ -2,11 +2,11 @@
 
 namespace Swiftly\Dependency\Exception;
 
-use RuntimeException;
 use Exception;
+use RuntimeException;
 
 /**
- * Wrapper user to let us pass exception information to the top-most scope
+ * Wrapper user to let us pass exception information to the top-most scope.
  *
  * @internal
  */

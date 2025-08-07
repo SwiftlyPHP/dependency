@@ -8,7 +8,7 @@ use Swiftly\Dependency\Type;
 use function is_scalar;
 
 /**
- * Function parameter that expects boolean values
+ * Function parameter that expects boolean values.
  *
  * In non-strict mode PHP allows scalar values as arguments for boolean typed
  * parameters, hence the call to `is_scalar`.
@@ -32,7 +32,7 @@ class BooleanParameter extends Parameter
     }
 
     /** {@inheritDoc} */
-    public function accepts($subject): bool
+    public function accepts(mixed $subject): bool
     {
         return is_scalar($subject)
             || ($this->isNullable() && $subject === null);

@@ -7,14 +7,14 @@ use RuntimeException;
 use function sprintf;
 
 /**
- * Exception used to indicate no value was provided for a required argument
+ * Exception used to indicate no value was provided for a required argument.
  *
  * @api
  */
 final class MissingArgumentException extends RuntimeException
 {
     /**
-     * Indicate that a value is required for `$parameter` but none was provided
+     * Indicate that a value is required for `$parameter` but none was provided.
      *
      * @param non-empty-string $parameter Parameter name
      */

@@ -1,15 +1,15 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Swiftly\Dependency\Tests\ExampleFunctionTrait;
-use Swiftly\Dependency\Tests\ExampleClassTrait;
-use Swiftly\Dependency\Tests\ExampleMethodTrait;
 use Swiftly\Dependency\Parameter;
+use Swiftly\Dependency\Tests\ExampleClassTrait;
+use Swiftly\Dependency\Tests\ExampleFunctionTrait;
+use Swiftly\Dependency\Tests\ExampleMethodTrait;
 
 /**
- * Shared functionality usefull for InspectorInterface testing
+ * Shared functionality usefull for InspectorInterface testing.
  *
  * @see \Swiftly\Dependency\Tests\Inspector\ReflectionInspectorTest
  * @see \Swiftly\Dependency\Tests\Inspector\DocblockInspectorTest
@@ -23,7 +23,7 @@ abstract class AbstractInspectorTest extends TestCase
     use ExampleMethodTrait;
 
     /**
-     * Create a parameter expectation
+     * Create a parameter expectation.
      *
      * Used in conjunction with {@see self::assertParameter()} to check
      * inspected parameters meet expectations.
@@ -39,7 +39,7 @@ abstract class AbstractInspectorTest extends TestCase
     }
 
     /**
-     * Assert that the returned parameters match expections
+     * Assert that the returned parameters match expections.
      *
      * @param list<array{0:string, 1:class-string<Parameter>, 2:string}> $expected
      * @param list<Parameter> $actual
@@ -55,7 +55,7 @@ abstract class AbstractInspectorTest extends TestCase
     }
 
     /**
-     * Assert that a returned parameter matches expectations
+     * Assert that a returned parameter matches expectations.
      *
      * `$expected` should be an array like the following:
      * * 0 => parameter name
@@ -69,7 +69,7 @@ abstract class AbstractInspectorTest extends TestCase
      */
     protected static function assertParameter(array $expected, Parameter $actual): void
     {
-        list($name, $classname, $type) = $expected;
+        [$name, $classname, $type] = $expected;
 
         self::assertSame($name, $actual->getName());
         self::assertSame($type, $actual->getType());

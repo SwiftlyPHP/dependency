@@ -4,17 +4,17 @@ namespace Swiftly\Dependency;
 
 use Closure;
 
-use function is_object;
-use function is_callable;
-use function is_array;
-use function is_string;
 use function class_exists;
-use function interface_exists;
 use function get_class;
 use function gettype;
+use function interface_exists;
+use function is_array;
+use function is_callable;
+use function is_object;
+use function is_string;
 
 /**
- * Utility class containing static methods used for type inspection
+ * Utility class containing static methods used for type inspection.
  *
  * The `TYPE_*` constants here should match the names returned for the built-in
  * types by the {@see \ReflectionNamedType::getName} method.
@@ -33,12 +33,12 @@ abstract class Type
     public const TYPE_OBJECT = 'object';
 
     /**
-     * Determine if the subject is a service factory or service instance
+     * Determine if the subject is a service factory or service instance.
      *
      * @template T of object
      * @psalm-assert-if-true T $subject
-     * @psalm-param T|callable():T $subject
      * @param object|callable $subject Service factory or instance
+     * @psalm-param T|callable():T $subject
      * @return bool                    Is object instance?
      */
     final public static function isServiceInstance($subject): bool
@@ -47,7 +47,7 @@ abstract class Type
     }
 
     /**
-     * Determine if the subject is a class method callable
+     * Determine if the subject is a class method callable.
      *
      * @psalm-assert-if-true callable-array&callable-method $subject
      * @param mixed $subject Callable variable
@@ -59,7 +59,7 @@ abstract class Type
     }
 
     /**
-     * Determine if the subject is a valid class or interface name
+     * Determine if the subject is a valid class or interface name.
      *
      * @psalm-assert-if-true class-string $subject
      * @param mixed $subject Subject variable
@@ -72,15 +72,14 @@ abstract class Type
     }
 
     /**
-     * Return a user-friendly type descriptor
+     * Return a user-friendly type descriptor.
      *
-     * @upgrade:php8.0 Swap to using `get_debug_type`
-     * @psalm-return ($subject is object ? class-string : string)
      * @param mixed $subject Subject variable
      * @return string        Type name
+     * @psalm-return ($subject is object ? class-string : string)
      */
-    final public static function getName($subject): string
+    final public static function getName(mixed $subject): string
     {
-        return is_object($subject) ? get_class($subject) : gettype($subject);
+        return get_debug_type($subject);
     }
 }

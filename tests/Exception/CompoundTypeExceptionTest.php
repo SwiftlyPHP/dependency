@@ -1,13 +1,13 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Swiftly\Dependency\Tests\Exception;
 
 use PHPUnit\Framework\TestCase;
-use Swiftly\Dependency\Exception\CompoundTypeException;
 use ReflectionMethod;
+use Swiftly\Dependency\Exception\CompoundTypeException;
 
 /**
- * All `ParameterException` types are covered by our API guarantee
+ * All `ParameterException` types are covered by our API guarantee.
  *
  * @covers \Swiftly\Dependency\ParameterException
  * @covers \Swiftly\Dependency\Exception\CompoundTypeException
