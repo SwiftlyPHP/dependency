@@ -2,7 +2,6 @@ version: 2.1
 jobs:
   test:
     docker:
-    # php 8 required for testCanInspectSingleMixedParameter & testThrowsIfCompoundType
       - image: circleci/php:8.0
     steps:
       - checkout

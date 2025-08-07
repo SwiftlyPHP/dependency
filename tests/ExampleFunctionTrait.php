@@ -16,12 +16,12 @@ use Swiftly\Dependency\Tests\AbstractInspectorTest;
 /**
  * Trait used to provide example functions.
  *
- * @upgrade:phpunit10 Refactor to #[DataProviderExternal]
  * @mixin AbstractInspectorTest
+ *
+ * @upgrade:phpunit10 Refactor to #[DataProviderExternal]
  */
 trait ExampleFunctionTrait
 {
-    /** @php:8.0 Uncomment the `mixed` type test */
     public function exampleFunctionTrait(): array
     {
         return [
@@ -41,7 +41,6 @@ trait ExampleFunctionTrait
                     'bool'
                 )
             ],
-            /*
             'mixed' => [
                 'exampleMixed',
                 ...self::expectedParam(
@@ -50,7 +49,6 @@ trait ExampleFunctionTrait
                     'mixed'
                 )
             ],
-            */
             'classname' => [
                 'exampleClass',
                 ...self::expectedParam(

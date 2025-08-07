@@ -51,16 +51,6 @@ final class ReflectionInspectorTest extends AbstractInspectorTest
         self::assertParameter($expected, $parameter);
     }
 
-    /**
-     * @php:8.0 Delete this and uncomment entry in exampleTypeProvider
-     * @testdox Can inspect single parameter of type mixed
-     * @requires PHP >= 8.0
-     */
-    public function testCanInspectSingleMixedParameter(): void
-    {
-        $this->testCanInspectSingleParameter('exampleMixed', 'value', MixedParameter::class, 'mixed');
-    }
-
     public function testCanInspectNullableParameter(): void
     {
         [$parameter] = $this->inspector->inspectFunction('exampleNullable');
@@ -177,7 +167,6 @@ final class ReflectionInspectorTest extends AbstractInspectorTest
 
     /**
      * @covers \Swiftly\Dependency\Exception\CompoundTypeException
-     * @requires PHP >= 8.0
      */
     public function testThrowsIfCompoundType(): void
     {
