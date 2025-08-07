@@ -9,12 +9,12 @@
         "ext-json": "To allow JSON configuration files"
     },
     "require": {
-        "php": "^7.4 || ^8"
+        "php": "^8"
     },
     "require-dev": {
-        "vimeo/psalm": "^5.15",
+        "vimeo/psalm": "^5.26",
         "phpunit/phpunit": "^9.6",
-        "friendsofphp/php-cs-fixer": "^3"
+        "friendsofphp/php-cs-fixer": "^3.85"
     },
     "autoload": {
         "psr-4": {
@@ -27,7 +27,7 @@
         }
     },
     "scripts": {
-        "fix": "@php vendor/bin/php-cs-fixer fix",
+        "fix": "@php vendor/bin/php-cs-fixer fix --diff",
         "lint": "@php vendor/bin/php-cs-fixer check --diff"
     }
 }
