@@ -5,13 +5,12 @@ namespace Swiftly\Dependency;
 use Exception;
 use ReflectionClass;
 use Swiftly\Dependency\Entry;
+use Swiftly\Dependency\Exception\AttributeException;
+use Swiftly\Dependency\Exception\ContainerException;
 use Swiftly\Dependency\Exception\InvalidArgumentException;
 use Swiftly\Dependency\Exception\MissingArgumentException;
 use Swiftly\Dependency\Exception\NestedServiceException;
 use Swiftly\Dependency\Exception\ServiceInstantiationException;
-use Swiftly\Dependency\Exception\UndefinedServiceException;
-use Swiftly\Dependency\Exception\UndefinedStructureException;
-use Swiftly\Dependency\Exception\UnexpectedTypeException;
 use Swiftly\Dependency\Inspector\ReflectionInspector;
 use Swiftly\Dependency\InspectorInterface;
 use Swiftly\Dependency\Parameter;
@@ -65,14 +64,15 @@ class Container
      *
      * @template T of object
      *
-     * @param class-string<T> $service Service type.
-     * @param null|T|callable $factory Service provider/factory.
-     * @psalm-param null|T|callable():T $factory
+     * @param class-string<T> $service
+     * @param null|T|ProvideInterface<T>|callable(mixed):T $factory
      *
-     * @return Entry<T>                Service entry definition.
+     * @return Entry<T>
      */
-    public function register(string $service, $factory = null): Entry
-    {
+    public function register(
+        string $service,
+        object|callable|null $factory = null,
+    ): Entry {
         if ($factory && Type::isServiceInstance($factory)) {
             $entry = Entry::fromInstance($service, $factory);
         } else {
@@ -85,20 +85,19 @@ class Container
     /**
      * Create an alias mapping between one service and another.
      *
-     *
      * @template T of object
      *
-     * @param class-string<T> $service Service name.
-     * @param class-string<T> $alias   Alias.
-     * @throws UndefinedServiceException
-     *          If trying to alias a service that doesn't exist.
+     * @param class-string<T> $service
+     * @param class-string<T> $alias
      *
-     * @return self                    Chainable interface.
+     * @throws ContainerException When trying to alias a non-existent service.
+     *
+     * @return self
      */
     public function alias(string $service, string $alias): self
     {
         if (!isset($this->entries[$service])) {
-            throw new UndefinedServiceException($service);
+            throw ContainerException::missingService($service);
         }
 
         $this->aliases[$alias] = $service;
@@ -124,49 +123,41 @@ class Container
     /**
      * Return a service of the given type.
      *
-     *
      * @template T of object
      *
-     * @param class-string<T> $service Service type.
-     * @throws UndefinedServiceException
-     *          If no definition is found for the given service.
-     * @throws ServiceInstantiationException
-     *          If an error occured while resolving service requirements.
-     * @throws UnexpectedTypeException
-     *          If a service was created but did not meet the type constraints.
+     * @param class-string<T> $service
      *
-     * @return T                       Service object.
+     * @throws ContainerException When trying to fetch a unknown service.
+     * @throws ContainerException If the service type constraint is broken.
+     *
+     * @return T
      */
     public function get(string $service): object
     {
         if (!$this->has($service)) {
-            throw new UndefinedServiceException($service);
+            throw ContainerException::missingService($service);
         }
 
-        // Get the service definition
         $service = $this->aliases[$service] ?? $service;
         $entry = $this->entries[$service];
 
-        // Allowed to return cached copy?
+        // Service might be a singleton
         if (isset($this->cache[$service]) && $entry->once) {
             $instance = $this->cache[$service];
             self::assertType($instance, $service);
             return $instance;
         }
 
-        // Get factory (or class constructor)
-        $factory_or_class = self::factoryOrClass($entry);
+        $factoryOrClass = self::factoryOrClass($entry);
 
-        // Attempt to resolve arguments
         try {
-            $parameters = $this->inspect($factory_or_class);
+            $parameters = $this->inspect($factoryOrClass);
             $parameters = $this->prepare($parameters, $entry->arguments);
         } catch (Exception $e) {
             throw new ServiceInstantiationException($service, $e);
         }
 
-        // Create the object!
-        $instance = self::create($factory_or_class, $parameters);
+        $instance = self::create($factoryOrClass, $parameters);
         self::assertType($instance, $service);
         $this->cache[$service] = $instance;
 
@@ -181,10 +172,10 @@ class Container
      *
      * @template T of object
      *
-     * @param non-empty-string $tag   Service tag.
-     * @param null|class-string $type Interface or class constraint.
-     * @psalm-param null|class-string<T> $type
-     * @return object[]               Tagged services.
+     * @param non-empty-string $tag
+     * @param null|class-string<T> $type
+     *
+     * @return object[]
      * @psalm-return ($type is class-string ? list<T> : list<object>)
      */
     public function tagged(string $tag, ?string $type = null): array
@@ -213,7 +204,7 @@ class Container
      *
      * @template T
      *
-     * @param callable(mixed):T $callback
+     * @param callable():T $callback
      * @param array<non-empty-string, mixed> $parameters
      *
      * @return T
@@ -244,10 +235,9 @@ class Container
      *
      * Accepts class names and all callable types apart from invokable objects.
      *
+     * @param class-string|callable $class_or_callable
      *
-     * @param class-string|callable $class_or_callable Class FQN or callable.
      * @throws ParameterException
-     * @throws UndefinedStructureException
      *
      * @return list<Parameter>
      */
@@ -266,14 +256,16 @@ class Container
     /**
      * Prepares arguments required for a function call.
      *
-     *
      * @template T
-     * @param list<Parameter<T>> $parameters           Parameter information.
-     * @param array<non-empty-string,mixed> $arguments Provided arguments.
+     *
+     * @param list<Parameter<T>> $parameters
+     * @param array<non-empty-string, mixed> $arguments
+     *
      * @throws NestedServiceException
      * @throws InvalidArgumentException
      * @throws MissingArgumentException
-     * @return list<T>                                 Resolved arguments.
+     *
+     * @return list<T>
      */
     protected function prepare(array $parameters, array $arguments): array
     {
@@ -286,7 +278,7 @@ class Container
             if (array_key_exists($name, $arguments)) {
                 $value = $arguments[$name];
             } else {
-                $value = $this->findValue($parameter);
+                $value = $this->resolveParam($parameter);
             }
 
             if (!$parameter->accepts($value)) {
@@ -304,24 +296,28 @@ class Container
     }
 
     /**
-     * Attempts to find a suitable value for the given parameter.
-     *
-     *
      * @template T
      *
      * @param Parameter<T> $parameter
+     *
      * @throws NestedServiceException
      * @throws MissingArgumentException
      *
      * @return null|T
      */
-    protected function findValue(Parameter $parameter): mixed
+    protected function resolveParam(Parameter $parameter): mixed
     {
-        if (!$parameter->isBuiltin()
-            && $this->has(($type = $parameter->getType()))
-        ) {
+        $provider = $parameter->getAttribute(ProvideInterface::class);
+
+        if (null !== $provider) {
+            return $this->resolveProvider($parameter, $provider->newInstance());
+        }
+
+        $typeHint = $parameter->isBuiltin() ? $parameter->getType() : null;
+
+        if (null !== $typeHint && $this->has($typeHint)) {
             try {
-                return $this->get($type);
+                return $this->get($typeHint);
             } catch (Exception $e) {
                 throw new NestedServiceException($e);
             }
@@ -329,7 +325,7 @@ class Container
 
         $value = self::defaultValue($parameter);
 
-        if ($value === null && !$parameter->isNullable()) {
+        if (null === $value && !$parameter->isNullable()) {
             throw new MissingArgumentException($parameter->getName());
         }
 
@@ -337,8 +333,30 @@ class Container
     }
 
     /**
-     * Return the default argument of a parameter.
+     * @template T
+     * @template K
      *
+     * @param Parameter<T> $parameter
+     * @param ProvideInterface<K> $provider
+     *
+     * @throws AttributeException
+     *
+     * @return (T&K)
+     */
+    protected function resolveProvider(
+        Parameter $parameter,
+        ProvideInterface $provider,
+    ): mixed {
+        $value = $provider->provide($this);
+
+        if (!$parameter->accepts($value)) {
+            throw AttributeException::typeError($provider, $parameter, $value);
+        }
+
+        return $value;
+    }
+
+    /**
      * @template T
      *
      * @param Parameter<T> $parameter
@@ -347,10 +365,9 @@ class Container
      */
     protected static function defaultValue(Parameter $parameter): mixed
     {
-        return ($parameter->hasDefault()
+        return $parameter->hasDefault()
             ? ($parameter->getDefaultCallback())()
-            : null
-        );
+            : null;
     }
 
     /**
@@ -373,12 +390,12 @@ class Container
     }
 
     /**
-     * Initialise a new service instance with the given parameters.
-     *
      * @template T of object
-     * @param class-string<T> $class Class FQN.
-     * @param list<mixed> $arguments Constructor arguments.
-     * @return T                     Initialised class.
+     *
+     * @param class-string<T> $class
+     * @param list<mixed> $arguments
+     *
+     * @return T
      */
     protected static function initialise(string $class, array $arguments): object
     {
@@ -386,26 +403,21 @@ class Container
     }
 
     /**
-     * Validate that the given object meets a type constaint.
-     *
-     *
      * @template T of object
      * @template K of object
      * @psalm-assert T&K $service
-     * @param T $service               Service instance.
-     * @param class-string $constraint Interface or class constaint.
-     * @psalm-param class-string<K> $constraint
-     * @throws UnexpectedTypeException
-     *          If the `$service` is not of type `$constraint`
-     * @return void
+     *
+     * @param T $service
+     * @param class-string<K> $constraint
+     *
+     * @throws ContainerException If the service does not meet the constraint.
      */
     protected static function assertType(object $service, string $constraint): void
     {
         if (!($service instanceof $constraint)) {
-            throw new UnexpectedTypeException(
-                $constraint,
-                Type::getName($service)
-            );
+            return;
         }
+
+        throw ContainerException::typeConstraint($service::class, $constraint);
     }
 }

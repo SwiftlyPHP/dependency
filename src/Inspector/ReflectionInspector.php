@@ -3,15 +3,15 @@
 namespace Swiftly\Dependency\Inspector;
 
 use Closure;
+use ReflectionAttribute;
 use ReflectionClass;
-use ReflectionException;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
-use Swiftly\Dependency\Exception\CompoundTypeException;
-use Swiftly\Dependency\Exception\UndefinedStructureException;
+use Swiftly\Dependency\ContainerAwareInterface;
+use Swiftly\Dependency\Exception\ReflectionException;
 use Swiftly\Dependency\Exception\UnknownTypeException;
 use Swiftly\Dependency\InspectorInterface;
 use Swiftly\Dependency\Parameter;
@@ -22,9 +22,11 @@ use Swiftly\Dependency\Parameter\NamedClassParameter;
 use Swiftly\Dependency\Parameter\NumericParameter;
 use Swiftly\Dependency\Parameter\ObjectParameter;
 use Swiftly\Dependency\Parameter\StringParameter;
+use Swiftly\Dependency\ResolvableInterface;
 use Swiftly\Dependency\Type;
 
 use function class_exists;
+use function count;
 use function get_class;
 use function is_object;
 
@@ -37,13 +39,15 @@ use function is_object;
  */
 class ReflectionInspector implements InspectorInterface
 {
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public function inspectClass(string $class): array
     {
         try {
             $reflection = new ReflectionClass($class);
         } catch (ReflectionException $e) {
-            throw UndefinedStructureException::createForClass($class);
+            throw ReflectionException::missingClass($class);
         }
 
         $constructor = $reflection->getConstructor();
@@ -55,7 +59,9 @@ class ReflectionInspector implements InspectorInterface
         return $this->inspectFromReflection($constructor);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public function inspectMethod(Object|string $class, string $method): array
     {
         try {
@@ -64,12 +70,9 @@ class ReflectionInspector implements InspectorInterface
             $class = is_object($class) ? get_class($class) : $class;
 
             if (!class_exists($class)) {
-                throw UndefinedStructureException::createForClass($class);
+                throw ReflectionException::missingClass($class);
             } else {
-                throw UndefinedStructureException::createForMethod(
-                    $class,
-                    $method
-                );
+                throw ReflectionException::missingMethod($class, $method);
             }
         }
 
@@ -81,9 +84,9 @@ class ReflectionInspector implements InspectorInterface
     {
         try {
             $reflection = new ReflectionFunction($function);
-        } catch (ReflectionException $e) {
+        } catch (\ReflectionException $e) {
             /** @var string $function */
-            throw UndefinedStructureException::createForFunction($function);
+            throw ReflectionException::missingFunction($function);
         }
 
         return $this->inspectFromReflection($reflection);
@@ -107,23 +110,14 @@ class ReflectionInspector implements InspectorInterface
         return $parameters;
     }
 
-    /**
-     * Returns information about a single method or function parameter.
-     *
-     *
-     * @param ReflectionParameter $reflected
-     * @throws CompoundTypeException If we encounter a union/intersection type.
-     *
-     * @return Parameter
-     */
     private function inspectParameter(ReflectionParameter $reflected): Parameter
     {
         $type = $reflected->getType();
 
         if ($type !== null && !($type instanceof ReflectionNamedType)) {
-            throw new CompoundTypeException(
+            throw ReflectionException::compoundType(
+                $reflected->getDeclaringFunction(),
                 $reflected->getName(),
-                $reflected->getDeclaringFunction()
             );
         }
 
@@ -131,10 +125,7 @@ class ReflectionInspector implements InspectorInterface
     }
 
     /**
-     * Return the appropriate Parameter subclass to represent this parameter.
-     *
-     * @param ReflectionParameter $parameter
-     * @param ReflectionNamedType|null $type
+     * Return the appropriate subclass to represent this parameter.
      */
     private function parameterFromReflection(
         ReflectionParameter $parameter,
@@ -143,47 +134,59 @@ class ReflectionInspector implements InspectorInterface
         $type_name = $type ? $type->getName() : Type::TYPE_MIXED;
         $name = $parameter->getName();
         $nullable = $parameter->allowsNull();
-        $default = $this->prepareDefaultCallback($parameter);
+        $default = self::prepareDefaultCallback($parameter);
+        $attributes = self::getAttributes($parameter);
 
         return match ($type_name) {
-            /** @var null|callable():array $default */
-            Type::TYPE_ARRAY => new ArrayParameter($name, $nullable, $default),
+            Type::TYPE_ARRAY =>
+                /** @var null|callable():array $default */
+                new ArrayParameter($name, $nullable, $default),
 
-            /** @var null|callable():bool $default */
-            Type::TYPE_BOOL => new BooleanParameter($name, $nullable, $default),
+            Type::TYPE_BOOL =>
+                /** @var null|callable():bool $default */
+                new BooleanParameter($name, $nullable, $default),
 
-            /** @var null|callable():mixed $default */
-            Type::TYPE_MIXED => new MixedParameter($name, $default),
+            Type::TYPE_MIXED =>
+                /** @var null|callable():mixed $default */
+                new MixedParameter($name, $default),
 
-            /** @var null|callable():(int|float) $default */
             Type::TYPE_INT,
             Type::TYPE_FLOAT =>
+                /** @var null|callable():(int|float) $default */
                 new NumericParameter($name, $type_name, $nullable, $default),
 
-            /** @var null|callable():string $default */
-            Type::TYPE_STRING => new StringParameter($name, $nullable, $default),
+            Type::TYPE_STRING =>
+                /** @var null|callable():string $default */
+                new StringParameter($name, $nullable, $default),
 
-            /** @var null|callable():object $default */
-            Type::TYPE_OBJECT => new ObjectParameter($name, $nullable, $default),
+            Type::TYPE_OBJECT =>
+                /** @var null|callable():object $default */
+                new ObjectParameter($name, $nullable, $default),
 
-            /** @var null|callable():object $default */
-            default => Type::isClassname($type_name)
-                ? new NamedClassParameter($name, $type_name, $nullable, $default)
-                : throw new UnknownTypeException($name, $type_name),
+            default =>
+                /** @var null|callable():object $default */
+                Type::isClassname($type_name)
+                    ? new NamedClassParameter($name, $type_name, $nullable, $default)
+                    : throw ReflectionException::unknownType($parameter),
         };
     }
 
-    /**
-     * Create the callback used to provide the default value.
-     *
-     * @param ReflectionParameter $parameter Parameter information.
-     * @return null|callable                 Default value provider.
-     */
-    private function prepareDefaultCallback(
-        ReflectionParameter $parameter
+    private static function prepareDefaultCallback(
+        ReflectionParameter $parameter,
     ): ?callable {
         return $parameter->isDefaultValueAvailable()
             ? [$parameter, 'getDefaultValue']
             : null;
+    }
+
+    /**
+     * @return list<ReflectionAttribute<ContainerAwareInterface>>
+     */
+    private static function getAttributes(ReflectionParameter $parameter): array
+    {
+        return $parameter->getAttributes(
+            ContainerAwareInterface::class,
+            ReflectionAttribute::IS_INSTANCEOF,
+        );
     }
 }
