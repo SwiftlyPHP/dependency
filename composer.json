@@ -5,9 +5,6 @@
     "readme": "README.md",
     "type": "library",
     "license": "MIT",
-    "suggest": {
-        "ext-json": "To allow JSON configuration files"
-    },
     "require": {
         "php": "^8"
     },
