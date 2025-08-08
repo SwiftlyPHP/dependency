@@ -12,7 +12,6 @@ use Swiftly\Dependency\Tests\ExampleMethodTrait;
  * Shared functionality usefull for InspectorInterface testing.
  *
  * @see \Swiftly\Dependency\Tests\Inspector\ReflectionInspectorTest
- * @see \Swiftly\Dependency\Tests\Inspector\DocblockInspectorTest
  *
  * @abstract
  */

@@ -2,11 +2,7 @@
 /**
  * Example functions used by Inspector tests
  *
- * The docblock params are not a mistake, they are used when testing the
- * {@see DocblockInspector}.
- *
  * @see \Swiftly\Dependency\Tests\Inspector\ReflectionInspectorTest
- * @see \Swiftly\Dependency\Tests\Inspector\DocblockInspectorTest
  *
  * @internal
  */
