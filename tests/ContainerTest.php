@@ -180,6 +180,21 @@ final class ContainerTest extends TestCase
         self::assertNotSame($service1, $service2);
     }
 
+    public function testCanCallUserProvidedFunction(): void
+    {
+        $this->container->register(TestCase::class, $this);
+
+        $callback = function (
+            TestCase $testCase,
+            string $greet,
+        ): void {
+            self::assertSame($this, $testCase);
+            self::assertSame('hi', $greet);
+        };
+
+        $this->container->call($callback, ['greet' => 'hi']);
+    }
+
     /**
      * @covers \Swiftly\Dependency\Exception\UndefinedServiceException
      */

@@ -209,6 +209,23 @@ class Container
     }
 
     /**
+     * Attempts to resolve and call the provided function.
+     *
+     * @template T
+     *
+     * @param callable(mixed):T $callback
+     * @param array<non-empty-string, mixed> $parameters
+     *
+     * @return T
+     */
+    public function call(callable $callback, array $parameters = []): mixed
+    {
+        $arguments = $this->prepare($this->inspect($callback), $parameters);
+
+        return call_user_func_array($callback, $arguments);
+    }
+
+    /**
      * Return the factory - or if not available the FQN - for this service.
      *
      * @template T of object
