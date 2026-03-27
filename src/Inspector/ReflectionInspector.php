@@ -46,7 +46,7 @@ class ReflectionInspector implements InspectorInterface
     {
         try {
             $reflection = new ReflectionClass($class);
-        } catch (ReflectionException $e) {
+        } catch (\ReflectionException $e) {
             throw ReflectionException::missingClass($class);
         }
 
@@ -66,7 +66,7 @@ class ReflectionInspector implements InspectorInterface
     {
         try {
             $reflection = new ReflectionMethod($class, $method);
-        } catch (ReflectionException $e) {
+        } catch (\ReflectionException $e) {
             $class = is_object($class) ? get_class($class) : $class;
 
             if (!class_exists($class)) {

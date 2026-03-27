@@ -14,7 +14,7 @@ final class Entry
     /** @var class-string<T> $type */
     public string $type;
 
-    /** @var null|callable():T $factory */
+    /** @var null|ProvideInterface|callable():T $factory */
     public $factory;
 
     /** @var list<non-empty-string> $tags */
@@ -30,15 +30,16 @@ final class Entry
      * Create a new entry in the register.
      *
      * @internal
+     *
      * @param class-string<T> $type        Fully qualified classname
      * @param callable|null $factory       Service factory
      * @param list<non-empty-string> $tags Service tags
-     * @psalm-param null|callable():T $factory
+     * @psalm-param null|ProvideInterface|callable():T $factory
      */
     public function __construct(
         string $type,
-        ?callable $factory = null,
-        array $tags = []
+        callable|ProvideInterface|null $factory = null,
+        array $tags = [],
     ) {
         $this->type = $type;
         $this->factory = $factory;

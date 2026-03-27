@@ -2,7 +2,11 @@
 
 namespace Swiftly\Dependency;
 
+use ReflectionAttribute;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
+
+use function array_filter;
+use function is_a;
 
 /**
  * Base class from which all parameter types inherit.
@@ -13,11 +17,10 @@ use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
  */
 abstract class Parameter
 {
-    /** @var non-empty-string $name (case-sensitive) */
+    /** @var non-empty-string (case-sensitive) */
     protected string $name;
 
-    /** Allows nullable arguments? */
-    protected bool $is_nullable;
+    protected bool $isNullable;
 
     /**
      * Declared default value for this parameter.
@@ -27,9 +30,12 @@ abstract class Parameter
      * hiding the default behind a callable we can lazily evaluate the value,
      * therefore delaying any potentially expensive initialization.
      *
-     * @var null|callable():T $default
+     * @var null|callable():T
      */
     protected $default;
+
+    /** @var list<ReflectionAttribute<ContainerAwareInterface>> */
+    protected array $attributes = [];
 
     /**
      * Create a new parameter definition.
@@ -38,19 +44,21 @@ abstract class Parameter
      * constructors and then pass any neccessary values to
      * `parent::__construct`.
      *
-     * @param non-empty-string $name Case-sensitive parameter name.
-     * @param bool $is_nullable      Parameter allows null values?
-     * @param null|callable $default Default value provider function.
-     * @psalm-param null|callable():T $default
+     * @param non-empty-string $name
+     * @param bool $isNullable
+     * @param null|callable():T $default
+     * @param list<ReflectionAttribute<ContainerAwareInterface>> $attributes
      */
     public function __construct(
         string $name,
-        bool $is_nullable,
-        $default = null
+        bool $isNullable,
+        $default = null,
+        array $attributes = [],
     ) {
         $this->name = $name;
-        $this->is_nullable = $is_nullable;
+        $this->isNullable = $isNullable;
         $this->default = $default;
+        $this->attributes = $attributes;
     }
 
     /**
@@ -68,7 +76,7 @@ abstract class Parameter
      */
     public function isNullable(): bool
     {
-        return $this->is_nullable;
+        return $this->isNullable;
     }
 
     /**
@@ -95,6 +103,53 @@ abstract class Parameter
         }
 
         return $this->default;
+    }
+
+    /**
+     * Return all the attributes that apply to this parameter.
+     *
+     * @template K of ContainerAwareInterface
+     *
+     * @param class-string<K>|null $type
+     *
+     * @return ($type is class-string
+     *     ? list<ReflectionAttribute<K>>
+     *     : list<ReflectionAttribute<ContainerAwareInterface>>)
+     */
+    public function getAttributes(?string $type = null): array
+    {
+        if (null === $type) {
+            return $this->attributes;
+        }
+
+        return array_filter(
+            $this->attributes,
+            static fn (
+                ReflectionAttribute $attribute,
+            ): bool => is_a($attribute->name, $type, true),
+        );
+    }
+
+    /**
+     * Return the first attribute that is an instance of `$type`.
+     *
+     * @template K or ContainerAwareInterface
+     *
+     * @param class-string<K> $type
+     *
+     * @return ReflectionAttribute<K>|null
+     *
+     * @upgrade:php8.4 Swap to using {@see array_find()}
+     */
+    public function getAttribute(string $type): ReflectionAttribute|null
+    {
+        foreach ($this->attributes as $attribute) {
+            if (is_a($attribute->name, $type, true)) {
+                return $attribute;
+            }
+        }
+
+        return null;
     }
 
     /**

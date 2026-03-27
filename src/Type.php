@@ -19,8 +19,9 @@ use function is_string;
  * The `TYPE_*` constants here should match the names returned for the built-in
  * types by the {@see \ReflectionNamedType::getName} method.
  *
- * @psalm-type callable-method = list{class-string|object,non-empty-string}
  * @internal
+ *
+ * @psalm-type callable-method = list{class-string|object, non-empty-string}
  */
 abstract class Type
 {
@@ -36,14 +37,18 @@ abstract class Type
      * Determine if the subject is a service factory or service instance.
      *
      * @template T of object
+     *
      * @psalm-assert-if-true T $subject
-     * @param object|callable $subject Service factory or instance
-     * @psalm-param T|callable():T $subject
-     * @return bool                    Is object instance?
+     *
+     * @param T|ProvideInterface<T>|callable():T $subject
      */
     final public static function isServiceInstance($subject): bool
     {
-        return is_object($subject) && !($subject instanceof Closure);
+        return is_object($subject)
+            && !(
+                $subject instanceof Closure
+                || $subject instanceof ProvideInterface
+            );
     }
 
     /**
