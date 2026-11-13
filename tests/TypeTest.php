@@ -3,13 +3,12 @@
 namespace Swiftly\Dependency\Tests;
 
 use Iterator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Swiftly\Dependency\Type;
 
-/**
- * @covers \Swiftly\Dependency\Type
- */
+#[CoversClass(Type::class)]
 final class TypeTest extends TestCase
 {
     public function testCanTellIfVariableIsObject(): void

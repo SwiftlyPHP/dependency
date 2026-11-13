@@ -2,15 +2,16 @@
 
 namespace Swiftly\Dependency\Tests\Parameter;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
+use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\MixedParameter;
 
-/**
- * @covers \Swiftly\Dependency\Parameter
- * @covers \Swiftly\Dependency\Parameter\MixedParameter
- */
+#[CoversClass(Parameter::class)]
+#[CoversClass(MixedParameter::class)]
+#[CoversClass(UndefinedDefaultValueException::class)]
 final class MixedParameterTest extends TestCase
 {
     private MixedParameter $parameter;
@@ -19,7 +20,7 @@ final class MixedParameterTest extends TestCase
     {
         $this->parameter = new MixedParameter(
             'value',
-            function () { return $this; }
+            fn () => $this,
         );
     }
 
@@ -66,9 +67,6 @@ final class MixedParameterTest extends TestCase
         self::assertTrue($this->parameter->accepts(new stdClass()));
     }
 
-    /**
-     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
-     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);

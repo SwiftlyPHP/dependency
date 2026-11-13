@@ -11,6 +11,8 @@ use Swiftly\Dependency\ResolvableInterface;
 /**
  * Will provide a parameter all services that have a given tag.
  *
+ * @upgrade:php8.2 Mark class as readonly
+ *
  * @api
  *
  * @template T of object
@@ -24,8 +26,8 @@ final class UseTagged implements ResolvableInterface, ContainerAwareInterface
      * @param class-string<T>|null $type
      */
     public function __construct(
-        private string $tag,
-        private string|null $type = null,
+        private readonly string $tag,
+        private readonly string|null $type = null,
     ) {
     }
 

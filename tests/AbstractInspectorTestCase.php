@@ -2,6 +2,7 @@
 
 namespace Swiftly\Dependency\Tests;
 
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Tests\ExampleClassTrait;
@@ -12,10 +13,9 @@ use Swiftly\Dependency\Tests\ExampleMethodTrait;
  * Shared functionality usefull for InspectorInterface testing.
  *
  * @see \Swiftly\Dependency\Tests\Inspector\ReflectionInspectorTest
- *
- * @abstract
  */
-abstract class AbstractInspectorTest extends TestCase
+#[CoversNothing]
+abstract class AbstractInspectorTestCase extends TestCase
 {
     use ExampleFunctionTrait;
     use ExampleClassTrait;
@@ -45,7 +45,7 @@ abstract class AbstractInspectorTest extends TestCase
      */
     protected static function assertParameters(array $expected, array $actual): void
     {
-        self::assertCount(count($expected), $actual);
+        self::assertCount(\count($expected), $actual);
 
         foreach ($expected as $i => $expect) {
             $parameter = $actual[$i];

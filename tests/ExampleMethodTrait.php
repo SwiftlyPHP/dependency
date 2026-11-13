@@ -6,13 +6,12 @@ use Swiftly\Dependency\Parameter\ArrayParameter;
 use Swiftly\Dependency\Parameter\BooleanParameter;
 use Swiftly\Dependency\Parameter\NumericParameter;
 use Swiftly\Dependency\Parameter\StringParameter;
-use Swiftly\Dependency\Tests\AbstractInspectorTest;
+use Swiftly\Dependency\Tests\AbstractInspectorTestCase;
 
 /**
  * Trait used to provide example methods.
  *
- * @upgrade:phpunit10 Refactor to #[DataProviderExternal]
- * @mixin AbstractInspectorTest
+ * @mixin AbstractInspectorTestCase
  */
 trait ExampleMethodTrait
 {

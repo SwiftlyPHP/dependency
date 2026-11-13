@@ -11,18 +11,16 @@ use Swiftly\Dependency\Parameter\NamedClassParameter;
 use Swiftly\Dependency\Parameter\NumericParameter;
 use Swiftly\Dependency\Parameter\ObjectParameter;
 use Swiftly\Dependency\Parameter\StringParameter;
-use Swiftly\Dependency\Tests\AbstractInspectorTest;
+use Swiftly\Dependency\Tests\AbstractInspectorTestCase;
 
 /**
  * Trait used to provide example functions.
  *
- * @mixin AbstractInspectorTest
- *
- * @upgrade:phpunit10 Refactor to #[DataProviderExternal]
+ * @mixin AbstractInspectorTestCase
  */
 trait ExampleFunctionTrait
 {
-    public function exampleFunctionTrait(): array
+    public function exampleFunctionProvider(): array
     {
         return [
             'array' => [

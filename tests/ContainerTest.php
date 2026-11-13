@@ -2,6 +2,9 @@
 
 namespace Swiftly\Dependency\Tests;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Container;
 use Swiftly\Dependency\Exception\ServiceInstantiationException;
@@ -10,23 +13,22 @@ use Swiftly\Dependency\Exception\UnexpectedTypeException;
 use Swiftly\Dependency\Inspector\ReflectionInspector;
 use Swiftly\Dependency\InspectorInterface;
 
-/**
- * @covers \Swiftly\Dependency\Container
- * @uses \Swiftly\Dependency\Inspector\ReflectionInspector
- * @uses \Swiftly\Dependency\Entry
- * @uses \Swiftly\Dependency\Type
- * @uses \Swiftly\Dependency\Parameter
- * @uses \Swiftly\Dependency\Parameter\StringParameter
- * @uses \Swiftly\Dependency\Parameter\NumericParameter
- * @uses \Swiftly\Dependency\Parameter\NamedClassParameter
- */
+#[CoversClass(Container::class)]
+#[UsesClass(ReflectionInspector::class)]
+#[UsesClass(Entry::class)]
+#[UsesClass(Type::class)]
+#[UsesClass(Parameter::class)]
+#[UsesClass(StringParameter::class)]
+#[UsesClass(NumericParameter::class)]
+#[UsesClass(NamedClassParameter::class)]
+
 final class ContainerTest extends TestCase
 {
     private Container $container;
 
     public function setUp(): void
     {
-        $this->container = new Container(new ReflectionInspector());
+        $this->container = new Container();
     }
 
     public function exampleMethod(): object
@@ -56,13 +58,10 @@ final class ContainerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider exampleServiceProvider
-     * @param mixed $factory_or_instance
-     */
-    public function testCanRegisterService(string $service, $factory_or_instance): void
+    #[DataProvider('exampleServiceProvider')]
+    public function testCanRegisterService(string $service, mixed $factoryOrInstance): void
     {
-        $this->container->register($service, $factory_or_instance);
+        $this->container->register($service, $factoryOrInstance);
 
         self::assertTrue($this->container->has($service));
         self::assertInstanceOf($service, $this->container->get($service));

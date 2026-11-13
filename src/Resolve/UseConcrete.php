@@ -11,8 +11,10 @@ use Swiftly\Dependency\ResolvableInterface;
 /**
  * Will provide a parameter with the named concrete implementation.
  *
- * Useful when you want to use an interface type hint for a parameter, but you
- * want to force the use of a known class.
+ * Useful when you want to use an interface type hint for a parameter, but want
+ * to force the use of a known class.
+ *
+ * @upgrade:php8.2 Mark class as readonly
  *
  * @api
  *
@@ -26,7 +28,7 @@ final class UseConcrete implements ResolvableInterface, ContainerAwareInterface
      * @param class-string<T> $class
      */
     public function __construct(
-        private string $class,
+        private readonly string $class,
     ) {
     }
 

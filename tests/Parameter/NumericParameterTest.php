@@ -2,14 +2,14 @@
 
 namespace Swiftly\Dependency\Tests\Parameter;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
 use Swiftly\Dependency\Parameter\NumericParameter;
 
-/**
- * @covers \Swiftly\Dependency\Parameter
- * @covers \Swiftly\Dependency\Parameter\NumericParameter
- */
+#[CoversClass(Parameter::class)]
+#[CoversClass(NumericParameter::class)]
+#[CoversClass(UndefinedDefaultValueException::class)]
 final class NumericParameterTest extends TestCase
 {
     private NumericParameter $parameter;
@@ -20,7 +20,7 @@ final class NumericParameterTest extends TestCase
             'value',
             'float',
             false,
-            static function () { return 3.14; }
+            static fn () => 3.14,
         );
     }
 
@@ -85,9 +85,6 @@ final class NumericParameterTest extends TestCase
         self::assertTrue($parameter->accepts(null));
     }
 
-    /**
-     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
-     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);

@@ -2,15 +2,16 @@
 
 namespace Swiftly\Dependency\Tests\Parameter;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
+use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\NamedClassParameter;
 
-/**
- * @covers \Swiftly\Dependency\Parameter
- * @covers \Swiftly\Dependency\Parameter\NamedClassParameter
- */
+#[CoversClass(Parameter::class)]
+#[CoversClass(NamedClassParameter::class)]
+#[CoversClass(UndefinedDefaultValueException::class)]
 final class NamedClassParameterTest extends TestCase
 {
     private NamedClassParameter $parameter;
@@ -21,7 +22,7 @@ final class NamedClassParameterTest extends TestCase
             'value',
             TestCase::class,
             false,
-            function () { return $this; }
+            fn () => $this,
         );
     }
 
@@ -59,7 +60,7 @@ final class NamedClassParameterTest extends TestCase
     public function testCanCheckAcceptableInput(): void
     {
         self::assertTrue($this->parameter->accepts($this));
-        self::assertTrue($this->parameter->accepts(new class () extends TestCase {}));
+        self::assertTrue($this->parameter->accepts(new class ('test') extends TestCase {}));
 
         self::assertFalse($this->parameter->accepts('Hi!'));
         self::assertFalse($this->parameter->accepts(42));
@@ -77,9 +78,6 @@ final class NamedClassParameterTest extends TestCase
         self::assertTrue($parameter->accepts(null));
     }
 
-    /**
-     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
-     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);

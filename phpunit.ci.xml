@@ -5,7 +5,7 @@
     noInteraction="true">
     <testsuites>
         <testsuite name="unit">
-            <directory suffix=".php">tests</directory>
+            <directory>tests</directory>
             <exclude>tests/example</exclude>
         </testsuite>
     </testsuites>

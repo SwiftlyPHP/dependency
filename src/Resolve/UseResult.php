@@ -11,6 +11,8 @@ use Swiftly\Dependency\ResolvableInterface;
 /**
  * Will provide the parameter with the result of calling a method or function.
  *
+ * @upgrade:php8.2 Mark class as readonly
+ *
  * @api
  *
  * @template T
@@ -25,7 +27,7 @@ final class UseResult implements ResolvableInterface, ContainerAwareInterface
      */
     public function __construct(
         private $callback,
-        private array $parameters = [],
+        private readonly array $parameters = [],
     ) {
     }
 

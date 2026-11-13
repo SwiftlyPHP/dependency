@@ -3,6 +3,10 @@
 namespace Swiftly\Dependency\Tests\Inspector;
 
 use ExampleClass;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestDox;
+use PHPUnit\Framework\Attributes\UsesClass;
 use Swiftly\Dependency\Exception\CompoundTypeException;
 use Swiftly\Dependency\Exception\UndefinedStructureException;
 use Swiftly\Dependency\Exception\UnknownTypeException;
@@ -11,21 +15,20 @@ use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\ArrayParameter;
 use Swiftly\Dependency\Parameter\MixedParameter;
 use Swiftly\Dependency\Parameter\StringParameter;
-use Swiftly\Dependency\Tests\AbstractInspectorTest;
+use Swiftly\Dependency\Tests\AbstractInspectorTestCase;
 
-/**
- * @covers \Swiftly\Dependency\Inspector\ReflectionInspector
- * @uses \Swiftly\Dependency\Parameter
- * @uses \Swiftly\Dependency\Parameter\ArrayParameter
- * @uses \Swiftly\Dependency\Parameter\BooleanParameter
- * @uses \Swiftly\Dependency\Parameter\MixedParameter
- * @uses \Swiftly\Dependency\Parameter\NamedClassParameter
- * @uses \Swiftly\Dependency\Parameter\NumericParameter
- * @uses \Swiftly\Dependency\Parameter\ObjectParameter
- * @uses \Swiftly\Dependency\Parameter\StringParameter
- * @uses \Swiftly\Dependency\Type
- */
-final class ReflectionInspectorTest extends AbstractInspectorTest
+#[CoversClass(ReflectionInspector::class)]
+#[CoversClass(UndefinedStructureException::class)]
+#[UsesClass(Parameter::class)]
+#[UsesClass(ArrayParameter::class)]
+#[UsesClass(BooleanParameter::class)]
+#[UsesClass(MixedParameter::class)]
+#[UsesClass(NamedClassParameter::class)]
+#[UsesClass(NumericParameter::class)]
+#[UsesClass(ObjectParameter::class)]
+#[UsesClass(StringParameter::class)]
+#[UsesClass(Type::class)]
+final class ReflectionInspectorTest extends AbstractInspectorTestCase
 {
     private ReflectionInspector $inspector;
 
@@ -35,13 +38,13 @@ final class ReflectionInspectorTest extends AbstractInspectorTest
     }
 
     /**
-     * @dataProvider exampleFunctionTrait
-     * @testdox Can inspect single parameter of type $_dataName
-     * @param callable $function                 Function to inspect
+     * @param callable-string $function          Function to inspect
      * @param string $name                       Expected parameter name
      * @param class-string<Parameter> $classname Expected parameter class
      * @param string $type                       Expected parameter type
      */
+    #[DataProvider('exampleFunctionProvider')]
+    #[TestDox('Can inspect single parameter of type $_dataName')]
     public function testCanInspectSingleParameter(callable $function, string $name, string $classname, string $type): void
     {
         [$parameter] = $this->inspector->inspectFunction($function);
@@ -73,10 +76,8 @@ final class ReflectionInspectorTest extends AbstractInspectorTest
         self::assertSame('Hi!', ($parameter->getDefaultCallback())());
     }
 
-    /**
-     * @dataProvider exampleClassProvider
-     * @testdox Can inspect constructor of $_dataName
-     */
+    #[DataProvider('exampleClassProvider')]
+    #[TestDox('Can inspect constructor of $_dataName')]
     public function testCanInspectConstructorParameters(string $classname, array $expected): void
     {
         $parameters = $this->inspector->inspectClass($classname);
@@ -84,10 +85,8 @@ final class ReflectionInspectorTest extends AbstractInspectorTest
         self::assertParameters($expected, $parameters);
     }
 
-    /**
-     * @dataProvider exampleMethodProvider
-     * @testdox Can inspect $example->$_dataName method parameters
-     */
+    #[DataProvider('exampleMethodProvider')]
+    #[TestDox('Can inspect $example->$_dataName method parameters')]
     public function testCanInspectInstanceMethodParameters(string $method, array $expected): void
     {
         $class = new ExampleClass($this);
@@ -97,10 +96,8 @@ final class ReflectionInspectorTest extends AbstractInspectorTest
         self::assertParameters($expected, $parameters);
     }
 
-    /**
-     * @dataProvider exampleMethodProvider
-     * @testdox Can inspect ExampleClass::$_dataName method parameters
-     */
+    #[DataProvider('exampleMethodProvider')]
+    #[TestDox('Can inspect ExampleClass::$_dataName method parameters')]
     public function testCanInspectClassnameMethodParameters(string $method, array $expected): void
     {
         $class = ExampleClass::class;
@@ -110,9 +107,6 @@ final class ReflectionInspectorTest extends AbstractInspectorTest
         self::assertParameters($expected, $parameters);
     }
 
-    /**
-     * @covers \Swiftly\Dependency\Exception\UndefinedStructureException
-     */
     public function testThrowsIfFunctionDoesNotExist(): void
     {
         self::expectException(UndefinedStructureException::class);

@@ -2,15 +2,18 @@
 
 namespace Swiftly\Dependency\Tests\Exception;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
+use Swiftly\Dependency\Parameter;
+use Swiftly\Dependency\ParameterException;
 
 /**
  * All `ParameterException` types are covered by our API guarantee.
  *
- * @covers \Swiftly\Dependency\ParameterException
- * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
  */
+#[CoversClass(ParameterException::class)]
+#[CoversClass(UndefinedDefaultValueException::class)]
 final class UndefinedDefaultValueExceptionTest extends TestCase
 {
     private UndefinedDefaultValueException $exception;

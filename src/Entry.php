@@ -7,12 +7,14 @@ use function in_array;
 /**
  * Stores information regarding a single service entry in the service container.
  *
+ * @upgrade:php8.2 Mark class as readonly
+ *
  * @template T of object
  */
 final class Entry
 {
     /** @var class-string<T> $type */
-    public string $type;
+    public readonly string $type;
 
     /** @var null|ProvideInterface|callable():T $factory */
     public $factory;

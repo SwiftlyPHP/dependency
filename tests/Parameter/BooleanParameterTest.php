@@ -2,14 +2,15 @@
 
 namespace Swiftly\Dependency\Tests\Parameter;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
+use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\BooleanParameter;
 
-/**
- * @covers \Swiftly\Dependency\Parameter
- * @covers \Swiftly\Dependency\Parameter\BooleanParameter
- */
+#[CoversClass(Parameter::class)]
+#[CoversClass(BooleanParameter::class)]
+#[CoversClass(UndefinedDefaultValueException::class)]
 final class BooleanParameterTest extends TestCase
 {
     private BooleanParameter $parameter;
@@ -19,7 +20,7 @@ final class BooleanParameterTest extends TestCase
         $this->parameter = new BooleanParameter(
             'value',
             false,
-            static function () { return true; }
+            static fn () => true,
         );
     }
 
@@ -80,9 +81,6 @@ final class BooleanParameterTest extends TestCase
         self::assertTrue($parameter->accepts(null));
     }
 
-    /**
-     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
-     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);

@@ -11,6 +11,8 @@ use function is_a;
 /**
  * Base class from which all parameter types inherit.
  *
+ * @upgrade:php8.2 Mark class as readonly
+ *
  * @api
  * @psalm-immutable
  * @template T
@@ -18,9 +20,9 @@ use function is_a;
 abstract class Parameter
 {
     /** @var non-empty-string (case-sensitive) */
-    protected string $name;
+    protected readonly string $name;
 
-    protected bool $isNullable;
+    protected readonly bool $isNullable;
 
     /**
      * Declared default value for this parameter.
@@ -35,7 +37,7 @@ abstract class Parameter
     protected $default;
 
     /** @var list<ReflectionAttribute<ContainerAwareInterface>> */
-    protected array $attributes = [];
+    protected readonly array $attributes = [];
 
     /**
      * Create a new parameter definition.
@@ -45,7 +47,6 @@ abstract class Parameter
      * `parent::__construct`.
      *
      * @param non-empty-string $name
-     * @param bool $isNullable
      * @param null|callable():T $default
      * @param list<ReflectionAttribute<ContainerAwareInterface>> $attributes
      */

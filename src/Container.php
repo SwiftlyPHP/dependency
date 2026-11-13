@@ -24,21 +24,17 @@ use function call_user_func_array;
  * Container responsible for storing and creating services.
  *
  * @api
- *
- * @upgrade:php8.1 Drop null hint and use `new` in constructor
  */
 class Container
 {
-    private InspectorInterface $inspector;
-
     /** @var array<class-string, Entry> $entries */
-    private array $entries;
+    private array $entries = [];
 
     /** @var array<class-string, class-string> $aliases */
-    private array $aliases;
+    private array $aliases = [];
 
     /** @var array<class-string, object> $cache */
-    private array $cache;
+    private array $cache = [];
 
     /**
      * Create a new service container.
@@ -46,14 +42,11 @@ class Container
      * By default the `ReflectionInspector` is used, but if you need to supply
      * your own inspector you may pass it in here.
      *
-     * @param InspectorInterface|null $inspector Parameter inspector.
+     * @param InspectorInterface $inspector Parameter inspector.
      */
-    public function __construct(?InspectorInterface $inspector = null)
-    {
-        $this->inspector = $inspector ?? new ReflectionInspector();
-        $this->entries = [];
-        $this->aliases = [];
-        $this->cache = [];
+    public function __construct(
+        private InspectorInterface $inspector = new ReflectionInspector(),
+    ) {
     }
 
     /**

@@ -6,12 +6,12 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "php": "^8"
+        "php": "^8.1"
     },
     "require-dev": {
-        "vimeo/psalm": "^5.26",
-        "phpunit/phpunit": "^9.6",
-        "friendsofphp/php-cs-fixer": "^3.85"
+        "vimeo/psalm": "^6.21",
+        "phpunit/phpunit": "^10.5",
+        "friendsofphp/php-cs-fixer": "^3.95"
     },
     "autoload": {
         "psr-4": {
@@ -24,7 +24,11 @@
         }
     },
     "scripts": {
-        "fix": "@php vendor/bin/php-cs-fixer fix --diff",
-        "lint": "@php vendor/bin/php-cs-fixer check --diff"
+        "style": "@php vendor/bin/php-cs-fixer fix --diff",
+        "lint": "@php vendor/bin/php-cs-fixer check --diff",
+        "analyse": "@php vendor/bin/psalm --show-info=true",
+        "test:unit": "@php vendor/bin/phpunit --testsuite=unit",
+        "test": ["@test:unit"],
+        "check": ["@lint", "@analyse"]
     }
 }

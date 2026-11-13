@@ -2,14 +2,15 @@
 
 namespace Swiftly\Dependency\Tests\Parameter;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
+use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\ArrayParameter;
 
-/**
- * @covers \Swiftly\Dependency\Parameter
- * @covers \Swiftly\Dependency\Parameter\ArrayParameter
- */
+#[CoversClass(Parameter::class)]
+#[CoversClass(ArrayParameter::class)]
+#[CoversClass(UndefinedDefaultValueException::class)]
 final class ArrayParameterTest extends TestCase
 {
     private ArrayParameter $parameter;
@@ -19,7 +20,7 @@ final class ArrayParameterTest extends TestCase
         $this->parameter = new ArrayParameter(
             'value',
             false,
-            static function () { return ['Hi!']; }
+            static fn () => ['Hi!'],
         );
     }
 
@@ -71,9 +72,6 @@ final class ArrayParameterTest extends TestCase
         self::assertTrue($parameter->accepts(null));
     }
 
-    /**
-     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
-     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);

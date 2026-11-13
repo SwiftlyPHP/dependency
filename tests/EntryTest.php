@@ -2,12 +2,11 @@
 
 namespace Swiftly\Dependency\Tests;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Entry;
 
-/**
- * @covers \Swiftly\Dependency\Entry
- */
+#[CoversClass(Entry::class)]
 final class EntryTest extends TestCase
 {
     private Entry $entry;

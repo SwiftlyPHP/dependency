@@ -2,15 +2,16 @@
 
 namespace Swiftly\Dependency\Tests\Parameter;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Swiftly\Dependency\Exception\UndefinedDefaultValueException;
+use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\ObjectParameter;
 
-/**
- * @covers \Swiftly\Dependency\Parameter
- * @covers \Swiftly\Dependency\Parameter\ObjectParameter
- */
+#[CoversClass(Parameter::class)]
+#[CoversClass(ObjectParameter::class)]
+#[CoversClass(UndefinedDefaultValueException::class)]
 final class ObjectParameterTest extends TestCase
 {
     private ObjectParameter $parameter;
@@ -20,7 +21,7 @@ final class ObjectParameterTest extends TestCase
         $this->parameter = new ObjectParameter(
             'value',
             false,
-            function () { return $this; }
+            fn () => $this,
         );
     }
 
@@ -77,9 +78,6 @@ final class ObjectParameterTest extends TestCase
         self::assertTrue($parameter->accepts(null));
     }
 
-    /**
-     * @covers \Swiftly\Dependency\Exception\UndefinedDefaultValueException
-     */
     public function testThrowsIfNoDefaultValueAvailable(): void
     {
         self::expectException(UndefinedDefaultValueException::class);
