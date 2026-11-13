@@ -12,7 +12,6 @@ use ReflectionNamedType;
 use ReflectionParameter;
 use Swiftly\Dependency\ContainerAwareInterface;
 use Swiftly\Dependency\Exception\ReflectionException;
-use Swiftly\Dependency\Exception\UnknownTypeException;
 use Swiftly\Dependency\InspectorInterface;
 use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Parameter\ArrayParameter;
@@ -22,11 +21,9 @@ use Swiftly\Dependency\Parameter\NamedClassParameter;
 use Swiftly\Dependency\Parameter\NumericParameter;
 use Swiftly\Dependency\Parameter\ObjectParameter;
 use Swiftly\Dependency\Parameter\StringParameter;
-use Swiftly\Dependency\ResolvableInterface;
 use Swiftly\Dependency\Type;
 
 use function class_exists;
-use function count;
 use function get_class;
 use function is_object;
 

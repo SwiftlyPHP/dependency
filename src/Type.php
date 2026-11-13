@@ -5,8 +5,6 @@ namespace Swiftly\Dependency;
 use Closure;
 
 use function class_exists;
-use function get_class;
-use function gettype;
 use function interface_exists;
 use function is_array;
 use function is_callable;

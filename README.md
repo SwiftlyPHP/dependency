@@ -16,6 +16,16 @@ While not as fully-featured as some containers such as Symfony's or Laravel's,
 this component offers a minimal, easy to use interface for managing
 dependencies.
 
+## Index
+
+* [Installation](#installation)
+* [Usage](#usage)
+    * [The Basics](#the-basics)
+    * [Object Hierarchies](#object-hierarchies)
+    * [Factories](#factories)
+    * [Function Calling](#function-calling)
+    * [Tagging](#tagging)
+
 ## Installation
 
 To install the library use [Composer](https://getcomposer.org/):
@@ -36,7 +46,7 @@ together in a way that is easy to reason about and is composable.
 Over time however, you'll likely end up with a lot of classes. Objects will
 start to rely on other objects. You end up with constructors that require two or
 three objects, whose own constructors take the same again, quickly spirally into
-a hierarchy that is complicated to manage.
+a hierarchy that can become complicated to manage.
 
 Enter the service container:
 
@@ -60,7 +70,7 @@ class MyClass
 {
     public function __construct(
         private string $name,
-        private int $age
+        private int $age,
     ) {}
 
     public function speak()
@@ -78,11 +88,10 @@ We can register it with the container like so:
 use Swiftly\Dependency\Container;
 
 $container = new Container();
-$container->register(MyClass::class)
-    ->setArguments([
-        'name' => 'John',
-        'age' => 42
-    ]);
+$container->register(MyClass::class)->setArguments([
+    'name' => 'John',
+    'age' => 42,
+]);
 ```
 
 Here we've let the container know about our custom class and also provided the
@@ -117,14 +126,14 @@ Imagine the following classes:
 class Person
 {
     public function __construct(
-        public string $name
+        public string $name,
     ) {}
 }
 
 class Salary
 {
     public function __construct(
-        public int $yearly
+        public int $yearly,
     ) {}
 }
 
@@ -132,7 +141,7 @@ class Job
 {
     public function __construct(
         public string $title,
-        protected Salary $salary
+        protected Salary $salary,
     ) {}
 }
 
@@ -140,12 +149,12 @@ class Employee
 {
     public function __construct(
         Person $person,
-        Job $role
+        Job $role,
     ) {}
 
     public function speak()
     {
-        return "I'm " . $this->person->name ", I am a " . $this->job->title;
+        return "I'm " . $this->person->name ", a " . $this->job->title;
     }
 }
 ```
@@ -180,25 +189,27 @@ $container = new Container();
 $container->register(Person::class)->setArguments(['name' => 'Jim']);
 $container->register(Salary::class)->setArguments(['yearly' => 42_000]);
 $container->register(Job::class)->setArguments(['title' => 'Developer']);
-$container->register(Employee:class);
+$container->register(Employee::class);
 
-$employee = $container->get(Employee:class);
+$employee = $container->get(Employee::class);
 
-// "I'm Jim, I am a Developer"
+// "I'm Jim, a Developer"
 echo $employee->speak();
 ```
 
 Instead of having to construct a new hierarchy every time we want an instance of
 `Employee` we simply register our classes once and then call `get()` when
-needed. The container inspects the constructors of each class, going down the 
-hierarchy as far as necessary and resolving each of their requirements if it is
-able to do so. (Or throwing a helpful exception if not).
+we want to create one. The container inspects the constructors of each class,
+going down the  hierarchy as far as necessary and resolving each of their
+requirements if it is able to do so. (Or throwing a detailed exception if not).
 
 ### Factories
 
 Sometimes when creating an object you may need to perform some additional setup,
 such as opening a database connection or reading a config file. This is where
 factories come in.
+
+The second argument to `Container->register(...)` allows passing a `$factory`.
 
 At their core, factories are just functions that create and return objects.
 
@@ -219,8 +230,8 @@ echo $person->name;
 ```
 
 This code is functionality equivalent to the `Person` examples above, but
-instead of using the `setArguments()` utility the values have been hardcoded in
-the factory.
+instead of using `setArguments()` the values have been hardcoded in the factory
+function.
 
 A more practical example however might look like:
 
@@ -240,7 +251,7 @@ $container->register(Database::class, function () {
 Now whenever we `get()` a copy of `Database` we can be confident it is already
 open and ready for use.
 
-Great! But what if your factory also needs values passed into it?
+Great! But what if we also need to pass values into the factory?
 
 ```php
 <?php
@@ -248,26 +259,65 @@ Great! But what if your factory also needs values passed into it?
 use Swiftly\Dependency\Container;
 
 $container = new Container();
-$container->register(HttpTransport::class, function (string $user_agent) {
-    new CurlTransport($user_agent);
+$container->register(HttpTransport::class, function (string $userAgent) {
+    new CurlTransport($userAgent);
 })->setArguments([
-    'user_agent' => 'PHP/Curl'
+    'userAgent' => 'PHP/Curl',
 ]);
-$container->register(
-    HttpClient::class,
-    function (HttpTransport $transport) {
-        $client = new HttpClient($transport);
-        $client->setTimeout(2000);
-        $client->setBlocking(true);
-        return $client;
-    }
-);
+$container->register(HttpClient::class, function (HttpTransport $transport) {
+    $client = new HttpClient($transport);
+    $client->setTimeout(2000);
+    $client->setBlocking(true);
+
+    return $client;
+});
 ```
+
+In this example the container will construct a `HttpClient` using a
+`CurlTransport` with `$userAgent = 'PHP/Curl'`.
 
 Here we've uncovered 2 key points:
 1. Arguments you provide to `setArguments()` are forwarded to the factory
 2. The container will resolve [type hinted](https://www.php.net/manual/en/language.types.declarations.php)
     factory arguments where possible.
+
+### Function Calling
+
+Now that we've registered our classes and how to construct them, presumably we
+need to use them across our codebase.
+
+A basic approach would be to fulfill function parameters manually:
+
+```php
+<?php
+
+function sendCustomerNotifications(
+    Database $database,
+    EmailHandler $emailHandler,
+    LoggerInterface $logger,
+): void {
+    // ... some business logic
+}
+
+sendCustomerNotifications(
+    $container->get(Database::class),
+    $container->get(EmailHandler::class),
+    $container->get(LoggerInterface::class),
+);
+```
+
+While this does work (and is a completely valid approach!) the container also
+provides a `call()` method to allow flow control to be inverted.
+
+```php
+<?php
+
+$container->call(sendCustomerNotifications(...));
+```
+
+This achieves exactly the same outcome, but here the container automatically
+infers and passes function arguments for you. In fact this is exactly the
+mechanism by which registered [factory](#factories) functions are called.
 
 ### Tagging
 
@@ -322,12 +372,9 @@ To group them together we can use tags:
 use Swiftly\Dependency\Container;
 
 $container = new Container();
-$container->register(EmailTask::class)
-    ->setTags(['task']);
-$container->register(NotificationTask::class)
-    ->setTags(['task']);
-$container->register(LogTask::class)
-    ->setTags(['task']);
+$container->register(EmailTask::class)->setTags(['task']);
+$container->register(NotificationTask::class)->setTags(['task']);
+$container->register(LogTask::class)->setTags(['task']);
 
 foreach ($container->tagged('task') as $task) {
     $task->execute();
@@ -356,6 +403,8 @@ foreach ($container->tagged('task', TaskInterface::class) as $task) {
 }
 ```
 
-If any of the returned services don't match `TaskInterface` an exception will be
-thrown explaining as much.
+This elimates the need for an `assert($task instanceof TaskInterface)` statement
+or a `/** @var TaskInterface */` comment.
 
+If any of the returned services don't match `TaskInterface` an exception will be
+thrown, providing a runtime guarentee of class type safety.
