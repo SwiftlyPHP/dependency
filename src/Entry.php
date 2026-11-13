@@ -12,7 +12,7 @@ use function in_array;
 final class Entry
 {
     /** @var class-string<T> $type */
-    public string $type;
+    public readonly string $type;
 
     /** @var null|ProvideInterface|callable():T $factory */
     public $factory;

@@ -10,6 +10,7 @@
     <testsuites>
         <testsuite name="unit">
             <directory suffix=".php">tests</directory>
+            <exclude>tests/example</exclude>
         </testsuite>
     </testsuites>
     <coverage>
