@@ -7,9 +7,9 @@ use LogicException;
 use function sprintf;
 
 /**
- * Indicates general errors that occured in the container.
+ * Indicates a logic error has occured in the container.
  *
- * These should normally lead to a code change.
+ * These should normally lead to configuration changes.
  *
  * @api
  */
@@ -27,6 +27,10 @@ final class ContainerException extends LogicException
         ));
     }
 
+    /**
+     * @param class-string $actual
+     * @param class-string $expected
+     */
     public static function typeConstraint(
         string $actual,
         string $expected,

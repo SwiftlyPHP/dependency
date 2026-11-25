@@ -18,6 +18,8 @@ interface ConstraintInterface
 
     /**
      * Determine whether this constraint is for a class, interface or enum type.
+     *
+     * @psalm-assert-if-true class-string $this->getName()
      */
     public function isClassType(): bool;
 

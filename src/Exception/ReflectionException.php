@@ -2,7 +2,6 @@
 
 namespace Swiftly\Dependency\Exception;
 
-use ReflectionFunctionAbstract;
 use ReflectionParameter;
 use Swiftly\Dependency\Debug;
 

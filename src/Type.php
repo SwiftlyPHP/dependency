@@ -37,12 +37,10 @@ abstract class Type
      * @template T of object
      *
      * @psalm-assert-if-true T $subject
-     *
-     * @param T|callable():T $subject
      */
     final public static function isServiceInstance(object $subject): bool
     {
-        return is_object($subject) && !$subject instanceof Closure;
+        return !$subject instanceof Closure;
     }
 
     /**

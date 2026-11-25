@@ -71,8 +71,6 @@ final class Recipe
 
     /**
      * @param non-empty-string $tag
-     *
-     * @return $this
      */
     public function hasTag(string $tag): bool
     {

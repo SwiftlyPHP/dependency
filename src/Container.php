@@ -5,10 +5,8 @@ namespace Swiftly\Dependency;
 use Closure;
 use Exception;
 use ReflectionClass;
+use Swiftly\Dependency\Exception\ArgumentException;
 use Swiftly\Dependency\Exception\ContainerException;
-use Swiftly\Dependency\Exception\InvalidArgumentException;
-use Swiftly\Dependency\Exception\MissingArgumentException;
-use Swiftly\Dependency\Exception\NestedServiceException;
 use Swiftly\Dependency\Exception\ReflectionException;
 use Swiftly\Dependency\Exception\ServiceInstantiationException;
 use Swiftly\Dependency\Inspector\ReflectionInspector;
@@ -119,8 +117,9 @@ class Container
      *
      * @param class-string<T> $service
      *
-     * @throws ContainerException When trying to fetch a unknown service.
-     * @throws ContainerException If the service type constraint is broken.
+     * @throws ContainerException
+     * @throws ReflectionException
+     * @throws ArgumentException
      *
      * @return T
      */
@@ -195,9 +194,13 @@ class Container
      * Attempts to resolve and call the provided function.
      *
      * @template T
+     * @template K
      *
-     * @param callable():T $callback
-     * @param array<non-empty-string, mixed> $parameters
+     * @param callable(...K):T $callback
+     * @param array<non-empty-string,K> $parameters
+     *
+     * @throws ReflectionException
+     * @throws ArgumentException
      *
      * @return T
      */
@@ -251,11 +254,9 @@ class Container
      * @template T
      *
      * @param list<Parameter<T>> $parameters
-     * @param array<non-empty-string, mixed> $arguments
+     * @param array<non-empty-string,T> $arguments
      *
-     * @throws NestedServiceException
-     * @throws InvalidArgumentException
-     * @throws MissingArgumentException
+     * @throws ArgumentException
      *
      * @return list<T>
      */
@@ -274,11 +275,7 @@ class Container
             }
 
             if (!$parameter->type->isSatisfiedBy($value)) {
-                throw new InvalidArgumentException(
-                    $name,
-                    $parameter->type->getName(),
-                    Type::getName($value),
-                );
+                throw ArgumentException::invalidType($parameter, $value);
             }
 
             $prepared[] = $value;
@@ -291,9 +288,6 @@ class Container
      * @template T
      *
      * @param Parameter<T> $parameter
-     *
-     * @throws NestedServiceException
-     * @throws MissingArgumentException
      *
      * @return null|T
      */

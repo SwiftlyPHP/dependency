@@ -28,7 +28,6 @@ use Swiftly\Dependency\Type\ObjectConstraint;
 use Swiftly\Dependency\Type\StringConstraint;
 use Swiftly\Dependency\Type\UnionConstraint;
 
-use function assert;
 use function class_exists;
 use function get_class;
 use function is_object;
@@ -43,7 +42,7 @@ use function is_object;
 class ReflectionInspector implements InspectorInterface
 {
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function inspectClass(string $class): array
     {
@@ -63,7 +62,7 @@ class ReflectionInspector implements InspectorInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function inspectMethod(Object|string $class, string $method): array
     {
@@ -82,7 +81,9 @@ class ReflectionInspector implements InspectorInterface
         return $this->inspectFromReflection($reflection);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * @inheritDoc
+     */
     public function inspectFunction(Closure|string $function): array
     {
         try {
@@ -98,7 +99,6 @@ class ReflectionInspector implements InspectorInterface
     /**
      * Return information about the given reflected method or function.
      *
-     * @param ReflectionFunctionAbstract $reflection
      * @return list<Parameter>
      */
     private function inspectFromReflection(
@@ -115,28 +115,26 @@ class ReflectionInspector implements InspectorInterface
 
     private function inspectParameter(ReflectionParameter $parameter): Parameter
     {
-        $type = $parameter->getType();
-        $constraint = null !== $type
-            ? self::constraintFromReflection($parameter, $type)
+        $constraint = $parameter->hasType()
+            ? self::constraintFromReflection($parameter, $parameter->getType())
             : new MixedConstraint();
 
         return new Parameter(
             $parameter->getName(),
             $constraint,
             self::prepareDefaultCallback($parameter),
-            [],
         );
     }
 
     /**
-     * @psalm-assert ReflectionNamedType|ReflectionUnionType|ReflectionIntersectionType $type
+     * @throws ReflectionException
      */
     private static function constraintFromReflection(
         ReflectionParameter $parameter,
         ReflectionType $type,
     ): ConstraintInterface {
         if ($type instanceof ReflectionNamedType) {
-            return self::mapConstraint($type->getName());
+            return self::mapConstraint($parameter, $type);
         }
 
         if ($type instanceof ReflectionUnionType) {
@@ -154,9 +152,18 @@ class ReflectionInspector implements InspectorInterface
         throw ReflectionException::unknownType($parameter);
     }
 
-    private static function mapConstraint(string $typeName): ConstraintInterface
-    {
-        return match ($typeName) {
+    /**
+     * @throws ReflectionException
+     */
+    private static function mapConstraint(
+        ReflectionParameter $parameter,
+        ReflectionNamedType $type,
+    ): ConstraintInterface {
+        if (!$type->isBuiltin()) {
+            return new ClassConstraint($type->getName());
+        }
+
+        return match ($type->getName()) {
             Type::TYPE_ARRAY => new ArrayConstraint(),
             Type::TYPE_BOOL => new BoolConstraint(),
             Type::TYPE_FLOAT => new FloatConstraint(),
@@ -164,7 +171,7 @@ class ReflectionInspector implements InspectorInterface
             Type::TYPE_MIXED => new MixedConstraint(),
             Type::TYPE_OBJECT => new ObjectConstraint(),
             Type::TYPE_STRING => new StringConstraint(),
-            default => new ClassConstraint($typeName),
+            default => throw ReflectionException::unknownType($parameter),
         };
     }
 
@@ -181,11 +188,14 @@ class ReflectionInspector implements InspectorInterface
             $members[] = self::constraintFromReflection($parameter, $type);
         }
 
-        assert(!empty($members));
-
         return $members;
     }
 
+    /**
+     * @template T
+     *
+     * @return null|Closure():T
+     */
     private static function prepareDefaultCallback(
         ReflectionParameter $reflectionParameter,
     ): ?Closure {
