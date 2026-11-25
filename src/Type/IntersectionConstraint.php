@@ -23,7 +23,7 @@ final class IntersectionConstraint implements CompoundConstraintInterface
      * @param non-empty-list<ConstraintInterface<T>> $members
      */
     public function __construct(
-        private array $members,
+        private readonly array $members,
     ) {
     }
 

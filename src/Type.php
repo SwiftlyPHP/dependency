@@ -38,25 +38,19 @@ abstract class Type
      *
      * @psalm-assert-if-true T $subject
      *
-     * @param T|ProvideInterface<T>|callable():T $subject
+     * @param T|callable():T $subject
      */
-    final public static function isServiceInstance($subject): bool
+    final public static function isServiceInstance(object $subject): bool
     {
-        return is_object($subject)
-            && !(
-                $subject instanceof Closure
-                || $subject instanceof ProvideInterface
-            );
+        return is_object($subject) && !$subject instanceof Closure;
     }
 
     /**
      * Determine if the subject is a class method callable.
      *
-     * @psalm-assert-if-true callable-array&callable-method $subject
-     * @param mixed $subject Callable variable
-     * @return bool          Is method call?
+     * @psalm-assert-if-true callable-method $subject
      */
-    final public static function isMethod($subject): bool
+    final public static function isMethod(mixed $subject): bool
     {
         return is_callable($subject) && is_array($subject);
     }
@@ -65,10 +59,8 @@ abstract class Type
      * Determine if the subject is a valid class or interface name.
      *
      * @psalm-assert-if-true class-string $subject
-     * @param mixed $subject Subject variable
-     * @return bool          Is class name?
      */
-    final public static function isClassname($subject): bool
+    final public static function isClassname(mixed $subject): bool
     {
         return is_string($subject)
             && (class_exists($subject) || interface_exists($subject));

@@ -2,9 +2,9 @@
 
 namespace Swiftly\Dependency;
 
+use Closure;
 use Exception;
 use ReflectionClass;
-use Swiftly\Dependency\Entry;
 use Swiftly\Dependency\Exception\ContainerException;
 use Swiftly\Dependency\Exception\InvalidArgumentException;
 use Swiftly\Dependency\Exception\MissingArgumentException;
@@ -27,13 +27,13 @@ use function call_user_func_array;
  */
 class Container
 {
-    /** @var array<class-string, Entry> $entries */
-    private array $entries = [];
+    /** @var array<class-string,Recipe> */
+    private array $recipes = [];
 
-    /** @var array<class-string, class-string> $aliases */
+    /** @var array<class-string,class-string> */
     private array $aliases = [];
 
-    /** @var array<class-string, object> $cache */
+    /** @var array<class-string,object> */
     private array $cache = [];
 
     /**
@@ -42,7 +42,7 @@ class Container
      * By default the `ReflectionInspector` is used, but if you need to supply
      * your own inspector you may pass it in here.
      *
-     * @param InspectorInterface $inspector Parameter inspector.
+     * @param $inspector Parameter inspector.
      */
     public function __construct(
         private InspectorInterface $inspector = new ReflectionInspector(),
@@ -58,21 +58,20 @@ class Container
      * @template T of object
      *
      * @param class-string<T> $service
-     * @param null|T|callable(mixed):T $factory
+     * @param null|T|Closure(mixed):T $factory
      *
-     * @return Entry<T>
+     * @return Recipe<T>
      */
     public function register(
         string $service,
-        object|callable|null $factory = null,
-    ): Entry {
-        if (null !== $factory && Type::isServiceInstance($factory)) {
-            $entry = Entry::fromInstance($service, $factory);
-        } else {
-            $entry = new Entry($service, $factory);
-        }
-
-        return ($this->entries[$service] = $entry);
+        object|null $factory = null,
+    ): Recipe {
+        return $this->recipes[$service] = new Recipe(
+            $service,
+            null !== $factory && Type::isServiceInstance($factory)
+                ? static fn () => $factory
+                : $factory,
+        );
     }
 
     /**
@@ -89,7 +88,7 @@ class Container
      */
     public function alias(string $service, string $alias): self
     {
-        if (!isset($this->entries[$service])) {
+        if (!isset($this->recipes[$service])) {
             throw ContainerException::missingService($service);
         }
 
@@ -102,7 +101,7 @@ class Container
      * Determine if the given service has been registered.
      *
      * @template T of object
-     * @psalm-assert-if-true T $this->entries[$service]
+     * @psalm-assert-if-true T $this->recipes[$service]
      *
      * @param class-string<T> $service Service type.
      *
@@ -110,7 +109,7 @@ class Container
      */
     public function has(string $service): bool
     {
-        return isset($this->entries[$this->aliases[$service] ?? $service]);
+        return isset($this->recipes[$this->aliases[$service] ?? $service]);
     }
 
     /**
@@ -132,20 +131,20 @@ class Container
         }
 
         $service = $this->aliases[$service] ?? $service;
-        $entry = $this->entries[$service];
+        $recipe = $this->recipes[$service];
 
         // Service might be a singleton
-        if (isset($this->cache[$service]) && $entry->once) {
+        if (isset($this->cache[$service]) && $recipe->isSingleton) {
             $instance = $this->cache[$service];
             self::assertType($instance, $service);
             return $instance;
         }
 
-        $factoryOrClass = self::factoryOrClass($entry);
+        $factoryOrClass = self::factoryOrClass($recipe);
 
         try {
             $parameters = $this->inspect($factoryOrClass);
-            $parameters = $this->prepare($parameters, $entry->arguments);
+            $parameters = $this->prepare($parameters, $recipe->defaultArguments);
         } catch (Exception $e) {
             throw new ServiceInstantiationException($service, $e);
         }
@@ -175,8 +174,8 @@ class Container
     {
         $resolved = [];
 
-        foreach ($this->entries as $name => $entry) {
-            if (!$entry->hasTag($tag)) {
+        foreach ($this->recipes as $name => $recipe) {
+            if (!$recipe->hasTag($tag)) {
                 continue;
             }
 
@@ -214,13 +213,13 @@ class Container
      *
      * @template T of object
      *
-     * @param Entry<T> $entry Service definition
-     * @return class-string|callable
-     * @psalm-return class-string<T>|callable():T
+     * @param Recipe<T> $recipe
+     *
+     * @return class-string<T>|Closure():T
      */
-    protected static function factoryOrClass(Entry $entry): callable|string
+    protected static function factoryOrClass(Recipe $recipe): callable|string
     {
-        return $entry->factory ?? $entry->type;
+        return $recipe->factory ?? $recipe->className;
     }
 
     /**
@@ -228,21 +227,21 @@ class Container
      *
      * Accepts class names and all callable types apart from invokable objects.
      *
-     * @param class-string|callable $class_or_callable
+     * @param class-string|callable $classOrCallable
      *
      * @throws ReflectionException
      *
      * @return list<Parameter>
      */
-    protected function inspect($class_or_callable): array
+    protected function inspect($classOrCallable): array
     {
-        if (Type::isClassname($class_or_callable)) {
-            return $this->inspector->inspectClass($class_or_callable);
-        } elseif (Type::isMethod($class_or_callable)) {
-            return $this->inspector->inspectMethod($class_or_callable[0], $class_or_callable[1]);
+        if (Type::isClassname($classOrCallable)) {
+            return $this->inspector->inspectClass($classOrCallable);
+        } elseif (Type::isMethod($classOrCallable)) {
+            return $this->inspector->inspectMethod($classOrCallable[0], $classOrCallable[1]);
         } else {
             /** @psalm-suppress ArgumentTypeCoercion */
-            return $this->inspector->inspectFunction($class_or_callable);
+            return $this->inspector->inspectFunction($classOrCallable);
         }
     }
 
@@ -375,18 +374,19 @@ class Container
      * Create a service, either by calling the factory or creating an object.
      *
      * @template T of object
-     * @param class-string|callable $factory_or_class Factory or class FQN.
-     * @param list<mixed> $arguments                  Arguments.
-     * @psalm-param class-string<T>|callable():T $factory_or_class
+     *
+     * @param class-string<T>|callable():T $factoryOrClass
+     * @param list<mixed> $arguments
+     *
      * @return T
      */
-    protected static function create($factory_or_class, array $arguments): object
+    protected static function create($factoryOrClass, array $arguments): object
     {
-        if (Type::isClassname($factory_or_class)) {
-            return self::initialise($factory_or_class, $arguments);
+        if (Type::isClassname($factoryOrClass)) {
+            return self::initialise($factoryOrClass, $arguments);
         } else {
             /** @psalm-suppress TooManyArguments */
-            return call_user_func_array($factory_or_class, $arguments);
+            return call_user_func_array($factoryOrClass, $arguments);
         }
     }
 

@@ -20,7 +20,7 @@ final class ClassConstraint implements ConstraintInterface
      * @param class-string<T> $className
      */
     public function __construct(
-        private string $className,
+        private readonly string $className,
     ) {
     }
 
