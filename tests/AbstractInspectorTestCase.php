@@ -9,6 +9,8 @@ use Swiftly\Dependency\Tests\ExampleClassTrait;
 use Swiftly\Dependency\Tests\ExampleFunctionTrait;
 use Swiftly\Dependency\Tests\ExampleMethodTrait;
 
+use function count;
+
 /**
  * Shared functionality usefull for InspectorInterface testing.
  *
@@ -45,7 +47,7 @@ abstract class AbstractInspectorTestCase extends TestCase
      */
     protected static function assertParameters(array $expected, array $actual): void
     {
-        self::assertCount(\count($expected), $actual);
+        self::assertCount(count($expected), $actual);
 
         foreach ($expected as $i => $expect) {
             $parameter = $actual[$i];

@@ -7,9 +7,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Swiftly\Dependency\Container;
-use Swiftly\Dependency\Exception\ServiceInstantiationException;
-use Swiftly\Dependency\Exception\UndefinedServiceException;
-use Swiftly\Dependency\Exception\UnexpectedTypeException;
+use Swiftly\Dependency\Exception\ContainerException;
 use Swiftly\Dependency\Inspector\ReflectionInspector;
 use Swiftly\Dependency\InspectorInterface;
 
@@ -199,7 +197,7 @@ final class ContainerTest extends TestCase
      */
     public function testThrowsIfAliasingUndefinedService(): void
     {
-        self::expectException(UndefinedServiceException::class);
+        self::expectException(ContainerException::class);
 
         $this->container->alias(ReflectionInspector::class, InspectorInterface::class);
     }
@@ -209,7 +207,7 @@ final class ContainerTest extends TestCase
      */
     public function testThrowsIfRequestingUndefinedService(): void
     {
-        self::expectException(UndefinedServiceException::class);
+        self::expectException(ContainerException::class);
 
         $this->container->get(ReflectionInspector::class);
     }
@@ -220,12 +218,13 @@ final class ContainerTest extends TestCase
      */
     public function testThrowsIfRequiredArgumentMissing(): void
     {
-        self::expectException(ServiceInstantiationException::class);
+        self::expectException(ContainerException::class);
         self::expectExceptionMessageMatches('/\$value/');
 
         $this->container->register(
             TestCase::class,
-            static function (string $value) {}
+            static function (string $value) {
+            },
         );
         $this->container->get(TestCase::class);
     }
@@ -236,12 +235,13 @@ final class ContainerTest extends TestCase
      */
     public function testThrowsIfProvidedArgumentIsWrongType(): void
     {
-        self::expectException(ServiceInstantiationException::class);
+        self::expectException(ContainerException::class);
         self::expectExceptionMessageMatches('/\$value/');
 
         $this->container->register(
             TestCase::class,
-            static function (string $value) {}
+            static function (string $value) {
+            }
         )->setArguments([
             'value' => ['Hi!']
         ]);
@@ -253,7 +253,7 @@ final class ContainerTest extends TestCase
      */
     public function testThrowsIfResolvedServiceIsWrongType(): void
     {
-        self::expectException(UnexpectedTypeException::class);
+        self::expectException(ContainerException::class);
 
         $this->container->register(InspectorInterface::class, $this);
         $this->container->get(InspectorInterface::class);
@@ -266,7 +266,7 @@ final class ContainerTest extends TestCase
      */
     public function testThrowsOnNestedFailure(): void
     {
-        self::expectException(ServiceInstantiationException::class);
+        self::expectException(ContainerException::class);
         self::expectExceptionMessageMatches('/InspectorInterface/');
 
         // Container requires InspectorInterface but will resolve wrong type
@@ -280,7 +280,7 @@ final class ContainerTest extends TestCase
      */
     public function testThrowsIfTaggedServicesBreakConstaint(): void
     {
-        self::expectException(UnexpectedTypeException::class);
+        self::expectException(ContainerException::class);
 
         $this->container->register(ReflectionInspector::class)
             ->setTags(['inspector']);

@@ -5,19 +5,19 @@ namespace Swiftly\Dependency;
 use Exception;
 use ReflectionClass;
 use Swiftly\Dependency\Entry;
-use Swiftly\Dependency\Exception\AttributeException;
 use Swiftly\Dependency\Exception\ContainerException;
 use Swiftly\Dependency\Exception\InvalidArgumentException;
 use Swiftly\Dependency\Exception\MissingArgumentException;
 use Swiftly\Dependency\Exception\NestedServiceException;
+use Swiftly\Dependency\Exception\ReflectionException;
 use Swiftly\Dependency\Exception\ServiceInstantiationException;
 use Swiftly\Dependency\Inspector\ReflectionInspector;
 use Swiftly\Dependency\InspectorInterface;
 use Swiftly\Dependency\Parameter;
-use Swiftly\Dependency\ParameterException;
 use Swiftly\Dependency\Type;
 
 use function array_key_exists;
+use function assert;
 use function call_user_func_array;
 
 /**
@@ -58,7 +58,7 @@ class Container
      * @template T of object
      *
      * @param class-string<T> $service
-     * @param null|T|ProvideInterface<T>|callable(mixed):T $factory
+     * @param null|T|callable(mixed):T $factory
      *
      * @return Entry<T>
      */
@@ -66,7 +66,7 @@ class Container
         string $service,
         object|callable|null $factory = null,
     ): Entry {
-        if ($factory && Type::isServiceInstance($factory)) {
+        if (null !== $factory && Type::isServiceInstance($factory)) {
             $entry = Entry::fromInstance($service, $factory);
         } else {
             $entry = new Entry($service, $factory);
@@ -230,7 +230,7 @@ class Container
      *
      * @param class-string|callable $class_or_callable
      *
-     * @throws ParameterException
+     * @throws ReflectionException
      *
      * @return list<Parameter>
      */
@@ -265,7 +265,7 @@ class Container
         $prepared = [];
 
         foreach ($parameters as $parameter) {
-            $name = $parameter->getName();
+            $name = $parameter->name;
 
             // User manually provided args?
             if (array_key_exists($name, $arguments)) {
@@ -274,11 +274,11 @@ class Container
                 $value = $this->resolveParam($parameter);
             }
 
-            if (!$parameter->accepts($value)) {
+            if (!$parameter->type->isSatisfiedBy($value)) {
                 throw new InvalidArgumentException(
                     $name,
-                    $parameter->getType(),
-                    Type::getName($value)
+                    $parameter->type->getName(),
+                    Type::getName($value),
                 );
             }
 
@@ -300,53 +300,61 @@ class Container
      */
     protected function resolveParam(Parameter $parameter): mixed
     {
-        $provider = $parameter->getAttribute(ProvideInterface::class);
+        $type = $parameter->type;
 
-        if (null !== $provider) {
-            return $this->resolveProvider($parameter, $provider->newInstance());
+        $resolvedOrNull = $type instanceof CompoundConstraintInterface
+            ? $this->resolveOneOf($type->getMembers())
+            : $this->resolveSingle($type);
+
+        if (null === $resolvedOrNull) {
+            $resolvedOrNull = self::defaultValue($parameter);
         }
 
-        $typeHint = $parameter->isBuiltin() ? $parameter->getType() : null;
-
-        if (null !== $typeHint && $this->has($typeHint)) {
-            try {
-                return $this->get($typeHint);
-            } catch (Exception $e) {
-                throw new NestedServiceException($e);
-            }
-        }
-
-        $value = self::defaultValue($parameter);
-
-        if (null === $value && !$parameter->isNullable()) {
-            throw new MissingArgumentException($parameter->getName());
-        }
-
-        return $value;
+        return $resolvedOrNull;
     }
 
     /**
      * @template T
-     * @template K
      *
-     * @param Parameter<T> $parameter
-     * @param ProvideInterface<K> $provider
+     * @param non-empty-list<ConstraintInterface<T>> $types
      *
-     * @throws AttributeException
-     *
-     * @return (T&K)
+     * @return null|T
      */
-    protected function resolveProvider(
-        Parameter $parameter,
-        ProvideInterface $provider,
-    ): mixed {
-        $value = $provider->provide($this);
+    protected function resolveOneOf(array $types): ?object
+    {
+        foreach ($types as $type) {
+            $resolved = $this->resolveSingle($type);
 
-        if (!$parameter->accepts($value)) {
-            throw AttributeException::typeError($provider, $parameter, $value);
+            if (null !== $resolved) {
+                return $resolved;
+            }
         }
 
-        return $value;
+        return null;
+    }
+
+    /**
+     * @template T
+     *
+     * @param ConstraintInterface<T> $type
+     *
+     * @return null|T
+     */
+    protected function resolveSingle(ConstraintInterface $type): ?object
+    {
+        if (!$type->isClassType()) {
+            return null;
+        }
+
+        $typeName = $type->getName();
+
+        assert(Type::isClassname($typeName));
+
+        if (!$this->has($typeName)) {
+            return null;
+        }
+
+        return $this->get($typeName);
     }
 
     /**
@@ -358,8 +366,8 @@ class Container
      */
     protected static function defaultValue(Parameter $parameter): mixed
     {
-        return $parameter->hasDefault()
-            ? ($parameter->getDefaultCallback())()
+        return null !== $parameter->defaultValueCallback
+            ? ($parameter->defaultValueCallback)()
             : null;
     }
 
@@ -407,7 +415,7 @@ class Container
      */
     protected static function assertType(object $service, string $constraint): void
     {
-        if (!($service instanceof $constraint)) {
+        if ($service instanceof $constraint) {
             return;
         }
 

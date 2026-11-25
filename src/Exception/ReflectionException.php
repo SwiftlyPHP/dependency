@@ -48,30 +48,12 @@ final class ReflectionException extends \ReflectionException
         ));
     }
 
-    /**
-     * This library does not (yet) support resolving union or compound types.
-     *
-     * @param non-empty-string $parameter
-     */
-    public static function compoundType(
-        ReflectionFunctionAbstract $function,
-        string $parameter,
-    ): self {
-        return new self(sprintf(
-            "Unable to resolve complex type of parameter '\$%s' of function"
-            . " '%s()'. Please either remove the union/compound type hint or"
-            . ' use one of the #[Resolve\Use*] attributes.',
-            $parameter,
-            Debug::getFunctionName($function),
-        ));
-    }
-
     public static function unknownType(ReflectionParameter $parameter): self
     {
         return new self(sprintf(
             "Unable to determine the type expected by parameter '\$%s' of"
             . " function '%s()'. In most cases this is because it expects"
-            . ' either an Enum or resource.',
+            . ' a resource or compound type (union, intersection etc.).',
             $parameter->getName(),
             Debug::getFunctionName($parameter->getDeclaringFunction()),
         ));

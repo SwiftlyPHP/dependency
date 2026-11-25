@@ -16,7 +16,8 @@ final class TypeTest extends TestCase
         self::assertTrue(Type::isServiceInstance($this));
         self::assertTrue(Type::isServiceInstance(new stdClass()));
 
-        self::assertFalse(Type::isServiceInstance(static function () {}));
+        self::assertFalse(Type::isServiceInstance(static function () {
+        }));
         self::assertFalse(Type::isServiceInstance([]));
         self::assertFalse(Type::isServiceInstance(null));
     }
@@ -27,7 +28,8 @@ final class TypeTest extends TestCase
         self::assertTrue(Type::isMethod([Type::class, 'isMethod']));
 
         self::assertFalse(Type::isMethod([new stdClass(), '__invoke']));
-        self::assertFalse(Type::isMethod(static function () {}));
+        self::assertFalse(Type::isMethod(static function () {
+        }));
         self::assertFalse(Type::isMethod('strlen'));
         self::assertFalse(Type::isMethod(null));
     }

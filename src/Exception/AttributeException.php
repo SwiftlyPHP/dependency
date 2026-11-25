@@ -23,10 +23,10 @@ final class AttributeException extends LogicException
     ): self {
         return new self(sprintf(
             'The #[%s] attribute for parameter $%s is incorrect. The parameter'
-            . ' expects a %s but the attribute provided a %s instead.',
+            . ' expects %s but the attribute provided a %s instead.',
             $provider::class,
-            $parameter->getName(),
-            $parameter->getType(),
+            $parameter->name,
+            $parameter->type->getName(),
             get_debug_type($given),
         ));
     }

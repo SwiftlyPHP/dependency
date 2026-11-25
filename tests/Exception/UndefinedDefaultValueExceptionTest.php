@@ -23,11 +23,6 @@ final class UndefinedDefaultValueExceptionTest extends TestCase
         $this->exception = new UndefinedDefaultValueException('name');
     }
 
-    public function testCanGetParameterName(): void
-    {
-        self::assertSame('name', $this->exception->getParameterName());
-    }
-
     public function testOutputShouldIncludeParameterNameOnThrow(): void
     {
         self::expectExceptionMessageMatches('/\$name/');

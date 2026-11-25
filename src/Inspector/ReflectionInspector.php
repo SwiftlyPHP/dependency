@@ -3,26 +3,32 @@
 namespace Swiftly\Dependency\Inspector;
 
 use Closure;
-use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
+use ReflectionIntersectionType;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
-use Swiftly\Dependency\ContainerAwareInterface;
+use ReflectionType;
+use ReflectionUnionType;
+use Swiftly\Dependency\ConstraintInterface;
 use Swiftly\Dependency\Exception\ReflectionException;
 use Swiftly\Dependency\InspectorInterface;
 use Swiftly\Dependency\Parameter;
-use Swiftly\Dependency\Parameter\ArrayParameter;
-use Swiftly\Dependency\Parameter\BooleanParameter;
-use Swiftly\Dependency\Parameter\MixedParameter;
-use Swiftly\Dependency\Parameter\NamedClassParameter;
-use Swiftly\Dependency\Parameter\NumericParameter;
-use Swiftly\Dependency\Parameter\ObjectParameter;
-use Swiftly\Dependency\Parameter\StringParameter;
 use Swiftly\Dependency\Type;
+use Swiftly\Dependency\Type\ArrayConstraint;
+use Swiftly\Dependency\Type\BoolConstraint;
+use Swiftly\Dependency\Type\ClassConstraint;
+use Swiftly\Dependency\Type\FloatConstraint;
+use Swiftly\Dependency\Type\IntConstraint;
+use Swiftly\Dependency\Type\IntersectionConstraint;
+use Swiftly\Dependency\Type\MixedConstraint;
+use Swiftly\Dependency\Type\ObjectConstraint;
+use Swiftly\Dependency\Type\StringConstraint;
+use Swiftly\Dependency\Type\UnionConstraint;
 
+use function assert;
 use function class_exists;
 use function get_class;
 use function is_object;
@@ -107,83 +113,84 @@ class ReflectionInspector implements InspectorInterface
         return $parameters;
     }
 
-    private function inspectParameter(ReflectionParameter $reflected): Parameter
+    private function inspectParameter(ReflectionParameter $parameter): Parameter
     {
-        $type = $reflected->getType();
+        $type = $parameter->getType();
+        $constraint = null !== $type
+            ? self::constraintFromReflection($parameter, $type)
+            : new MixedConstraint();
 
-        if ($type !== null && !($type instanceof ReflectionNamedType)) {
-            throw ReflectionException::compoundType(
-                $reflected->getDeclaringFunction(),
-                $reflected->getName(),
+        return new Parameter(
+            $parameter->getName(),
+            $constraint,
+            self::prepareDefaultCallback($parameter),
+            [],
+        );
+    }
+
+    /**
+     * @psalm-assert ReflectionNamedType|ReflectionUnionType|ReflectionIntersectionType $type
+     */
+    private static function constraintFromReflection(
+        ReflectionParameter $parameter,
+        ReflectionType $type,
+    ): ConstraintInterface {
+        if ($type instanceof ReflectionNamedType) {
+            return self::mapConstraint($type->getName());
+        }
+
+        if ($type instanceof ReflectionUnionType) {
+            return new UnionConstraint(
+                self::mapCompoundConstraint($parameter, $type)
             );
         }
 
-        return $this->parameterFromReflection($reflected, $type);
+        if ($type instanceof ReflectionIntersectionType) {
+            return new IntersectionConstraint(
+                self::mapCompoundConstraint($parameter, $type)
+            );
+        }
+
+        throw ReflectionException::unknownType($parameter);
     }
 
-    /**
-     * Return the appropriate subclass to represent this parameter.
-     */
-    private function parameterFromReflection(
-        ReflectionParameter $parameter,
-        ReflectionNamedType|null $type,
-    ): Parameter {
-        $type_name = $type ? $type->getName() : Type::TYPE_MIXED;
-        $name = $parameter->getName();
-        $nullable = $parameter->allowsNull();
-        $default = self::prepareDefaultCallback($parameter);
-        $attributes = self::getAttributes($parameter);
-
-        return match ($type_name) {
-            Type::TYPE_ARRAY =>
-                /** @var null|callable():array $default */
-                new ArrayParameter($name, $nullable, $default),
-
-            Type::TYPE_BOOL =>
-                /** @var null|callable():bool $default */
-                new BooleanParameter($name, $nullable, $default),
-
-            Type::TYPE_MIXED =>
-                /** @var null|callable():mixed $default */
-                new MixedParameter($name, $default),
-
-            Type::TYPE_INT,
-            Type::TYPE_FLOAT =>
-                /** @var null|callable():(int|float) $default */
-                new NumericParameter($name, $type_name, $nullable, $default),
-
-            Type::TYPE_STRING =>
-                /** @var null|callable():string $default */
-                new StringParameter($name, $nullable, $default),
-
-            Type::TYPE_OBJECT =>
-                /** @var null|callable():object $default */
-                new ObjectParameter($name, $nullable, $default),
-
-            default =>
-                /** @var null|callable():object $default */
-                Type::isClassname($type_name)
-                    ? new NamedClassParameter($name, $type_name, $nullable, $default)
-                    : throw ReflectionException::unknownType($parameter),
+    private static function mapConstraint(string $typeName): ConstraintInterface
+    {
+        return match ($typeName) {
+            Type::TYPE_ARRAY => new ArrayConstraint(),
+            Type::TYPE_BOOL => new BoolConstraint(),
+            Type::TYPE_FLOAT => new FloatConstraint(),
+            Type::TYPE_INT => new IntConstraint(),
+            Type::TYPE_MIXED => new MixedConstraint(),
+            Type::TYPE_OBJECT => new ObjectConstraint(),
+            Type::TYPE_STRING => new StringConstraint(),
+            default => new ClassConstraint($typeName),
         };
     }
 
-    private static function prepareDefaultCallback(
+    /**
+     * @return non-empty-list<ConstraintInterface>
+     */
+    private static function mapCompoundConstraint(
         ReflectionParameter $parameter,
-    ): ?callable {
-        return $parameter->isDefaultValueAvailable()
-            ? [$parameter, 'getDefaultValue']
-            : null;
+        ReflectionUnionType|ReflectionIntersectionType $type,
+    ): array {
+        $members = [];
+
+        foreach ($type->getTypes() as $type) {
+            $members[] = self::constraintFromReflection($parameter, $type);
+        }
+
+        assert(!empty($members));
+
+        return $members;
     }
 
-    /**
-     * @return list<ReflectionAttribute<ContainerAwareInterface>>
-     */
-    private static function getAttributes(ReflectionParameter $parameter): array
-    {
-        return $parameter->getAttributes(
-            ContainerAwareInterface::class,
-            ReflectionAttribute::IS_INSTANCEOF,
-        );
+    private static function prepareDefaultCallback(
+        ReflectionParameter $reflectionParameter,
+    ): ?Closure {
+        return $reflectionParameter->isDefaultValueAvailable()
+            ? Closure::fromCallable([$reflectionParameter, 'getDefaultValue'])
+            : null;
     }
 }
