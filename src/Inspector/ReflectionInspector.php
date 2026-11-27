@@ -122,7 +122,7 @@ class ReflectionInspector implements InspectorInterface
         return new Parameter(
             $parameter->getName(),
             $constraint,
-            self::prepareDefaultCallback($parameter),
+            $parameter->isDefaultValueAvailable(),
         );
     }
 
@@ -189,18 +189,5 @@ class ReflectionInspector implements InspectorInterface
         }
 
         return $members;
-    }
-
-    /**
-     * @template T
-     *
-     * @return null|Closure():T
-     */
-    private static function prepareDefaultCallback(
-        ReflectionParameter $reflectionParameter,
-    ): ?Closure {
-        return $reflectionParameter->isDefaultValueAvailable()
-            ? Closure::fromCallable([$reflectionParameter, 'getDefaultValue'])
-            : null;
     }
 }

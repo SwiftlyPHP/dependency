@@ -8,7 +8,6 @@ use function class_exists;
 use function interface_exists;
 use function is_array;
 use function is_callable;
-use function is_object;
 use function is_string;
 
 /**
@@ -30,18 +29,6 @@ abstract class Type
     public const TYPE_FLOAT = 'float';
     public const TYPE_STRING = 'string';
     public const TYPE_OBJECT = 'object';
-
-    /**
-     * Determine if the subject is a service factory or service instance.
-     *
-     * @template T of object
-     *
-     * @psalm-assert-if-true T $subject
-     */
-    final public static function isServiceInstance(object $subject): bool
-    {
-        return !$subject instanceof Closure;
-    }
 
     /**
      * Determine if the subject is a class method callable.

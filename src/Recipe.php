@@ -13,15 +13,11 @@ use function in_array;
  */
 final class Recipe
 {
-    /**
-     * @var list<non-empty-string>
-     */
+    /** @var list<non-empty-string> */
     public array $tags = [];
 
-    /**
-     * @var array<non-empty-string,mixed>
-     */
-    public array $defaultArguments = [];
+    /** @var array<non-empty-string,mixed> */
+    public array $arguments = [];
 
     public bool $isSingleton = true;
 
@@ -54,7 +50,7 @@ final class Recipe
      */
     public function setArguments(array $arguments): self
     {
-        $this->defaultArguments = $arguments;
+        $this->arguments = $arguments;
 
         return $this;
     }

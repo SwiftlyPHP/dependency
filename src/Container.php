@@ -56,7 +56,7 @@ class Container
      * @template T of object
      *
      * @param class-string<T> $service
-     * @param null|T|Closure(mixed):T $factory
+     * @param null|T|Closure():T $factory
      *
      * @return Recipe<T>
      */
@@ -66,9 +66,9 @@ class Container
     ): Recipe {
         return $this->recipes[$service] = new Recipe(
             $service,
-            null !== $factory && Type::isServiceInstance($factory)
-                ? static fn () => $factory
-                : $factory,
+            null === $factory || $factory instanceof Closure
+                ? $factory
+                : static fn () => $factory,
         );
     }
 
@@ -113,7 +113,7 @@ class Container
     /**
      * Return a service of the given type.
      *
-     * @template T of object
+     * @template T
      *
      * @param class-string<T> $service
      *
@@ -143,7 +143,7 @@ class Container
 
         try {
             $parameters = $this->inspect($factoryOrClass);
-            $parameters = $this->prepare($parameters, $recipe->defaultArguments);
+            $parameters = $this->prepare($parameters, $recipe->arguments);
         } catch (Exception $e) {
             throw new ServiceInstantiationException($service, $e);
         }
@@ -220,7 +220,7 @@ class Container
      *
      * @return class-string<T>|Closure():T
      */
-    protected static function factoryOrClass(Recipe $recipe): callable|string
+    protected static function factoryOrClass(Recipe $recipe): Closure|string
     {
         return $recipe->factory ?? $recipe->className;
     }
@@ -258,7 +258,7 @@ class Container
      *
      * @throws ArgumentException
      *
-     * @return list<T>
+     * @return array<non-empty-string,T>
      */
     protected function prepare(array $parameters, array $arguments): array
     {
@@ -272,13 +272,16 @@ class Container
                 $value = $arguments[$name];
             } else {
                 $value = $this->resolveParam($parameter);
+
+                if (null === $value && !$parameter->hasDefaultValue) {
+                    throw ArgumentException::noValue($parameter);
+                }
             }
 
-            if (!$parameter->type->isSatisfiedBy($value)) {
-                throw ArgumentException::invalidType($parameter, $value);
-            }
-
-            $prepared[] = $value;
+            $prepared[$parameter->name] = self::assertParameter(
+                $parameter,
+                $value,
+            );
         }
 
         return $prepared;
@@ -296,12 +299,8 @@ class Container
         $type = $parameter->type;
 
         $resolvedOrNull = $type instanceof CompoundConstraintInterface
-            ? $this->resolveOneOf($type->getMembers())
-            : $this->resolveSingle($type);
-
-        if (null === $resolvedOrNull) {
-            $resolvedOrNull = self::defaultValue($parameter);
-        }
+            ? $this->resolveMany($type->getMembers())
+            : $this->resolveOne($type);
 
         return $resolvedOrNull;
     }
@@ -313,10 +312,10 @@ class Container
      *
      * @return null|T
      */
-    protected function resolveOneOf(array $types): ?object
+    protected function resolveMany(array $types): ?object
     {
         foreach ($types as $type) {
-            $resolved = $this->resolveSingle($type);
+            $resolved = $this->resolveOne($type);
 
             if (null !== $resolved) {
                 return $resolved;
@@ -333,7 +332,7 @@ class Container
      *
      * @return null|T
      */
-    protected function resolveSingle(ConstraintInterface $type): ?object
+    protected function resolveOne(ConstraintInterface $type): ?object
     {
         if (!$type->isClassType()) {
             return null;
@@ -351,30 +350,16 @@ class Container
     }
 
     /**
-     * @template T
-     *
-     * @param Parameter<T> $parameter
-     *
-     * @return null|T
-     */
-    protected static function defaultValue(Parameter $parameter): mixed
-    {
-        return null !== $parameter->defaultValueCallback
-            ? ($parameter->defaultValueCallback)()
-            : null;
-    }
-
-    /**
      * Create a service, either by calling the factory or creating an object.
      *
      * @template T of object
      *
      * @param class-string<T>|callable():T $factoryOrClass
-     * @param list<mixed> $arguments
+     * @param array<non-empty-string,mixed> $arguments
      *
      * @return T
      */
-    protected static function create($factoryOrClass, array $arguments): object
+    protected static function create(string|callable $factoryOrClass, array $arguments): object
     {
         if (Type::isClassname($factoryOrClass)) {
             return self::initialise($factoryOrClass, $arguments);
@@ -388,7 +373,7 @@ class Container
      * @template T of object
      *
      * @param class-string<T> $class
-     * @param list<mixed> $arguments
+     * @param array<non-empty-string,mixed> $arguments
      *
      * @return T
      */
@@ -414,5 +399,23 @@ class Container
         }
 
         throw ContainerException::typeConstraint($service::class, $constraint);
+    }
+
+    /**
+     * @template T
+     *
+     * @param Parameter<T> $parameter
+     *
+     * @throws ArgumentException
+     *
+     * @return T
+     */
+    protected static function assertParameter(Parameter $parameter, mixed $value): mixed
+    {
+        if ($parameter->type->isSatisfiedBy($value)) {
+            return $value;
+        }
+
+        throw ArgumentException::invalidType($parameter, $value);
     }
 }

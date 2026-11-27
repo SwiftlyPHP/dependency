@@ -19,10 +19,20 @@ final class ArgumentException extends RuntimeException
     {
         return new self(sprintf(
             "Invalid value provided for parameter '\$%s'. It expects '%s' but"
-            . " was instead given '%s'",
+            . " was instead given '%s'.",
             $parameter->name,
             $parameter->type->getName(),
             Type::getName($value),
+        ));
+    }
+
+    public static function noValue(Parameter $parameter): self
+    {
+        return new self(sprintf(
+            "Unable to resolve parameter '\$%s'. It expects '%s' but the"
+            . ' container could not find a suitable value.',
+            $parameter->name,
+            $parameter->type->getName(),
         ));
     }
 }
