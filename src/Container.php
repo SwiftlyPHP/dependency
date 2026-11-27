@@ -15,7 +15,6 @@ use Swiftly\Dependency\Parameter;
 use Swiftly\Dependency\Type;
 
 use function array_key_exists;
-use function assert;
 use function call_user_func_array;
 
 /**
@@ -292,33 +291,36 @@ class Container
      *
      * @param Parameter<T> $parameter
      *
-     * @return null|T
+     * @return T|null
      */
     protected function resolveParam(Parameter $parameter): mixed
     {
         $type = $parameter->type;
 
-        $resolvedOrNull = $type instanceof CompoundConstraintInterface
-            ? $this->resolveMany($type->getMembers())
-            : $this->resolveOne($type);
+        $value = $type instanceof CompoundConstraintInterface
+            ? $this->resolveCompound($type)
+            : $this->resolveSingle($type);
 
-        return $resolvedOrNull;
+        return $value;
     }
 
     /**
      * @template T
      *
-     * @param non-empty-list<ConstraintInterface<T>> $types
+     * @param CompoundConstraintInterface<T> $compound
      *
-     * @return null|T
+     * @return T|null
      */
-    protected function resolveMany(array $types): ?object
-    {
-        foreach ($types as $type) {
-            $resolved = $this->resolveOne($type);
+    protected function resolveCompound(
+        CompoundConstraintInterface $compound,
+    ): ?object {
+        foreach ($compound->getMembers() as $type) {
+            $value = $type instanceof CompoundConstraintInterface
+                ? $this->resolveCompound($type)
+                : $this->resolveType($type);
 
-            if (null !== $resolved) {
-                return $resolved;
+            if ($compound->isSatisfiedBy($value)) {
+                return $value;
             }
         }
 
@@ -330,24 +332,41 @@ class Container
      *
      * @param ConstraintInterface<T> $type
      *
-     * @return null|T
+     * @return T|null
      */
-    protected function resolveOne(ConstraintInterface $type): ?object
+    protected function resolveSingle(ConstraintInterface $type): ?object
+    {
+        $value = $this->resolveType($type);
+
+        if ($type->isSatisfiedBy($value)) {
+            return $value;
+        }
+
+        return null;
+    }
+
+    /**
+     * @template T
+     *
+     * @param ConstraintInterface<T> $type
+     *
+     * @return T|null
+     */
+    protected function resolveType(ConstraintInterface $type): ?object
     {
         if (!$type->isClassType()) {
             return null;
         }
 
-        $typeName = $type->getName();
+        $className = $type->getName();
 
-        assert(Type::isClassname($typeName));
-
-        if (!$this->has($typeName)) {
+        if (!$this->has($className)) {
             return null;
         }
 
-        return $this->get($typeName);
+        return $this->get($className);
     }
+
 
     /**
      * Create a service, either by calling the factory or creating an object.

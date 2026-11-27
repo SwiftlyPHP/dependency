@@ -2,20 +2,15 @@
 
 namespace Swiftly\Dependency;
 
-/**
- * @psalm-immutable
- *
- * @template T
- */
-interface ConstraintInterface
-{
-    /**
-     * Determine whether the given `$value` satisfies this type constraint.
-     *
-     * @psalm-assert-if-true T $value
-     */
-    public function isSatisfiedBy(mixed $value): bool;
+use Swiftly\Dependency\TypeInterface;
 
+/**
+ * @template T
+ *
+ * @extends TypeInterface<T>
+ */
+interface ConstraintInterface extends TypeInterface
+{
     /**
      * Determine whether this constraint is for a class, interface or enum type.
      *

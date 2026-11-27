@@ -2,8 +2,6 @@
 
 namespace Swiftly\Dependency;
 
-use Closure;
-
 /**
  * @upgrade:php8.2 Mark class as readonly
  *
@@ -15,12 +13,13 @@ final class Parameter
 {
     /**
      * @param non-empty-string $name
-     * @param ConstraintInterface<T> $type
+     * @param ConstraintInterface<T>|CompoundConstraintInterface<T> $type
      */
     public function __construct(
         public readonly string $name,
-        public readonly ConstraintInterface $type,
+        public readonly ConstraintInterface|CompoundConstraintInterface $type,
         public readonly bool $hasDefaultValue,
+        public readonly bool $isNullable,
     ) {
     }
 }

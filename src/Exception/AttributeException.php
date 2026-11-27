@@ -26,7 +26,7 @@ final class AttributeException extends LogicException
             . ' expects %s but the attribute provided a %s instead.',
             $attribute::class,
             $parameter->name,
-            $parameter->type->getName(),
+            (string) $parameter->type,
             get_debug_type($given),
         ));
     }

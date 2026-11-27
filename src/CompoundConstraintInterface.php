@@ -3,21 +3,19 @@
 namespace Swiftly\Dependency;
 
 use Swiftly\Dependency\ConstraintInterface;
+use Swiftly\Dependency\TypeInterface;
 
 /**
- * @see \Swiftly\Dependency\Type\IntersectionConstraint
- * @see \Swiftly\Dependency\Type\UnionConstraint
- *
  * @template T
  *
- * @extends ConstraintInterface<T>
+ * @extends TypeInterface<T>
  */
-interface CompoundConstraintInterface extends ConstraintInterface
+interface CompoundConstraintInterface extends TypeInterface
 {
     /**
      * Return all members of this union or intersection type.
      *
-     * @return non-empty-list<ConstraintInterface<T>>
+     * @return non-empty-list<ConstraintInterface<T>|CompoundConstraintInterface<T>>
      */
     public function getMembers(): array;
 }

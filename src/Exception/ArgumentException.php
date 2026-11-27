@@ -21,7 +21,7 @@ final class ArgumentException extends RuntimeException
             "Invalid value provided for parameter '\$%s'. It expects '%s' but"
             . " was instead given '%s'.",
             $parameter->name,
-            $parameter->type->getName(),
+            (string) $parameter->type,
             Type::getName($value),
         ));
     }
@@ -32,7 +32,7 @@ final class ArgumentException extends RuntimeException
             "Unable to resolve parameter '\$%s'. It expects '%s' but the"
             . ' container could not find a suitable value.',
             $parameter->name,
-            $parameter->type->getName(),
+            (string) $parameter->type,
         ));
     }
 }

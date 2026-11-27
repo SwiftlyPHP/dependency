@@ -47,4 +47,12 @@ final class ClassConstraint implements ConstraintInterface
     {
         return true;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function __toString(): string
+    {
+        return $this->getName();
+    }
 }

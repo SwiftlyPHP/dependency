@@ -20,7 +20,7 @@ use function implode;
 final class UnionConstraint implements CompoundConstraintInterface
 {
     /**
-     * @param non-empty-list<ConstraintInterface<T>> $members
+     * @param non-empty-list<ConstraintInterface<T>|CompoundConstraintInterface<T>> $members
      */
     public function __construct(
         private readonly array $members,
@@ -33,22 +33,6 @@ final class UnionConstraint implements CompoundConstraintInterface
     public function getMembers(): array
     {
         return $this->members;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        $parts = [];
-
-        foreach ($this->members as $member) {
-            $parts[] = $member instanceof CompoundConstraintInterface
-                ? "({$member->getName()})"
-                : $member->getName();
-        }
-
-        return implode('|', $parts);
     }
 
     /**
@@ -68,14 +52,16 @@ final class UnionConstraint implements CompoundConstraintInterface
     /**
      * @inheritDoc
      */
-    public function isClassType(): bool
+    public function __toString(): string
     {
+        $parts = [];
+
         foreach ($this->members as $member) {
-            if ($member->isClassType()) {
-                return true;
-            }
+            $parts[] = $member instanceof CompoundConstraintInterface
+                ? "({$member})"
+                : (string) $member;
         }
 
-        return false;
+        return implode('|', $parts);
     }
 }

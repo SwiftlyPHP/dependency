@@ -40,4 +40,12 @@ final class StringConstraint implements ConstraintInterface
     {
         return false;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function __toString(): string
+    {
+        return $this->getName();
+    }
 }

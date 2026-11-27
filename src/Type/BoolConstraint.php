@@ -40,4 +40,12 @@ final class BoolConstraint implements ConstraintInterface
     {
         return false;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function __toString(): string
+    {
+        return $this->getName();
+    }
 }

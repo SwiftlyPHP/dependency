@@ -12,6 +12,7 @@ use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionType;
 use ReflectionUnionType;
+use Swiftly\Dependency\CompoundConstraintInterface;
 use Swiftly\Dependency\ConstraintInterface;
 use Swiftly\Dependency\Exception\ReflectionException;
 use Swiftly\Dependency\InspectorInterface;
@@ -97,8 +98,6 @@ class ReflectionInspector implements InspectorInterface
     }
 
     /**
-     * Return information about the given reflected method or function.
-     *
      * @return list<Parameter>
      */
     private function inspectFromReflection(
@@ -123,6 +122,7 @@ class ReflectionInspector implements InspectorInterface
             $parameter->getName(),
             $constraint,
             $parameter->isDefaultValueAvailable(),
+            $parameter->allowsNull(),
         );
     }
 
@@ -132,7 +132,7 @@ class ReflectionInspector implements InspectorInterface
     private static function constraintFromReflection(
         ReflectionParameter $parameter,
         ReflectionType $type,
-    ): ConstraintInterface {
+    ): ConstraintInterface|CompoundConstraintInterface {
         if ($type instanceof ReflectionNamedType) {
             return self::mapConstraint($parameter, $type);
         }
@@ -176,7 +176,7 @@ class ReflectionInspector implements InspectorInterface
     }
 
     /**
-     * @return non-empty-list<ConstraintInterface>
+     * @return non-empty-list<ConstraintInterface|CompoundConstraintInterface>
      */
     private static function mapCompoundConstraint(
         ReflectionParameter $parameter,
